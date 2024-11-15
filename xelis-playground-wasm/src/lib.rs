@@ -29,7 +29,7 @@ impl Silex {
         let tokens = Lexer::new(code).get()?;
 
         let parser = Parser::new(tokens, &self.environment);
-        let (program, _) = parser.parse().unwrap();
+        let (program, _) = parser.parse().map_err(|err| anyhow::anyhow!("{:?}", err))?;
         let compiler = Compiler::new(&program, self.environment.environment());
 
         Ok(Program {
