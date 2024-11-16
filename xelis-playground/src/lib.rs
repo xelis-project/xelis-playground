@@ -1,5 +1,6 @@
 use std::sync::mpsc;
 
+use humantime::format_duration;
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 use xelis_builder::EnvironmentBuilder;
 use xelis_bytecode::Module;
@@ -24,6 +25,7 @@ pub struct Program {
 pub struct ExecutionResult {
     value: String,
     logs: Vec<String>,
+    elapsed_time: String,
 }
 
 #[wasm_bindgen]
@@ -34,6 +36,10 @@ impl ExecutionResult {
 
     pub fn logs(&self) -> Vec<String> {
         self.logs.clone()
+    }
+
+    pub fn elapsed_time(&self) -> String {
+        self.elapsed_time.clone()
     }
 }
 
@@ -91,12 +97,16 @@ impl Silex {
         vm.invoke_entry_chunk(chunk_id)
             .map_err(|err| JsValue::from_str(&format!("{:#}", err)))?;
 
+        let start = web_time::Instant::now();
         let res = vm.run();
+        let elapsed_time = start.elapsed();
+
         let logs = self.logs_receiver.try_iter().collect();
         match res {
             Ok(value) => Ok(ExecutionResult {
                 value: format!("{}", value),
                 logs,
+                elapsed_time: format_duration(elapsed_time).to_string(),
             }),
             Err(err) => Err(JsValue::from_str(&format!("{:#}", err))),
         }

@@ -22,14 +22,13 @@ editor.innerText = code;
 
 runButton.addEventListener('click', () => {
     const code = editor.innerText;
+    localStorage.setItem('code', code);
 
     // Placeholder logic for executing Rust code
     logs.innerText = "------- Compiling -------\n";
     try {
         let program = silex.compile(code);
         logs.innerText += "Compiled successfully!\n";
-
-        localStorage.setItem('code', code);
 
         logs.innerText += "-------- Running --------\n";
         let result = silex.execute_program(program, 0);
@@ -41,8 +40,8 @@ runButton.addEventListener('click', () => {
         }
 
         logs.innerText += `Exit code: ${result.value()}\n`;
+        logs.innerText += `Executed in: ${result.elapsed_time()}\n`;
     } catch (e) {
         logs.innerText += "Error: " + e + "\n";
-        return;
     }
 });
