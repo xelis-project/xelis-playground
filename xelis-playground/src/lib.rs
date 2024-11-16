@@ -21,7 +21,7 @@ impl Silex {
     #[wasm_bindgen(constructor)]
     pub fn new() -> Self {
         Self {
-            environment: EnvironmentBuilder::new(),
+            environment: EnvironmentBuilder::default(),
         }
     }
 
