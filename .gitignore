@@ -1,2 +1,4 @@
 target/
 pkg/
+public/xelis_playground_bg.wasm
+public/xelis_playground.js
