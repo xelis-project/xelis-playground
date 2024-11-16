@@ -11,6 +11,8 @@ xelis_compiler = { git = "https://github.com/xelis-project/xelis-vm.git", branch
 xelis_parser = { git = "https://github.com/xelis-project/xelis-vm.git", branch = "dev", package = "xelis-parser" }
 xelis_lexer = { git = "https://github.com/xelis-project/xelis-vm.git", branch = "dev", package = "xelis-lexer" }
 xelis_builder = { git = "https://github.com/xelis-project/xelis-vm.git", branch = "dev", package = "xelis-builder" }
+xelis_types = { git = "https://github.com/xelis-project/xelis-vm.git", branch = "dev", package = "xelis-types" }
+
 anyhow = "1.0.93"
 
 [lib]
