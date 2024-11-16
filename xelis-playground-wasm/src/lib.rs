@@ -26,9 +26,11 @@ impl Silex {
     }
 
     fn compile_internal(&self, code: &str) -> anyhow::Result<Program> {
-        let tokens = Lexer::new(code).get()?;
+        let tokens = Lexer::new(code)
+            .into_iter()
+            .collect::<Result<Vec<_>, _>>()?;
 
-        let parser = Parser::new(tokens, &self.environment);
+        let parser = Parser::with(tokens.into_iter(), &self.environment);
         let (program, _) = parser.parse().map_err(|err| anyhow::anyhow!("{:#}", err))?;
         let compiler = Compiler::new(&program, self.environment.environment());
 
