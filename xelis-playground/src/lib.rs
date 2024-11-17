@@ -26,6 +26,7 @@ pub struct ExecutionResult {
     value: String,
     logs: Vec<String>,
     elapsed_time: String,
+    used_gas: u64,
 }
 
 #[wasm_bindgen]
@@ -40,6 +41,10 @@ impl ExecutionResult {
 
     pub fn elapsed_time(&self) -> String {
         self.elapsed_time.clone()
+    }
+
+    pub fn used_gas(&self) -> u64 {
+        self.used_gas
     }
 }
 
@@ -58,7 +63,7 @@ impl Silex {
         }
 
         environment.get_mut_function("println", None, vec![Type::Any])
-            .set_on_call(move |_, args| -> _ {
+            .set_on_call(move |_, args, _| -> _ {
                 let param = &args[0];
                 let sender = unsafe { LOGS_SENDER.as_ref().unwrap() };
                 sender.send(format!("{}", param.as_ref().as_value())).unwrap();
@@ -97,9 +102,14 @@ impl Silex {
         vm.invoke_entry_chunk(chunk_id)
             .map_err(|err| JsValue::from_str(&format!("{:#}", err)))?;
 
+        let context = vm.context_mut();
+        context.set_gas_limit(Some(u64::MAX));
+        context.set_memory_price_per_byte(1);
+
         let start = web_time::Instant::now();
         let res = vm.run();
         let elapsed_time = start.elapsed();
+        let used_gas = vm.context().current_gas_usage();
 
         let logs = self.logs_receiver.try_iter().collect();
         match res {
@@ -107,6 +117,7 @@ impl Silex {
                 value: format!("{}", value),
                 logs,
                 elapsed_time: format_duration(elapsed_time).to_string(),
+                used_gas,
             }),
             Err(err) => Err(JsValue::from_str(&format!("{:#}", err))),
         }

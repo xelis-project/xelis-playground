@@ -41,6 +41,7 @@ runButton.addEventListener('click', () => {
 
         logs.innerText += `Exit code: ${result.value()}\n`;
         logs.innerText += `Executed in: ${result.elapsed_time()}\n`;
+        logs.innerText += `Gas usage: ${result.used_gas()}\n`;
     } catch (e) {
         logs.innerText += "Error: " + e + "\n";
     }
