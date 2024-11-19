@@ -3,7 +3,7 @@ use std::sync::mpsc;
 use humantime::format_duration;
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 use xelis_builder::EnvironmentBuilder;
-use xelis_bytecode::Module;
+use xelis_bytecode::{Module, OpCode};
 use xelis_compiler::Compiler;
 use xelis_lexer::Lexer;
 use xelis_parser::Parser;
@@ -19,6 +19,56 @@ pub struct Silex {
 #[wasm_bindgen]
 pub struct Program {
     module: Module,
+    entries: Vec<Entry>,
+}
+
+#[wasm_bindgen]
+impl Program {
+    // Get the entries of the program
+    pub fn entries(&self) -> Vec<Entry> {
+        self.entries.clone()
+    }
+}
+
+#[wasm_bindgen]
+#[derive(Debug, Clone)]
+pub struct Parameter {
+    name: String,
+    _type: String,
+}
+
+#[wasm_bindgen]
+impl Parameter {
+    pub fn name(&self) -> String {
+        self.name.clone()
+    }
+
+    pub fn _type(&self) -> String {
+        self._type.clone()
+    }
+}
+
+#[wasm_bindgen]
+#[derive(Debug, Clone)]
+pub struct Entry {
+    id: u16,
+    name: String,
+    parameters: Vec<Parameter>,
+}
+
+#[wasm_bindgen]
+impl Entry {
+    pub fn id(&self) -> u16 {
+        self.id
+    }
+
+    pub fn name(&self) -> String {
+        self.name.clone()
+    }
+
+    pub fn parameters(&self) -> Vec<Parameter> {
+        self.parameters.clone()
+    }
 }
 
 #[wasm_bindgen]
@@ -82,14 +132,36 @@ impl Silex {
             .collect::<Result<Vec<_>, _>>()?;
 
         let parser = Parser::with(tokens.into_iter(), &self.environment);
-        let (program, _) = parser.parse().map_err(|err| anyhow::anyhow!("{:#}", err))?;
+        let (program, mapper) = parser.parse()
+            .map_err(|err| anyhow::anyhow!("{:#}", err))?;
+
+        // Collect all the available entry functions
+        let mut entries = Vec::new();
+        let env_offset = self.environment.get_functions().len() as u16;
+        for (i, func) in program.functions().iter().enumerate() {
+            if func.is_entry() {
+                let mapping = mapper.get_function(&(i as u16 + env_offset)).unwrap();
+                let parameters = mapping.parameters.iter()
+                    .map(|(name, _type)| Parameter { name: name.to_string(), _type: _type.to_string() })
+                    .collect();
+    
+                entries.push(Entry {
+                    id: i as u16,
+                    name: mapping.name.to_owned(),
+                    parameters,
+                });
+            }
+        }
+
         let compiler = Compiler::new(&program, self.environment.environment());
 
         Ok(Program {
-            module: compiler.compile()?
+            module: compiler.compile()?,
+            entries,
         })
     }
 
+    // Compile the code
     pub fn compile(&self, code: &str) -> Result<Program, JsValue> {
         match self.compile_internal(code) {
             Ok(program) => Ok(program),
@@ -97,8 +169,13 @@ impl Silex {
         }
     }
 
+    // Execute the program
     pub fn execute_program(&self, program: Program, chunk_id: u16, max_gas: Option<u64>) -> Result<ExecutionResult, JsValue> {
         let mut vm = VM::new(&program.module, self.environment.environment());
+
+        vm.table_mut()
+            .set_instruction_cost(OpCode::IteratorNext, 50);
+
         vm.invoke_entry_chunk(chunk_id)
             .map_err(|err| JsValue::from_str(&format!("{:#}", err)))?;
 
