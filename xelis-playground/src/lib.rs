@@ -97,13 +97,13 @@ impl Silex {
         }
     }
 
-    pub fn execute_program(&self, program: Program, chunk_id: u16) -> Result<ExecutionResult, JsValue> {
+    pub fn execute_program(&self, program: Program, chunk_id: u16, max_gas: Option<u64>) -> Result<ExecutionResult, JsValue> {
         let mut vm = VM::new(&program.module, self.environment.environment());
         vm.invoke_entry_chunk(chunk_id)
             .map_err(|err| JsValue::from_str(&format!("{:#}", err)))?;
 
         let context = vm.context_mut();
-        context.set_gas_limit(Some(u64::MAX));
+        context.set_gas_limit(max_gas);
         context.set_memory_price_per_byte(1);
 
         let start = web_time::Instant::now();

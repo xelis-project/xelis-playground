@@ -31,7 +31,8 @@ runButton.addEventListener('click', () => {
         logs.innerText += "Compiled successfully!\n";
 
         logs.innerText += "-------- Running --------\n";
-        let result = silex.execute_program(program, 0);
+
+        let result = silex.execute_program(program, 0, /* BigInt(100000000) */);
         let output = result.logs();
         if (output.length > 0) {
             logs.innerText += `Output:\n`;
