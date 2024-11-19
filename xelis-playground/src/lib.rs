@@ -3,7 +3,7 @@ use std::sync::mpsc;
 use humantime::format_duration;
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 use xelis_builder::EnvironmentBuilder;
-use xelis_bytecode::{Module, OpCode};
+use xelis_bytecode::Module;
 use xelis_compiler::Compiler;
 use xelis_lexer::Lexer;
 use xelis_parser::Parser;
@@ -172,9 +172,6 @@ impl Silex {
     // Execute the program
     pub fn execute_program(&self, program: Program, chunk_id: u16, max_gas: Option<u64>) -> Result<ExecutionResult, JsValue> {
         let mut vm = VM::new(&program.module, self.environment.environment());
-
-        vm.table_mut()
-            .set_instruction_cost(OpCode::IteratorNext, 50);
 
         vm.invoke_entry_chunk(chunk_id)
             .map_err(|err| JsValue::from_str(&format!("{:#}", err)))?;
