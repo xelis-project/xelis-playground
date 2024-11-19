@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Silex Playground</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -15,6 +14,7 @@
             flex-direction: column;
             height: 100vh;
         }
+
         #editor {
             flex: 1;
             padding: 10px;
@@ -23,7 +23,10 @@
             font-size: 16px;
             overflow: auto;
             border-bottom: 2px solid #ccc;
+            border: none;
+            outline: none;
         }
+
         .button {
             padding: 10px 20px;
             background-color: #007acc;
@@ -32,14 +35,17 @@
             cursor: pointer;
             font-size: 16px;
         }
+
         .button:hover {
             background-color: #005f99;
         }
+
         #actions {
             display: flex;
             justify-content: center;
             flex-direction: column;
         }
+
         #logs {
             flex: 0.5;
             padding: 10px;
@@ -51,14 +57,15 @@
         }
     </style>
 </head>
+
 <body>
-    <code id="editor" class="language-javascript" contenteditable="true"></code>
+    <textarea id="editor" is="highlighted-code" cols="80" rows="12" language="selix" tab-size="2" auto-height></textarea>
     <div id="actions">
         <button id="runButton" class="button">Run</button>
         <!-- <button id="buildButton" class="button">Build</button> -->
     </div>
     <div id="logs"></div>
-
     <script src="/index.js" type="module"></script>
 </body>
+
 </html>

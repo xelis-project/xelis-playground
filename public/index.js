@@ -1,4 +1,7 @@
 import init, { Silex } from "/xelis_playground.js";
+import HighlightedCode from './hightlighted-code.js';
+
+HighlightedCode.useTheme('github-dark');
 
 console.log("Loading WASM module...");
 await init();
@@ -12,17 +15,24 @@ const runButton = document.getElementById('runButton');
 let code = localStorage.getItem('code');
 if (!code) {
     code = `entry main() {
-        println("Hello, World!");
-        return 0;
+    println("Hello, World!");
+    return 0;
 }`;
 }
 
-editor.innerText = code;
-// hljs.highlightElement(editor);
+editor.value = code;
+
+function get_fn_count(code) {
+    const occurence = [...code.matchAll(new RegExp(/fn .+{/, 'g'))];
+    return occurence.length;
+}
 
 runButton.addEventListener('click', () => {
-    const code = editor.innerText;
+    const code = editor.value;
     localStorage.setItem('code', code);
+
+
+    const fn_count = get_fn_count(code);
 
     // Placeholder logic for executing Rust code
     logs.innerText = "------- Compiling -------\n";
@@ -32,7 +42,7 @@ runButton.addEventListener('click', () => {
 
         logs.innerText += "-------- Running --------\n";
 
-        let result = silex.execute_program(program, 0, /* BigInt(100000000) */);
+        let result = silex.execute_program(program, fn_count, /* BigInt(100000000) */);
         let output = result.logs();
         if (output.length > 0) {
             logs.innerText += `Output:\n`;
