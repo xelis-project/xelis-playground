@@ -8,7 +8,7 @@ use xelis_compiler::Compiler;
 use xelis_lexer::Lexer;
 use xelis_parser::Parser;
 use xelis_vm::VM;
-use xelis_types::{Type, Value};
+use xelis_types::{Path, Type, Value};
 
 #[wasm_bindgen]
 pub struct Silex {
@@ -180,16 +180,14 @@ impl Silex {
 
         let mut vm = VM::new(&program.module, self.environment.environment());
 
-        vm.invoke_entry_chunk(chunk_id)
-            .map_err(|err| JsValue::from_str(&format!("{:#}", err)))?;
-
         let context = vm.context_mut();
         context.set_gas_limit(max_gas);
         context.set_memory_price_per_byte(1);
 
 
+        let mut values = Vec::with_capacity(params.len());
         for (value, param) in params.into_iter().zip(entry.parameters.iter()) {
-            match param._type {
+            let v = match param._type {
                 Type::U8 => Value::U8(value.as_f64().map(|v| v as u8)
                     .ok_or_else(|| JsValue::from_str("Expected a u8 type"))?
                 ),
@@ -215,7 +213,13 @@ impl Silex {
                     return Err(JsValue::from_str(&format!("Unsupported parameter type: {}", param._type)));
                 }
             };
+
+            values.push(Path::Owned(v));
         }
+
+        vm.invoke_entry_chunk_with_args(chunk_id, values)
+            .map_err(|err| JsValue::from_str(&format!("{:#}", err)))?;
+
 
         let start = web_time::Instant::now();
         let res = vm.run();
