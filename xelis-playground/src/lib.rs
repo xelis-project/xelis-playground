@@ -8,7 +8,7 @@ use xelis_compiler::Compiler;
 use xelis_lexer::Lexer;
 use xelis_parser::Parser;
 use xelis_vm::VM;
-use xelis_types::Type;
+use xelis_types::{Type, Value};
 
 #[wasm_bindgen]
 pub struct Silex {
@@ -34,7 +34,7 @@ impl Program {
 #[derive(Debug, Clone)]
 pub struct Parameter {
     name: String,
-    _type: String,
+    _type: Type,
 }
 
 #[wasm_bindgen]
@@ -44,7 +44,7 @@ impl Parameter {
     }
 
     pub fn _type(&self) -> String {
-        self._type.clone()
+        self._type.to_string()
     }
 }
 
@@ -142,7 +142,7 @@ impl Silex {
             if func.is_entry() {
                 let mapping = mapper.get_function(&(i as u16 + env_offset)).unwrap();
                 let parameters = mapping.parameters.iter()
-                    .map(|(name, _type)| Parameter { name: name.to_string(), _type: _type.to_string() })
+                    .map(|(name, _type)| Parameter { name: name.to_string(), _type: _type.clone() })
                     .collect();
     
                 entries.push(Entry {
@@ -170,7 +170,14 @@ impl Silex {
     }
 
     // Execute the program
-    pub fn execute_program(&self, program: Program, chunk_id: u16, max_gas: Option<u64>) -> Result<ExecutionResult, JsValue> {
+    pub fn execute_program(&self, program: Program, chunk_id: u16, max_gas: Option<u64>, params: Vec<JsValue>) -> Result<ExecutionResult, JsValue> {
+        let entry = program.entries.get(chunk_id as usize)
+            .ok_or_else(|| JsValue::from_str("Invalid entry point"))?;
+
+        if entry.parameters.len() != params.len() {
+            return Err(JsValue::from_str("Invalid number of parameters"));
+        }
+
         let mut vm = VM::new(&program.module, self.environment.environment());
 
         vm.invoke_entry_chunk(chunk_id)
@@ -179,6 +186,36 @@ impl Silex {
         let context = vm.context_mut();
         context.set_gas_limit(max_gas);
         context.set_memory_price_per_byte(1);
+
+
+        for (value, param) in params.into_iter().zip(entry.parameters.iter()) {
+            match param._type {
+                Type::U8 => Value::U8(value.as_f64().map(|v| v as u8)
+                    .ok_or_else(|| JsValue::from_str("Expected a u8 type"))?
+                ),
+                Type::U16 => Value::U16(value.as_f64().map(|v| v as u16)
+                    .ok_or_else(|| JsValue::from_str("Expected a u16 type"))?
+                ),
+                Type::U32 => Value::U32(value.as_f64().map(|v| v as u32)
+                    .ok_or_else(|| JsValue::from_str("Expected a u32 type"))?
+                ),
+                Type::U64 => Value::U64(value.as_f64().map(|v| v as u64)
+                    .ok_or_else(|| JsValue::from_str("Expected a u64 type"))?
+                ),
+                Type::U128 => Value::U128(value.as_f64().map(|v| v as u128)
+                    .ok_or_else(|| JsValue::from_str("Expected a u128 type"))?
+                ),
+                Type::U256 => Value::U256(value.as_f64().map(|v| (v as u128).into())
+                    .ok_or_else(|| JsValue::from_str("Expected a u256 type"))?
+                ),
+                Type::String => Value::String(value.as_string()
+                    .ok_or_else(|| JsValue::from_str("Expected a string type"))?
+                ),
+                _ => {
+                    return Err(JsValue::from_str(&format!("Unsupported parameter type: {}", param._type)));
+                }
+            };
+        }
 
         let start = web_time::Instant::now();
         let res = vm.run();
