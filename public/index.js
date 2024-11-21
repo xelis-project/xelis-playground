@@ -159,7 +159,7 @@ function run_code() {
         const program = silex.compile(program_code);
         const entry = program.entries()[program_entry_index];
 
-        output.innerText += `-------- Running (${entry.name()}) --------\n`;
+        output.innerText += `-------- Running (${entry.name()} at index ${entry.id()}) --------\n`;
         const params = get_program_params();
         let result  = silex.execute_program(program, entry.id(), max_gas, params);
 
