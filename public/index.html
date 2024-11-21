@@ -2,32 +2,154 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Silex Playground</title>
-    <link rel="stylesheet" href="/index.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Silex Playground</title>
+  <link rel="stylesheet" href="/index.css">
+  <link rel="stylesheet" href="/custom-select/index.css">
 </head>
 
 <body>
-    <textarea id="input_editor" is="highlighted-code" cols="80" rows="12" language="selix" tab-size="4" auto-height></textarea>
-    <button id="btn_compile" class="button">Compile</button>
+  <div id="app">
     <div>
-        <div>Entries</div>
-        <select id="program_entries_select">
-            <option>No compiled yet</option>
-        </select>
-        <div>Params</div>
-        <div id="program_entry_params">
-            No parameters
+      <div class="controls">
+        <div class="title">
+          <svg width="35" height="35" viewBox="0 0 778 743" fill="currentColor">
+            <path fill-rule="evenodd" clip-rule="evenodd"
+              d="M388.909 742.872L777.817 353.964L424.056 0.202599L478.809 132.737L700.036 353.964L388.909 665.091L77.7817 353.964L299.507 129.121L353.964 0L0 353.964L388.909 742.872Z" />
+            <path d="M388.909 665.091L353.964 0L299.507 129.121L388.909 665.091Z" />
+            <path d="M424.056 0.202599L388.909 665.091L478.809 132.737L424.056 0.202599Z" />
+          </svg>
+          <div>
+            XELIS
+            <div class="playground">Playground</div>
+          </div>
         </div>
+        <div class="flex-row">
+          <div class="custom-select">
+            <select id="examples_select">
+              <option>Examples</option>
+              <option
+                value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/array.xel">
+                Array</option>
+              <option
+                value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/condition.xel">
+                Condition</option>
+              <option
+                value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/constants.xel">
+                Constants</option>
+              <option
+                value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/factorial.xel">
+                Factorial</option>
+              <option
+                value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/fizzbuzz.xel">
+                FizzBuzz</option>
+              <option
+                value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/loop.xel">
+                Loop</option>
+              <option
+                value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/number.xel">
+                Number</option>
+              <option
+                value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/optional.xel">
+                Optional</option>
+              <option
+                value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/path.xel">
+                Path</option>
+              <option
+                value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/prime.xel">
+                Prime</option>
+              <option
+                value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/prime_index.xel">
+                Prime Index</option>
+              <option
+                value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/recursive.xel">
+                Recursive</option>
+              <option
+                value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/specific_condition.xel">
+                Specific Condition</option>
+              <option
+                value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/struct.xel">
+                Struct</option>
+            </select>
+          </div>
+          <div class="custom-select">
+            <select id="tabsize_select">
+              <option>Tab Size</option>
+              <option value="2">Tab Size: 2</option>
+              <option value="4">Tab Size: 4</option>
+            </select>
+          </div>
+          <button id="btn_compile" class="btn" title="Build the code">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M1 12h4v4h-4v-4z"></path>
+              <path d="M6 12h4v4h-4v-4z"></path>
+              <path d="M11 12h4v4h-4v-4z"></path>
+              <path d="M1 7h4v4h-4v-4z"></path>
+              <path d="M1 2h4v4h-4v-4z"></path>
+              <path d="M6 7h4v4h-4v-4z"></path>
+              <path d="M7 1h4v4h-4v-4z"></path>
+              <path d="M11 7h4v4h-4v-4z"></path>
+              <path d="M13 0h3v3h-3v-3z"></path>
+            </svg>
+            Compile
+          </button>
+        </div>
+      </div>
+      <textarea id="input_editor" is="highlighted-code" cols="80" rows="12" language="selix" tab-size="4"
+        auto-height></textarea>
     </div>
-    <button id="btn_run" class="button" disabled>Run</button>
     <div>
-        <div>Max Gas</div>
-        <input id="input_max_gas" type="number" />
+      <div class="controls">
+        <div class="title">Output</div>
+        <button id="btn_run" class="btn" disabled title="Execute the code. Compile first!">
+          <svg width="16" height="16" viewBox="-0.5 0 7 7" fill="currentColor">
+            <g transform="translate(-347.000000, -3766.000000)">
+              <g transform="translate(56.000000, 160.000000)">
+                <path
+                  d="M296.494737,3608.57322 L292.500752,3606.14219 C291.83208,3605.73542 291,3606.25002 291,3607.06891 L291,3611.93095 C291,3612.7509 291.83208,3613.26444 292.500752,3612.85767 L296.494737,3610.42771 C297.168421,3610.01774 297.168421,3608.98319 296.494737,3608.57322">
+                </path>
+              </g>
+            </g>
+          </svg>
+          Run
+        </button>
+      </div>
+      <div id="spec">
+        <div>
+          <div>Entry</div>
+          <div class="custom-select" no-header>
+            <select id="program_entries_select">
+              <option>No compiled yet</option>
+            </select>
+          </div>
+        </div>
+        <div class="spec-column">
+          <div>Parameters</div>
+          <div id="program_entry_params" class="flex-column">
+            None
+          </div>
+        </div>
+        <div>
+          <div>Max Gas</div>
+          <input id="input_max_gas" type="number" placeholder="infinite" class="input" />
+        </div>
+      </div>
+      <div id="output_container">
+        <button id="btn_clear" class="btn-clear" title="Clear output">
+          <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
+            <path
+              d="M10 12.6l.7.7 1.6-1.6 1.6 1.6.8-.7L13 11l1.7-1.6-.8-.8-1.6 1.7-1.6-1.7-.7.8 1.6 1.6-1.6 1.6zM1 4h14V3H1v1zm0 3h14V6H1v1zm8 2.5V9H1v1h8v-.5zM9 13v-1H1v1h8z" />
+          </svg>
+        </button>
+        <div id="output">
+          Output
+        </div>
+      </div>
     </div>
-    <div id="output"></div>
-    <script src="/index.js" type="module"></script>
+  </div>
+  <script src="/index.js" type="module"></script>
+  <script src="/custom-select/index.js"></script>
 </body>
 
 </html>

@@ -1,16 +1,7 @@
 import init, { Silex } from "/xelis_playground.js";
 import HighlightedCode from './hightlighted-code.js';
 
-// TODO
-// input to set max gas - default infinite (done)
-// select entries after build (done)
-// build & run button (done)
-// provided input for each entry params (done)
-// select for code example - fetch from github https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/factorial.xel
-// options to set tabsize
-// style controls
-
-HighlightedCode.useTheme('github-dark');
+HighlightedCode.useTheme('tomorrow-night-bright'); // github-dark
 
 console.log("Loading WASM module...");
 await init();
@@ -24,9 +15,11 @@ const program_entry_params = document.getElementById('program_entry_params');
 const btn_run = document.getElementById('btn_run');
 const btn_compile = document.getElementById('btn_compile');
 const input_max_gas = document.getElementById('input_max_gas');
+const examples_select = document.getElementById('examples_select');
+const btn_clear = document.getElementById('btn_clear');
 
 let program_code = null;
-let program_entry_id = null;
+let program_entry_index = null;
 
 function load_code() {
     let code = localStorage.getItem('code');
@@ -52,29 +45,33 @@ function reset_entries() {
     program_entry_params.innerHTML = '';
 }
 
-function add_entry(entry) {
+function add_entry(entry, index) {
     const opt = document.createElement(`option`);
     opt.innerText = entry.name();
-    opt.value = entry.id();
+    opt.value = index;
     program_entries_select.appendChild(opt);
 }
 
-function add_entry_params(entry) {
+function add_entry_params(entry, index) {
     const container = document.createElement(`div`);
-    container.id = `entry_params_${entry.id()}`;
-    container.style.display = 'block';
+    container.id = `entry_params_${index}`;
+    container.classList.add(`spec-column`, `hidden`);
     const params = entry.parameters();
 
-    params.forEach((param) => {
-        const item = document.createElement(`div`); 
+    params.forEach((param, param_index) => {
+        const item = document.createElement(`div`);
+        item.classList.add(`spec-param`);
 
         const title = document.createElement(`div`);
         title.innerText = `${param.name()} (${param._type()})`;
 
         const input = document.createElement(`input`);
         input.type = "text";
-        input.name = `entry_params_${entry.id()}_input`;
-        //input.id = `entry_params_${entry.id()}_${param.name()}`;
+        input.autocomplete = `off`;
+        input.autocapitalize = `off`;
+        input.placeholder = `required`;
+        input.classList.add('input');
+        input.name = `entry_params_${param_index}_input`;
 
         item.appendChild(title);
         item.appendChild(input);
@@ -82,7 +79,7 @@ function add_entry_params(entry) {
     });
 
     if (params.length === 0) {
-        container.innerHTML = `No parameters`;
+        container.innerHTML = `None`;
     }
 
     program_entry_params.appendChild(container);
@@ -101,13 +98,14 @@ function compile_code() {
         const program = silex.compile(code);
 
         const entries = program.entries();
-        entries.forEach(entry => {
-            add_entry(entry);
-            add_entry_params(entry);
+        entries.forEach((entry, index) => {
+            add_entry(entry, index);
+            add_entry_params(entry, index);
         });
 
+        buildCustomSelects();
+
         if (entries.length > 0) {
-    
             program_entries_select.dispatchEvent(new Event('change'));
         }
 
@@ -124,18 +122,18 @@ btn_compile.addEventListener('click', () => {
 });
 
 program_entries_select.addEventListener('change', (e) => {
-    program_entry_id = e.target.value;
+    program_entry_index = e.target.value;
 
-    program_entry_params.childNodes.forEach((element) => {
-        element.style.display = 'none';
+    Array.from(program_entry_params.children).forEach((element) => {
+        element.classList.add(`hidden`);
     });
 
-    const params_container = document.getElementById(`entry_params_${program_entry_id}`);
-    params_container.style.display = 'block';
+    const params_container = document.getElementById(`entry_params_${program_entry_index}`);
+    if (params_container) params_container.classList.remove(`hidden`);
 });
 
 function get_program_params() {
-    const inputs = document.querySelectorAll(`input[name="entry_params_${program_entry_id}_input"]`);
+    const inputs = document.querySelectorAll(`input[name="entry_params_${program_entry_index}_input"]`);
     const params = [];
     inputs.forEach((element) => {
         const value = parseFloat(element.value);
@@ -153,10 +151,11 @@ function run_code() {
 
     try {
         const program = silex.compile(program_code);
+        const entry = program.entries()[program_entry_index];
 
-        output.innerText += "-------- Running --------\n";
+        output.innerText += `-------- Running (${entry.name()}) --------\n`;
         const params = get_program_params();
-        let result  = silex.execute_program(program, program_entry_id, max_gas, params);
+        let result  = silex.execute_program(program, entry.id(), max_gas, params);
 
         let logs = result.logs();
         if (logs.length > 0) {
@@ -172,9 +171,27 @@ function run_code() {
         output.innerText += "Error: " + e + "\n";
     }
 
-    output.scrollTop = output.scrollHeight;
+    // scroll down the output does not work for some reason
+    // output.scrollTop = output.scrollHeight;
 }
 
 btn_run.addEventListener('click', () => {
     run_code();
+});
+
+btn_clear.addEventListener('click', () => {
+    output.innerText = "";
+});
+
+examples_select.addEventListener('change', async (e) => {
+    const url = e.target.value;
+
+    const res = await fetch(url);
+    const code = await res.text();
+    input_editor.value = code;
+});
+
+tabsize_select.addEventListener('change', (e) => {
+    const tabsize = e.target.value;
+    input_editor.setAttribute(`tab-size`, tabsize);
 });
