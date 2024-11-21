@@ -5,66 +5,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Silex Playground</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-        }
-
-        #editor {
-            flex: 1;
-            padding: 10px;
-            background: #f5f5f5;
-            font-family: monospace;
-            font-size: 16px;
-            overflow: auto;
-            border-bottom: 2px solid #ccc;
-            border: none;
-            outline: none;
-        }
-
-        .button {
-            padding: 10px 20px;
-            background-color: #007acc;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        .button:hover {
-            background-color: #005f99;
-        }
-
-        #actions {
-            display: flex;
-            justify-content: center;
-            flex-direction: column;
-        }
-
-        #logs {
-            flex: 0.5;
-            padding: 10px;
-            background: #1e1e1e;
-            color: #dcdcdc;
-            font-family: monospace;
-            font-size: 16px;
-            overflow: auto;
-        }
-    </style>
+    <link rel="stylesheet" href="/index.css">
 </head>
 
 <body>
-    <textarea id="editor" is="highlighted-code" cols="80" rows="12" language="selix" tab-size="2" auto-height></textarea>
-    <div id="actions">
-        <button id="runButton" class="button">Run</button>
-        <!-- <button id="buildButton" class="button">Build</button> -->
+    <textarea id="input_editor" is="highlighted-code" cols="80" rows="12" language="selix" tab-size="4" auto-height></textarea>
+    <button id="btn_compile" class="button">Compile</button>
+    <div>
+        <div>Entries</div>
+        <select id="program_entries_select">
+            <option>No compiled yet</option>
+        </select>
+        <div>Params</div>
+        <div id="program_entry_params">
+            No parameters
+        </div>
     </div>
-    <div id="logs"></div>
+    <button id="btn_run" class="button" disabled>Run</button>
+    <div>
+        <div>Max Gas</div>
+        <input id="input_max_gas" type="number" />
+    </div>
+    <div id="output"></div>
     <script src="/index.js" type="module"></script>
 </body>
 
