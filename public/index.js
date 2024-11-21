@@ -17,20 +17,26 @@ const btn_compile = document.getElementById('btn_compile');
 const input_max_gas = document.getElementById('input_max_gas');
 const examples_select = document.getElementById('examples_select');
 const btn_clear = document.getElementById('btn_clear');
+const editor_lines = document.getElementById('editor_lines')
 
 let program_code = null;
 let program_entry_index = null;
+
+function set_editor_code(code) {
+    input_editor.value = code;
+    set_editor_lines();
+}
 
 function load_code() {
     let code = localStorage.getItem('code');
     if (!code) {
         code = `entry main() {
-        println("Hello, World!");
-        return 0;
-    }`;
+    println("Hello, World!");
+    return 0;
+}`;
     }
     
-    input_editor.value = code;
+    set_editor_code(code);
 }
 
 load_code();
@@ -188,10 +194,26 @@ examples_select.addEventListener('change', async (e) => {
 
     const res = await fetch(url);
     const code = await res.text();
-    input_editor.value = code;
+    set_editor_code(code);
 });
 
 tabsize_select.addEventListener('change', (e) => {
     const tabsize = e.target.value;
     input_editor.setAttribute(`tab-size`, tabsize);
+});
+
+function set_editor_lines() {
+    const text = input_editor.value;
+    const lines = text.split("\n");
+    const count = lines.length;
+    editor_lines.innerText = "";
+    for (let i =0;i<count;i++) {
+        const line = document.createElement(`div`);
+        line.innerHTML = i;
+        editor_lines.appendChild(line);
+    }
+}
+
+input_editor.addEventListener('input', (e) => {
+    set_editor_lines();
 });
