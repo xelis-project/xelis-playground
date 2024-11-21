@@ -51,14 +51,15 @@ impl Parameter {
 #[wasm_bindgen]
 #[derive(Debug, Clone)]
 pub struct Entry {
-    id: u16,
+    id: usize,
+    chunk_id: u16,
     name: String,
     parameters: Vec<Parameter>,
 }
 
 #[wasm_bindgen]
 impl Entry {
-    pub fn id(&self) -> u16 {
+    pub fn id(&self) -> usize {
         self.id
     }
 
@@ -146,7 +147,8 @@ impl Silex {
                     .collect();
     
                 entries.push(Entry {
-                    id: i as u16,
+                    id: entries.len(),
+                    chunk_id: i as u16,
                     name: mapping.name.to_owned(),
                     parameters,
                 });
@@ -170,8 +172,8 @@ impl Silex {
     }
 
     // Execute the program
-    pub fn execute_program(&self, program: Program, chunk_id: u16, max_gas: Option<u64>, params: Vec<JsValue>) -> Result<ExecutionResult, JsValue> {
-        let entry = program.entries.get(chunk_id as usize)
+    pub fn execute_program(&self, program: Program, entry_id: usize, max_gas: Option<u64>, params: Vec<JsValue>) -> Result<ExecutionResult, JsValue> {
+        let entry = program.entries.get(entry_id)
             .ok_or_else(|| JsValue::from_str("Invalid entry point"))?;
 
         if entry.parameters.len() != params.len() {
@@ -217,7 +219,7 @@ impl Silex {
             values.push(Path::Owned(v));
         }
 
-        vm.invoke_entry_chunk_with_args(chunk_id, values)
+        vm.invoke_entry_chunk_with_args(entry.chunk_id, values)
             .map_err(|err| JsValue::from_str(&format!("{:#}", err)))?;
 
 
