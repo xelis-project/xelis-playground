@@ -77,6 +77,7 @@ html, body {
   color: white;
   padding: 1rem;
   border-bottom: .1rem solid #3f3f3f;
+  flex-wrap: wrap;
 }
 
 .btn {
