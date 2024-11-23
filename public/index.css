@@ -48,6 +48,7 @@ html, body {
 @media screen and (min-width: 1024px) {
   #app> :nth-child(2) {
     border-left: .1rem solid #3f3f3f;
+    max-width: 500px;
   }
 
   #app> :nth-child(2) .controls {
@@ -162,9 +163,14 @@ html, body {
   color: #dcdcdc;
   font-family: monospace;
   font-size: 1rem;
-  overflow: auto;
   scroll-behavior: smooth;
   position: relative;
+}
+
+@media screen and (min-width: 1024px) {
+  #output_container {
+    overflow: auto;
+  }
 }
 
 ::-webkit-scrollbar {
