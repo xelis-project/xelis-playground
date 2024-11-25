@@ -1,4 +1,4 @@
-use std::sync::mpsc;
+use std::sync::{mpsc, Mutex};
 
 use humantime::format_duration;
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
@@ -8,7 +8,8 @@ use xelis_compiler::Compiler;
 use xelis_lexer::Lexer;
 use xelis_parser::Parser;
 use xelis_vm::VM;
-use xelis_types::{Path, Type, Value};
+use xelis_types::{Type, Value};
+use tokio_with_wasm as tokio;
 
 #[wasm_bindgen]
 pub struct Silex {
@@ -99,7 +100,7 @@ impl ExecutionResult {
     }
 }
 
-static mut LOGS_SENDER: Option<mpsc::Sender<String>> = None;
+static LOGS_SENDER: Mutex<Option<mpsc::Sender<String>>> = Mutex::new(None);
 
 #[wasm_bindgen]
 impl Silex {
@@ -109,14 +110,12 @@ impl Silex {
         // Patch the environment to include a println function that sends logs to the receiver
         let (sender, receiver) = mpsc::channel();
 
-        unsafe {
-            LOGS_SENDER = Some(sender);
-        }
-
+        *LOGS_SENDER.lock().unwrap() = Some(sender);
         environment.get_mut_function("println", None, vec![Type::Any])
             .set_on_call(move |_, args, _| -> _ {
                 let param = &args[0];
-                let sender = unsafe { LOGS_SENDER.as_ref().unwrap() };
+                let lock = LOGS_SENDER.lock().unwrap();
+                let sender = lock.as_ref().unwrap();
                 sender.send(format!("{}", param.as_ref().as_value())).unwrap();
                 Ok(None)
             });
@@ -172,20 +171,13 @@ impl Silex {
     }
 
     // Execute the program
-    pub fn execute_program(&self, program: Program, entry_id: usize, max_gas: Option<u64>, params: Vec<JsValue>) -> Result<ExecutionResult, JsValue> {
+    pub async fn execute_program(&self, program: Program, entry_id: usize, max_gas: Option<u64>, params: Vec<JsValue>) -> Result<ExecutionResult, JsValue> {
         let entry = program.entries.get(entry_id)
             .ok_or_else(|| JsValue::from_str("Invalid entry point"))?;
 
         if entry.parameters.len() != params.len() {
             return Err(JsValue::from_str("Invalid number of parameters"));
         }
-
-        let mut vm = VM::new(&program.module, self.environment.environment());
-
-        let context = vm.context_mut();
-        context.set_gas_limit(max_gas);
-        context.set_memory_price_per_byte(1);
-
 
         let mut values = Vec::with_capacity(params.len());
         for (value, param) in params.into_iter().zip(entry.parameters.iter()) {
@@ -216,27 +208,48 @@ impl Silex {
                 }
             };
 
-            values.push(Path::Owned(v));
+            values.push(v);
         }
 
-        vm.invoke_entry_chunk_with_args(entry.chunk_id, values)
+        let chunk_id = entry.chunk_id;
+        let environment = self.environment.environment().clone();
+        let handle: Result<ExecutionResult, String> = tokio::task::spawn_blocking(move || {
+            let mut vm = VM::new(&program.module, &environment);
+
+            let context = vm.context_mut();
+            context.set_gas_limit(max_gas);
+            context.set_memory_price_per_byte(1);
+    
+            vm.invoke_entry_chunk_with_args(chunk_id, values.into_iter())
+                .map_err(|err| format!("{:#}", err)).unwrap();
+
+            let start = web_time::Instant::now();
+            let res = vm.run();
+            let elapsed_time = start.elapsed();
+            let used_gas = vm.context().current_gas_usage();
+
+            match res {
+                Ok(value) => Ok(ExecutionResult {
+                    value: format!("{}", value),
+                    logs: Vec::new(),
+                    elapsed_time: format_duration(elapsed_time).to_string(),
+                    used_gas,
+                }),
+                Err(err) => Err(format!("{:#}", err)),
+            }
+        }).await
             .map_err(|err| JsValue::from_str(&format!("{:#}", err)))?;
 
+        // collect all logs
+        let logs: Vec<String> = self.logs_receiver.try_iter().collect();
 
-        let start = web_time::Instant::now();
-        let res = vm.run();
-        let elapsed_time = start.elapsed();
-        let used_gas = vm.context().current_gas_usage();
-
-        let logs = self.logs_receiver.try_iter().collect();
-        match res {
-            Ok(value) => Ok(ExecutionResult {
-                value: format!("{}", value),
-                logs,
-                elapsed_time: format_duration(elapsed_time).to_string(),
-                used_gas,
-            }),
-            Err(err) => Err(JsValue::from_str(&format!("{:#}", err))),
+        match handle {
+            Ok(result) => {
+                let mut result = result;
+                result.logs = logs;
+                Ok(result)
+            },
+            Err(err) => Err(JsValue::from_str(&err)),
         }
     }
 }

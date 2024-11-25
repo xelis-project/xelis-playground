@@ -152,7 +152,7 @@ function get_program_params() {
     return params;
 }
 
-function run_code() {
+async function run_code() {
     const max_gas = input_max_gas.value || undefined;
 
     try {
@@ -161,7 +161,9 @@ function run_code() {
 
         output.innerText += `-------- Running (${entry.name()} at index ${entry.id()}) --------\n`;
         const params = get_program_params();
-        let result  = silex.execute_program(program, entry.id(), max_gas, params);
+        console.log(params);
+        let result = await silex.execute_program(program, entry.id(), max_gas, params);
+        console.log(result);
 
         let logs = result.logs();
         if (logs.length > 0) {
@@ -181,8 +183,8 @@ function run_code() {
     // output.scrollTop = output.scrollHeight;
 }
 
-btn_run.addEventListener('click', () => {
-    run_code();
+btn_run.addEventListener('click', async () => {
+    await run_code();
 });
 
 btn_clear.addEventListener('click', () => {

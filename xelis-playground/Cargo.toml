@@ -16,6 +16,8 @@ xelis_types = { git = "https://github.com/xelis-project/xelis-vm.git", branch = 
 anyhow = "1.0.93"
 web-time = "1.1.0"
 humantime = "2.1.0"
+tokio_with_wasm = { version = "0.7.4", features = ["rt"] }
+wasm-bindgen-futures = "0.4.45"
 
 [lib]
 crate-type = ["cdylib", "rlib"]

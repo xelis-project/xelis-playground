@@ -7,7 +7,7 @@ else
   echo "Installing Cargo..."
 
   # Download & run rustup installer
-  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain stable -y
+  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain nightly -y
 
   # Source the Cargo env
   source "$HOME/.cargo/env"
@@ -18,4 +18,6 @@ fi
 # Make sure wasm-pack is installed
 cargo install wasm-pack
 
-wasm-pack build xelis-playground --target web --out-dir ../public --no-typescript --no-package
+export RUSTUP_TOOLCHAIN="nightly"
+export RUSTFLAGS="-C target-feature=+atomics,+bulk-memory,+mutable-globals"
+wasm-pack build xelis-playground --target web --out-dir ../public --no-typescript --no-package -- -Z build-std=std,panic_abort
