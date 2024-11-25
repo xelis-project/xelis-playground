@@ -14,6 +14,7 @@ else
 
   # Install nightly toolchain
   rustup toolchain install nightly
+  rustup component add rust-src --toolchain nightly
 
   echo "Cargo installed successfully."
 fi
