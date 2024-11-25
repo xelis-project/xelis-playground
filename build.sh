@@ -7,10 +7,13 @@ else
   echo "Installing Cargo..."
 
   # Download & run rustup installer
-  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain nightly -y
+  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain none -y
 
   # Source the Cargo env
   source "$HOME/.cargo/env"
+
+  # Install nightly toolchain
+  rustup toolchain install nightly
 
   echo "Cargo installed successfully."
 fi
