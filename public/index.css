@@ -221,3 +221,13 @@ html, body {
   padding: 1rem 0 1rem 1rem;
   font: 16px monospace;
 }
+
+.spin {
+  animation: spin .8s infinite;
+}
+
+@keyframes spin {
+  100% {
+    transform: rotate(360deg)
+  }
+}

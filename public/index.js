@@ -152,15 +152,43 @@ function get_program_params() {
     return params;
 }
 
+function btn_run_set_running() {
+    btn_run.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="spin">
+            <path d="M12 22C17.5228 22 22 17.5228 22 12H19C19 15.866 15.866 19 12 19V22Z" />
+            <path d="M2 12C2 6.47715 6.47715 2 12 2V5C8.13401 5 5 8.13401 5 12H2Z" />
+        </svg>
+        Running
+    `;
+    btn_run.setAttribute(`disabled`, "");
+}
+
+function btn_run_set_run() {
+    btn_run.innerHTML = `
+        <svg width="16" height="16" viewBox="-0.5 0 7 7" fill="currentColor">
+            <g transform="translate(-347.000000, -3766.000000)">
+                <g transform="translate(56.000000, 160.000000)">
+                <path
+                    d="M296.494737,3608.57322 L292.500752,3606.14219 C291.83208,3605.73542 291,3606.25002 291,3607.06891 L291,3611.93095 C291,3612.7509 291.83208,3613.26444 292.500752,3612.85767 L296.494737,3610.42771 C297.168421,3610.01774 297.168421,3608.98319 296.494737,3608.57322">
+                </path>
+                </g>
+            </g>
+        </svg>
+        Run
+    `;
+    btn_run.removeAttribute(`disabled`);
+}
+
 async function run_code() {
     const max_gas = input_max_gas.value || undefined;
-
-    if (silex.has_program_running()) {
-        output.innerText += "A program is already running!\n";
-        return;
-    }
+    btn_run_set_running();
 
     try {
+        if (silex.has_program_running()) {
+            output.innerText += "A program is already running!\n";
+            return;
+        }
+    
         const program = silex.compile(program_code);
         const entry = program.entries()[program_entry_index];
 
@@ -181,6 +209,8 @@ async function run_code() {
     } catch (e) {
         output.innerText += "Error: " + e + "\n";
     }
+
+    btn_run_set_run();
 
     // scroll down the output does not work for some reason
     // output.scrollTop = output.scrollHeight;
