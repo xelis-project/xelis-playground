@@ -1,4 +1,4 @@
-use std::sync::{mpsc, Mutex};
+use std::sync::{atomic::{AtomicBool, Ordering}, mpsc, Mutex};
 
 use humantime::format_duration;
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
@@ -15,6 +15,7 @@ use tokio_with_wasm as tokio;
 pub struct Silex {
     environment: EnvironmentBuilder<'static>,
     logs_receiver: mpsc::Receiver<String>,
+    is_running: AtomicBool,
 }
 
 #[wasm_bindgen]
@@ -123,6 +124,7 @@ impl Silex {
         Self {
             environment,
             logs_receiver: receiver,
+            is_running: AtomicBool::new(false),
         }
     }
 
@@ -170,8 +172,17 @@ impl Silex {
         }
     }
 
+    // Check if a program is running
+    pub fn has_program_running(&self) -> bool {
+        self.is_running.load(Ordering::Relaxed)
+    }
+
     // Execute the program
     pub async fn execute_program(&self, program: Program, entry_id: usize, max_gas: Option<u64>, params: Vec<JsValue>) -> Result<ExecutionResult, JsValue> {
+        if self.has_program_running() {
+            return Err(JsValue::from_str("A program is already running"));
+        }
+
         let entry = program.entries.get(entry_id)
             .ok_or_else(|| JsValue::from_str("Invalid entry point"))?;
 
@@ -211,9 +222,12 @@ impl Silex {
             values.push(v);
         }
 
+        // Mark it as running
+        self.is_running.store(true, Ordering::Relaxed);
+
         let chunk_id = entry.chunk_id;
         let environment = self.environment.environment().clone();
-        let handle: Result<ExecutionResult, String> = tokio::task::spawn_blocking(move || {
+        let res = tokio::task::spawn_blocking(move || {
             let mut vm = VM::new(&program.module, &environment);
 
             let context = vm.context_mut();
@@ -237,8 +251,12 @@ impl Silex {
                 }),
                 Err(err) => Err(format!("{:#}", err)),
             }
-        }).await
-            .map_err(|err| JsValue::from_str(&format!("{:#}", err)))?;
+        }).await;
+
+        // Mark it as not running
+        self.is_running.store(false, Ordering::Relaxed);
+
+        let handle = res.map_err(|err| JsValue::from_str(&format!("{:#}", err)))?;
 
         // collect all logs
         let logs: Vec<String> = self.logs_receiver.try_iter().collect();

@@ -155,15 +155,18 @@ function get_program_params() {
 async function run_code() {
     const max_gas = input_max_gas.value || undefined;
 
+    if (silex.has_program_running()) {
+        output.innerText += "A program is already running!\n";
+        return;
+    }
+
     try {
         const program = silex.compile(program_code);
         const entry = program.entries()[program_entry_index];
 
         output.innerText += `-------- Running (${entry.name()} at index ${entry.id()}) --------\n`;
         const params = get_program_params();
-        console.log(params);
         let result = await silex.execute_program(program, entry.id(), max_gas, params);
-        console.log(result);
 
         let logs = result.logs();
         if (logs.length > 0) {
