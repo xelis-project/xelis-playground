@@ -3,19 +3,6 @@ html, body {
   margin: 0;
   padding: 0;
   background: black;
-  height: 100%;
-}
-
-#app {
-  display: grid;
-  grid-template-columns: 1fr;
-  height: 100%;
-}
-
-@media screen and (min-width: 1024px) {
-  #app {
-    grid-template-columns: 1fr auto;
-  }
 }
 
 .title {
@@ -32,38 +19,60 @@ html, body {
   font-size: .9rem;
 }
 
-#app>div {
+@media screen and (min-width: 1024px) {
+  #app {
+    display: flex;
+    flex-direction: row;
+    height: 100vh;
+  }
+}
+
+.gutter {
+  background-color: #3f3f3f;
+  background-repeat: no-repeat;
+  background-position: 50%;
+  position: relative;
+}
+
+.gutter:hover {
+  background-color: #727272;
+}
+
+.gutter.gutter-horizontal {
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
+  cursor: col-resize;
+  width: 5px;
+}
+
+.gutter.gutter-vertical {
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII=');
+  cursor: row-resize;
+  height: 5px;
+  width: 100%;
+}
+
+#screen_left {
   display: flex;
   flex-direction: column;
 }
 
-#app> :nth-child(2) {
-  overflow: auto;
-}
-
-#app> :nth-child(2) .controls {
-  border-top: .1rem solid #3f3f3f;
-}
-
-@media screen and (min-width: 1024px) {
-  #app> :nth-child(2) {
-    border-left: .1rem solid #3f3f3f;
-    max-width: 500px;
-  }
-
-  #app> :nth-child(2) .controls {
-    border-top: none;
-  }
+#screen_right {
+  display: flex;
+  flex-direction: column;
+  background-color: black;
+  position: relative;
 }
 
 #input_editor {
-  padding: 1rem;
+  padding: 1rem 1rem 1rem .5rem;
   font-family: monospace;
   font-size: 1rem;
   overflow: auto;
   background: black;
   border: none;
   outline: none;
+  color: white;
+  resize: none;
   flex: 1;
 }
 
@@ -159,7 +168,7 @@ html, body {
 
 #output_container {
   flex: 1;
-  padding: 1rem;
+  padding: 1rem 1rem 2rem 1rem;
   background: black;
   color: #dcdcdc;
   font-family: monospace;
@@ -203,6 +212,7 @@ html, body {
   flex-direction: row;
   align-items: center;
   gap: .5rem;
+  flex-wrap: wrap;
 }
 
 .flex-column {
@@ -218,7 +228,7 @@ html, body {
 
 #editor_lines {
   color: #3f3f3f;
-  padding: 1rem 0 1rem 1rem;
+  padding: 1rem .5rem 1rem 1rem;
   font: 16px monospace;
 }
 

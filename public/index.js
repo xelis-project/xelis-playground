@@ -1,5 +1,44 @@
 import init, { Silex } from "/xelis_playground.js";
 import HighlightedCode from './hightlighted-code.js';
+import 'https://cdnjs.cloudflare.com/ajax/libs/split.js/1.6.5/split.min.js'
+
+let direction;
+let split;
+
+function set_split_direction() {
+    let temp_direction = direction;
+    if (window.innerWidth > 1024) {
+        direction = `horizontal`;
+    } else {
+        direction = `vertical`;
+    }
+
+    return temp_direction !== direction; // if changed
+}
+
+set_split_direction();
+
+function set_split() {
+    split = Split(
+        ['#screen_left', '#screen_right'],
+        {
+            minSize: 300,
+            gutterSize: 5,
+            direction: direction,
+        }
+    );
+}
+
+set_split();
+
+window.addEventListener(`resize`, (e) => {
+    const changed = set_split_direction();
+    if (changed) {
+        split.destroy();
+        set_split();
+    }
+})
+
 
 HighlightedCode.useTheme('tomorrow-night-bright'); // github-dark
 
@@ -35,7 +74,7 @@ function load_code() {
     return 0;
 }`;
     }
-    
+
     set_editor_code(code);
 }
 
@@ -188,7 +227,7 @@ async function run_code() {
             output.innerText += "A program is already running!\n";
             return;
         }
-    
+
         const program = silex.compile(program_code);
         const entry = program.entries()[program_entry_index];
 
@@ -242,7 +281,7 @@ function set_editor_lines() {
     const lines = text.split("\n");
     const count = lines.length;
     editor_lines.innerText = "";
-    for (let i =0;i<count;i++) {
+    for (let i = 0; i < count; i++) {
         const line = document.createElement(`div`);
         line.innerHTML = i;
         editor_lines.appendChild(line);

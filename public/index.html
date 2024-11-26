@@ -11,7 +11,7 @@
 
 <body>
   <div id="app">
-    <div>
+    <div id="screen_left">
       <div class="controls">
         <div class="title">
           <svg width="35" height="35" viewBox="0 0 778 743" fill="currentColor">
@@ -98,11 +98,11 @@
       </div>
       <div class="editor-wrap">
         <div id="editor_lines"></div>
-        <textarea id="input_editor" is="highlighted-code" language="silex" tab-size="4" spellcheck="false" auto-height>
+        <textarea id="input_editor" is="highlighted-code" language="silex" tab-size="4" spellcheck="false">
       </textarea>
       </div>
     </div>
-    <div>
+    <div id="screen_right">
       <div class="controls">
         <div class="title">Output</div>
         <button id="btn_run" class="btn" disabled title="Execute the code. Compile first!">
