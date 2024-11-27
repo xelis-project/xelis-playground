@@ -142,7 +142,7 @@ impl Silex {
         let env_offset = self.environment.get_functions().len() as u16;
         for (i, func) in program.functions().iter().enumerate() {
             if func.is_entry() {
-                let mapping = mapper.get_function(&(i as u16 + env_offset)).unwrap();
+                let mapping = mapper.functions().get_function(&(i as u16 + env_offset)).unwrap();
                 let parameters = mapping.parameters.iter()
                     .map(|(name, _type)| Parameter { name: name.to_string(), _type: _type.clone() })
                     .collect();
