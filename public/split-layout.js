@@ -8,7 +8,7 @@ let split;
 
 function set_split_direction() {
     let temp_direction = direction;
-    if (window.innerWidth > 1024) {
+    if (window.innerWidth >= 768) {
         direction = `horizontal`;
     } else {
         direction = `vertical`;
@@ -24,7 +24,7 @@ function set_split() {
         ['#screen_left', '#screen_right'],
         {
             minSize: 300,
-            gutterSize: 5,
+            gutterSize: 6,
             direction: direction,
         }
     );

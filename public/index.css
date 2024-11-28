@@ -3,6 +3,7 @@ html, body {
   margin: 0;
   padding: 0;
   background: black;
+  font-size: clamp(.7rem, 1.2vw, 1.1rem);
 }
 
 .title {
@@ -15,11 +16,11 @@ html, body {
 }
 
 .playground {
-  color: #3f3f3f;
+  color: #5b5b5b;
   font-size: .9rem;
 }
 
-@media screen and (min-width: 1024px) {
+@media screen and (min-width: 768px) {
   #app {
     display: flex;
     flex-direction: row;
@@ -41,13 +42,11 @@ html, body {
 .gutter.gutter-horizontal {
   background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
   cursor: col-resize;
-  width: 5px;
 }
 
 .gutter.gutter-vertical {
   background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII=');
   cursor: row-resize;
-  height: 5px;
   width: 100%;
 }
 
@@ -139,8 +138,6 @@ html, body {
   border-bottom: thin solid #6d6d6d;
 }
 
-#spec {}
-
 #spec>div {
   padding: 1rem;
   display: flex;
@@ -177,7 +174,7 @@ html, body {
   position: relative;
 }
 
-@media screen and (min-width: 1024px) {
+@media screen and (min-width: 768px) {
   #output_container {
     overflow: auto;
   }
@@ -229,7 +226,7 @@ html, body {
 #editor_lines {
   color: #3f3f3f;
   padding: 1rem .5rem 1rem 1rem;
-  font: 16px monospace;
+  font: 1rem monospace;
 }
 
 .spin {
