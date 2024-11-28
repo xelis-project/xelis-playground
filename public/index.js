@@ -33,13 +33,13 @@ function load_save() {
     // load code
     let code = localStorage.getItem('code');
     if (!code) {
-        code = `entry main() {\r\t\tprintln("Hello, World!");\r\t\treturn 0;\r}`;
+        code = `entry main() {\r\tprintln("Hello, World!");\r\treturn 0;\r}`;
     }
 
     set_editor_code(code);
 
     // load tabsize
-    const tabsize = localStorage.getItem('tabsize') || '2';
+    const tabsize = localStorage.getItem('tabsize') || '4';
     tabsize_select.value = tabsize;
     input_editor.setAttribute(`tab-size`, tabsize);
 }
@@ -233,7 +233,7 @@ btn_clear.addEventListener('click', () => {
 // examples are using spaces indentation - fix by replacing with tabulation
 function replace_spaces_indentation(data) {
     return data.replace(/^( +)/gm, (match) => {
-        const tab_count = Math.floor(match.length / 2);
+        const tab_count = Math.floor(match.length / 4);
         return `\t`.repeat(tab_count);
     });
 }
