@@ -69,10 +69,7 @@ function set_editor_code(code) {
 function load_code() {
     let code = localStorage.getItem('code');
     if (!code) {
-        code = `entry main() {
-    println("Hello, World!");
-    return 0;
-}`;
+        code = `entry main() {\r\t\tprintln("Hello, World!");\r\t\treturn 0;\r}`;
     }
 
     set_editor_code(code);
@@ -263,11 +260,20 @@ btn_clear.addEventListener('click', () => {
     output.innerText = "";
 });
 
+// examples are using spaces indentation - fix by replacing with tabulation
+function replace_spaces_indentation(data) {
+    return data.replace(/^( +)/gm, (match) => {
+        const tab_count = Math.floor(match.length / 2);
+        return `\t`.repeat(tab_count);
+    });
+}
+
 examples_select.addEventListener('change', async (e) => {
     const url = e.target.value;
 
     const res = await fetch(url);
-    const code = await res.text();
+    let code = await res.text();
+    code = replace_spaces_indentation(code);
     set_editor_code(code);
 });
 
