@@ -39,7 +39,6 @@ window.addEventListener(`resize`, (e) => {
     }
 })
 
-
 HighlightedCode.useTheme('tomorrow-night-bright'); // github-dark
 
 console.log("Loading WASM module...");
@@ -66,16 +65,23 @@ function set_editor_code(code) {
     set_editor_lines();
 }
 
-function load_code() {
+function load_save() {
+    // load code
     let code = localStorage.getItem('code');
     if (!code) {
         code = `entry main() {\r\t\tprintln("Hello, World!");\r\t\treturn 0;\r}`;
     }
 
     set_editor_code(code);
+
+    // load tabsize
+    const tabsize = localStorage.getItem('tabsize') || '4';
+    tabsize_select.value = tabsize;
+    input_editor.setAttribute(`tab-size`, tabsize);
 }
 
-load_code();
+load_save();
+buildCustomSelects();
 
 function save_code() {
     const code = input_editor.value;
@@ -277,9 +283,15 @@ examples_select.addEventListener('change', async (e) => {
     set_editor_code(code);
 });
 
+function save_tabsize() {
+    const tabsize = tabsize_select.value;
+    localStorage.setItem("tabsize", tabsize);
+}
+
 tabsize_select.addEventListener('change', (e) => {
     const tabsize = e.target.value;
     input_editor.setAttribute(`tab-size`, tabsize);
+    save_tabsize();
 });
 
 function set_editor_lines() {
