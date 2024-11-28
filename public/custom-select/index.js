@@ -5,7 +5,7 @@ function clearCustomSelects() {
   elements.forEach((e) => e.remove());
 }
 
-function buildCustomSelects() {
+export function buildCustomSelects() {
   clearCustomSelects();
 
   var x, i, j, l, ll, selElmnt, a, b, c;

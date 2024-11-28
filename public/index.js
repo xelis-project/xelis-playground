@@ -1,43 +1,7 @@
 import init, { Silex } from "/xelis_playground.js";
 import HighlightedCode from './hightlighted-code.js';
-import 'https://cdnjs.cloudflare.com/ajax/libs/split.js/1.6.5/split.min.js'
-
-let direction;
-let split;
-
-function set_split_direction() {
-    let temp_direction = direction;
-    if (window.innerWidth > 1024) {
-        direction = `horizontal`;
-    } else {
-        direction = `vertical`;
-    }
-
-    return temp_direction !== direction; // if changed
-}
-
-set_split_direction();
-
-function set_split() {
-    split = Split(
-        ['#screen_left', '#screen_right'],
-        {
-            minSize: 300,
-            gutterSize: 5,
-            direction: direction,
-        }
-    );
-}
-
-set_split();
-
-window.addEventListener(`resize`, (e) => {
-    const changed = set_split_direction();
-    if (changed) {
-        split.destroy();
-        set_split();
-    }
-})
+import { buildCustomSelects } from './custom-select/index.js';
+import './split-layout.js';
 
 HighlightedCode.useTheme('tomorrow-night-bright'); // github-dark
 
@@ -75,7 +39,7 @@ function load_save() {
     set_editor_code(code);
 
     // load tabsize
-    const tabsize = localStorage.getItem('tabsize') || '4';
+    const tabsize = localStorage.getItem('tabsize') || '2';
     tabsize_select.value = tabsize;
     input_editor.setAttribute(`tab-size`, tabsize);
 }
