@@ -231,7 +231,9 @@ impl Silex {
             let mut vm = VM::new(&program.module, &environment);
 
             let context = vm.context_mut();
-            context.set_gas_limit(max_gas);
+            if let Some(max_gas) = max_gas {
+                context.set_gas_limit(max_gas);
+            }
             context.set_memory_price_per_byte(1);
     
             vm.invoke_entry_chunk_with_args(chunk_id, values.into_iter())
