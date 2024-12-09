@@ -60,7 +60,7 @@ function reset_entries() {
 
 function add_entry(entry, index) {
     const opt = document.createElement(`option`);
-    opt.innerText = entry.name();
+    opt.textContent = entry.name();
     opt.value = index;
     program_entries_select.appendChild(opt);
 }
@@ -76,7 +76,7 @@ function add_entry_params(entry, index) {
         item.classList.add(`spec-param`);
 
         const title = document.createElement(`div`);
-        title.innerText = `${param.name()} (${param._type()})`;
+        title.textContent = `${param.name()} (${param._type()})`;
 
         const input = document.createElement(`input`);
         input.type = "text";
@@ -115,7 +115,7 @@ function compile_code() {
     localStorage.setItem('code', code);
 
     try {
-        output.innerText = "------- Compiling -------\n";
+        output.textContent = "------- Compiling -------\n";
         const program = silex.compile(code);
 
         const entries = program.entries();
@@ -131,7 +131,7 @@ function compile_code() {
         }
 
         program_code = code;
-        output.innerHTML += output_success("Compiled successfully!\n\n");
+        output.innerHTML += output_success("Compiled successfully!\n");
         btn_run.removeAttribute('disabled');
     } catch (e) {
         output.innerHTML += output_error("Error: " + e + "\n");
@@ -214,7 +214,7 @@ async function run_code() {
         const program = silex.compile(program_code);
         const entry = program.entries()[program_entry_index];
 
-        output.innerText = `-------- Running (${entry.name()} at index ${entry.id()}) --------\n`;
+        output.textContent = `-------- Running (${entry.name()} at index ${entry.id()}) --------\n`;
         stop_dot_loading = text_dot_loading(output, 3);
 
         const params = get_program_params();
@@ -224,15 +224,16 @@ async function run_code() {
         stop_dot_loading();
 
         let logs = result.logs();
+        output.textContent += "\n";
         if (logs.length > 0) {
-            output.innerText += logs.join("\n");
-            output.innerText += "\n";
+            output.textContent += logs.join("\n");
+            output.textContent += "\n";
         }
 
-        output.innerText += `-------- Result --------\n`;
-        output.innerText += `Exit code: ${result.value()}\n`;
-        output.innerText += `Executed in: ${result.elapsed_time()}\n`;
-        output.innerText += `Gas usage: ${result.used_gas()}\n`;
+        output.textContent += `-------- Result --------\n`;
+        output.textContent += `Exit code: ${result.value()}\n`;
+        output.textContent += `Executed in: ${result.elapsed_time()}\n`;
+        output.textContent += `Gas usage: ${result.used_gas()}\n`;
     } catch (e) {
         if (stop_dot_loading) stop_dot_loading();
         output.innerHTML += output_error("Error: " + e + "\n");
@@ -249,7 +250,7 @@ btn_run.addEventListener('click', async () => {
 });
 
 btn_clear.addEventListener('click', () => {
-    output.innerText = "";
+    output.textContent = "";
 });
 
 // examples are using spaces indentation - fix by replacing with tabulation
@@ -284,7 +285,7 @@ function set_editor_lines() {
     const text = input_editor.value;
     const lines = text.split("\n");
     const count = lines.length;
-    editor_lines.innerText = "";
+    editor_lines.textContent = "";
     for (let i = 0; i < count; i++) {
         const line = document.createElement(`div`);
         line.innerHTML = i;
