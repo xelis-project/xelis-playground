@@ -31,18 +31,13 @@ function set_editor_code(code) {
     set_editor_lines();
 }
 
-let temp_ouput_value = null;
 function program_changed() {
-    if (program_code) {
-        if (program_code !== input_editor.value) {
-            btn_run.setAttribute("disabled", "");
-            if (!temp_ouput_value) temp_ouput_value = output.innerHTML;
-            output.innerHTML = "";
-        } else {
-            output.innerHTML = temp_ouput_value;
-            temp_ouput_value = null;
-            btn_run.removeAttribute("disabled");
-        }
+    if (program_code && program_code !== input_editor.value) {
+        btn_run.setAttribute("disabled", "");
+        output.innerHTML = "";
+        reset_entries();
+        program_code = null;
+        program_entry_index = null;
     }
 }
 
@@ -70,6 +65,12 @@ function save_code() {
 }
 
 function reset_entries() {
+    program_entries_select.innerHTML = '<option>Not compiled yet</option>';
+    program_entry_params.innerHTML = 'None';
+    buildCustomSelects();
+}
+
+function clear_entries() {
     program_entries_select.innerHTML = '';
     program_entry_params.innerHTML = '';
 }
@@ -125,8 +126,8 @@ function output_success(text, append = false) {
 function compile_code() {
     try {
         save_code();
+        clear_entries();
         output.innerHTML = "Program saved locally.\n";
-        reset_entries();
         btn_run.setAttribute('disabled', '');
 
         const code = input_editor.value;
