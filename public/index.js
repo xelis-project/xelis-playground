@@ -2,6 +2,7 @@ import init, { Silex } from "/xelis_playground.js";
 import HighlightedCode from './hightlighted-code.js';
 import { buildCustomSelects } from './custom-select/index.js';
 import './split-layout.js';
+import { text_dot_loading } from './text-dot-loading.js';
 
 HighlightedCode.useTheme('tomorrow-night-bright'); // github-dark
 
@@ -122,7 +123,7 @@ function compile_code() {
         }
 
         program_code = code;
-        output.innerText += "Compiled successfully!\n";
+        output.innerText += "Compiled successfully!\n\n";
         btn_run.removeAttribute('disabled');
     } catch (e) {
         output.innerText += "Error: " + e + "\n";
@@ -187,20 +188,31 @@ function btn_run_set_run() {
 
 async function run_code() {
     const max_gas = input_max_gas.value || undefined;
+    if (max_gas < 0) {
+        output.innerText += "Max gas cannot be negative.\n";
+        return;
+    }
+
     btn_run_set_running();
+
+    let stop_dot_loading = null;
 
     try {
         if (silex.has_program_running()) {
-            output.innerText += "A program is already running!\n";
+            output.innerText = "A program is already running!\n";
             return;
         }
+
 
         const program = silex.compile(program_code);
         const entry = program.entries()[program_entry_index];
 
-        output.innerText += `-------- Running (${entry.name()} at index ${entry.id()}) --------\n`;
+        output.innerText = `-------- Running (${entry.name()} at index ${entry.id()}) --------\n`;
+        stop_dot_loading = text_dot_loading(output, 3);
+
         const params = get_program_params();
         let result = await silex.execute_program(program, entry.id(), max_gas, params);
+        stop_dot_loading();
 
         let logs = result.logs();
         if (logs.length > 0) {
@@ -213,8 +225,10 @@ async function run_code() {
         output.innerText += `Executed in: ${result.elapsed_time()}\n`;
         output.innerText += `Gas usage: ${result.used_gas()}\n`;
     } catch (e) {
+        if (stop_dot_loading) stop_dot_loading();
         output.innerText += "Error: " + e + "\n";
     }
+
 
     btn_run_set_run();
 
