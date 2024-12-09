@@ -27,7 +27,23 @@ let program_entry_index = null;
 
 function set_editor_code(code) {
     input_editor.value = code;
+    program_changed();
     set_editor_lines();
+}
+
+let temp_ouput_value = null;
+function program_changed() {
+    if (program_code) {
+        if (program_code !== input_editor.value) {
+            btn_run.setAttribute("disabled", "");
+            if (!temp_ouput_value) temp_ouput_value = output.innerHTML;
+            output.innerHTML = "";
+        } else {
+            output.innerHTML = temp_ouput_value;
+            temp_ouput_value = null;
+            btn_run.removeAttribute("disabled");
+        }
+    }
 }
 
 function load_save() {
@@ -107,15 +123,16 @@ function output_success(text, append = false) {
 }
 
 function compile_code() {
-    save_code();
-    reset_entries();
-    btn_run.setAttribute('disabled', '');
-
-    const code = input_editor.value;
-    localStorage.setItem('code', code);
-
     try {
-        output.textContent = "------- Compiling -------\n";
+        save_code();
+        output.innerHTML = "Program saved locally.\n";
+        reset_entries();
+        btn_run.setAttribute('disabled', '');
+
+        const code = input_editor.value;
+        localStorage.setItem('code', code);
+
+        output.textContent += "------- Compiling -------\n";
         const program = silex.compile(code);
 
         const entries = program.entries();
@@ -295,4 +312,5 @@ function set_editor_lines() {
 
 input_editor.addEventListener('input', (e) => {
     set_editor_lines();
+    program_changed();
 });
