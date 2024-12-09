@@ -98,6 +98,14 @@ function add_entry_params(entry, index) {
     program_entry_params.appendChild(container);
 }
 
+function output_error(text, append = false) {
+    return `<span class="out-err">${text}</span>`
+}
+
+function output_success(text, append = false) {
+    return `<span class="out-success">${text}</span>`
+}
+
 function compile_code() {
     save_code();
     reset_entries();
@@ -123,10 +131,10 @@ function compile_code() {
         }
 
         program_code = code;
-        output.innerText += "Compiled successfully!\n\n";
+        output.innerHTML += output_success("Compiled successfully!\n\n");
         btn_run.removeAttribute('disabled');
     } catch (e) {
-        output.innerText += "Error: " + e + "\n";
+        output.innerHTML += output_error("Error: " + e + "\n");
     }
 }
 
@@ -189,7 +197,7 @@ function btn_run_set_run() {
 async function run_code() {
     const max_gas = input_max_gas.value || undefined;
     if (max_gas < 0) {
-        output.innerText += "Max gas cannot be negative.\n";
+        output.innerHTML = output_error("Error: Max gas cannot be negative.\n");
         return;
     }
 
@@ -199,10 +207,9 @@ async function run_code() {
 
     try {
         if (silex.has_program_running()) {
-            output.innerText = "A program is already running!\n";
+            output.innerHTML = output_error("A program is already running!\n");
             return;
         }
-
 
         const program = silex.compile(program_code);
         const entry = program.entries()[program_entry_index];
@@ -211,24 +218,25 @@ async function run_code() {
         stop_dot_loading = text_dot_loading(output, 3);
 
         const params = get_program_params();
+        btn_compile.setAttribute("disabled", "");
         let result = await silex.execute_program(program, entry.id(), max_gas, params);
+        btn_compile.removeAttribute("disabled");
         stop_dot_loading();
 
         let logs = result.logs();
         if (logs.length > 0) {
-            output.innerText += `Output:\n`;
             output.innerText += logs.join("\n");
             output.innerText += "\n";
         }
 
+        output.innerText += `-------- Result --------\n`;
         output.innerText += `Exit code: ${result.value()}\n`;
         output.innerText += `Executed in: ${result.elapsed_time()}\n`;
         output.innerText += `Gas usage: ${result.used_gas()}\n`;
     } catch (e) {
         if (stop_dot_loading) stop_dot_loading();
-        output.innerText += "Error: " + e + "\n";
+        output.innerHTML += output_error("Error: " + e + "\n");
     }
-
 
     btn_run_set_run();
 
