@@ -19,13 +19,19 @@
 .modal-frame {
   background: black;
   color: white;
-  margin-top: 2rem;
+  margin: 2rem;
   z-index: 3;
   transform: translateY(-100%);
   animation: modal-anim .3s forwards;
   border-radius: .5em;
   box-shadow: 0 0 50px rgb(31, 31, 31);
-  max-width: 600px;
+  max-width: 400px;
+}
+
+@media screen and (min-width: 992px) {
+  .modal-frame {
+    max-width: 600px;
+  }
 }
 
 @keyframes modal-anim {
