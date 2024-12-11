@@ -53,7 +53,12 @@ html, body {
 #screen_left {
   display: flex;
   flex-direction: column;
-  width: 50%;
+}
+
+@media screen and (min-width: 768px) {
+  #screen_left {
+    width: 50%;
+  }
 }
 
 #screen_right {
@@ -61,7 +66,12 @@ html, body {
   flex-direction: column;
   background-color: black;
   position: relative;
-  width: 50%;
+}
+
+@media screen and (min-width: 768px) {
+  #screen_right {
+    width: 50%;
+  }
 }
 
 #input_editor {
