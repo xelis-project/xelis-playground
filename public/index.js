@@ -231,6 +231,7 @@ async function run_code() {
 
         const program = silex.compile(program_code);
         const entry = program.entries()[program_entry_index];
+        console.log(program.to_hex());
 
         output.textContent = `-------- Running (${entry.name()} at index ${entry.id()}) --------\n`;
         stop_dot_loading = text_dot_loading(output, 3);

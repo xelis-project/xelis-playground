@@ -10,6 +10,7 @@ use xelis_parser::Parser;
 use xelis_vm::VM;
 use xelis_types::{Type, Value};
 use tokio_with_wasm as tokio;
+use xelis_common::serializer::Serializer;
 
 #[wasm_bindgen]
 pub struct Silex {
@@ -29,6 +30,14 @@ impl Program {
     // Get the entries of the program
     pub fn entries(&self) -> Vec<Entry> {
         self.entries.clone()
+    }
+
+    pub fn to_bytes(&self) -> Vec<u8> {
+        self.module.to_bytes()
+    }
+
+    pub fn to_hex(&self) -> String {
+        self.module.to_hex()
     }
 }
 
