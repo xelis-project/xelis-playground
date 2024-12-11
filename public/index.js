@@ -3,6 +3,7 @@ import HighlightedCode from './hightlighted-code.js';
 import { buildCustomSelects } from './custom-select/index.js';
 import './split-layout.js';
 import { text_dot_loading } from './text-dot-loading.js';
+import './export-modal.js';
 
 HighlightedCode.useTheme('tomorrow-night-bright'); // github-dark
 
@@ -20,10 +21,15 @@ const btn_compile = document.getElementById('btn_compile');
 const input_max_gas = document.getElementById('input_max_gas');
 const examples_select = document.getElementById('examples_select');
 const btn_clear = document.getElementById('btn_clear');
-const editor_lines = document.getElementById('editor_lines')
+const editor_lines = document.getElementById('editor_lines');
+const btn_export = document.getElementById('btn_export');
 
 let program_code = null;
 let program_entry_index = null;
+
+globalThis.get_program = function () {
+    return silex.compile(program_code);
+}
 
 function set_editor_code(code) {
     input_editor.value = code;
@@ -34,6 +40,7 @@ function set_editor_code(code) {
 function program_changed() {
     if (program_code && program_code !== input_editor.value) {
         btn_run.setAttribute("disabled", "");
+        btn_export.setAttribute("disabled", "");
         output.innerHTML = "";
         reset_entries();
         program_code = null;
@@ -129,6 +136,7 @@ function compile_code() {
         clear_entries();
         output.innerHTML = "Program saved locally.\n";
         btn_run.setAttribute('disabled', '');
+        btn_export.setAttribute("disabled", "");
 
         const code = input_editor.value;
         localStorage.setItem('code', code);
@@ -151,6 +159,7 @@ function compile_code() {
         program_code = code;
         output.innerHTML += output_success("Compiled successfully!\n");
         btn_run.removeAttribute('disabled');
+        btn_export.removeAttribute('disabled');
     } catch (e) {
         output.innerHTML += output_error("Error: " + e + "\n");
     }
@@ -220,6 +229,7 @@ async function run_code() {
     }
 
     btn_run_set_running();
+    btn_export.setAttribute("disabled", "");
 
     let stop_dot_loading = null;
 
@@ -231,8 +241,6 @@ async function run_code() {
 
         const program = silex.compile(program_code);
         const entry = program.entries()[program_entry_index];
-        console.log(program.to_hex());
-
         output.textContent = `-------- Running (${entry.name()} at index ${entry.id()}) --------\n`;
         stop_dot_loading = text_dot_loading(output, 3);
 
@@ -259,6 +267,7 @@ async function run_code() {
     }
 
     btn_run_set_run();
+    btn_export.removeAttribute("disabled");
 
     // scroll down the output does not work for some reason
     // output.scrollTop = output.scrollHeight;

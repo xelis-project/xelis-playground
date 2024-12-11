@@ -37,7 +37,6 @@
 .select-items div,.select-selected {
   color: black;
   padding: .7rem 1.2rem;
-
   cursor: pointer;
 }
 

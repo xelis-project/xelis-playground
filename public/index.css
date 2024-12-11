@@ -112,6 +112,7 @@ html, body {
   gap: .5rem;
   display: flex;
   font-weight: bold;
+  align-items: center;
 }
 
 .btn:hover {
@@ -224,7 +225,7 @@ html, body {
 
 .hidden {
   position: absolute;
-  top: -9999px;
+  top: -9999px !important;
 }
 
 .flex-row {
@@ -275,4 +276,39 @@ html, body {
   position: relative;
   top: .4rem;
   color: black;
+}
+
+.export-program-buttons {
+  display: flex;
+  flex-direction: row;
+}
+
+.export-program-buttons button {
+  background: #141414;
+  border: none;
+  color: white;
+  padding: .5rem 1rem;
+  cursor: pointer;
+  border-bottom: thin solid #02ffcf;
+  user-select: none;
+}
+
+.export-program-buttons button:hover, .export-program-buttons button.selected {
+  background-color: #02ffcf;
+  color: black;
+}
+
+.export-program-value {
+  word-break: break-all;
+  font-size: .8rem;
+  padding: 1rem;
+  background: #141414;
+  color: white;
+  max-height: 400px;
+  overflow: auto;
+  margin-bottom: .5rem;
+}
+
+.export-program-size {
+  font-size: .8rem;
 }
