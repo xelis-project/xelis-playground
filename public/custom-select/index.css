@@ -53,6 +53,8 @@
   right: 0;
   z-index: 99;
   font-size: 1rem;
+  max-height: 400px;
+  overflow: auto;
 }
 
 /* Hide the items when the select box is closed: */
