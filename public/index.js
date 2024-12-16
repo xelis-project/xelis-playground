@@ -23,6 +23,31 @@ const examples_select = document.getElementById('examples_select');
 const btn_clear = document.getElementById('btn_clear');
 const editor_lines = document.getElementById('editor_lines');
 const btn_export = document.getElementById('btn_export');
+const function_list = document.getElementById('function_list');
+
+function load_function_list() {
+    let funcs = silex.get_env_functions();
+
+    let el_types = new Map();
+    funcs.forEach((f) => {
+        let el_type = el_types.get(f.f_type());
+        
+        if (!el_type) {
+            el_type = document.createElement(`div`);
+            const title = document.createElement(`div`)
+            title.innerText = f.f_type();
+            el_type.append(title);
+            el_types.set(f.f_type(), el_type);
+            function_list.append(el_type);
+        }
+
+        const el_func = document.createElement(`div`);
+        el_func.innerHTML = f.name() + "(" + f.params() + ")";
+        el_type.append(el_func);
+    });
+}
+
+load_function_list();
 
 let program_code = null;
 let program_entry_index = null;

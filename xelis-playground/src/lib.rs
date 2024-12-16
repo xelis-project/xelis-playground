@@ -32,12 +32,12 @@ impl Program {
         self.entries.clone()
     }
 
-    pub fn to_bytes(&self) -> Vec<u8> {
-        self.module.to_bytes()
+    pub fn to_bytes(&self) {
+        //self.module.to_bytes()
     }
 
-    pub fn to_hex(&self) -> String {
-        self.module.to_hex()
+    pub fn to_hex(&self) {
+        //self.module.to_hex()
     }
 }
 
@@ -107,6 +107,28 @@ impl ExecutionResult {
 
     pub fn used_gas(&self) -> u64 {
         self.used_gas
+    }
+}
+
+#[wasm_bindgen]
+pub struct Func {
+    name: String,
+    f_type: String,
+    params: Vec<String>,
+}
+
+#[wasm_bindgen]
+impl Func {
+    pub fn name(&self) -> String {
+        return self.name.clone();
+    }
+
+    pub fn f_type(&self) -> String {
+        return self.f_type.clone();
+    }
+
+    pub fn params(&self) -> Vec<String> {
+        return self.params.clone();
     }
 }
 
@@ -184,6 +206,31 @@ impl Silex {
     // Check if a program is running
     pub fn has_program_running(&self) -> bool {
         self.is_running.load(Ordering::Relaxed)
+    }
+
+    pub fn get_env_functions(&self) -> Vec<Func> {
+        let mapper = self.environment.get_functions_mapper();
+
+        let mut funcs = Vec::new();
+        for (t, list) in mapper.get_declared_functions().iter() {
+            //let ps: Vec<Type> = v.parameters.clone().into_iter().map(|(_, t)| t).collect();
+            //let func_cost = self.environment.get_mut_function(v.name, Some(Type::String), ps).get_cost();
+
+            for f in list.iter() {
+                let mut params: Vec<String> = Vec::new();
+                for p in f.parameters.clone() {
+                    params.push(p.1.to_string());
+                }
+    
+                funcs.push(Func {
+                    name: f.name.to_string(),
+                    f_type: t.unwrap_or(&Type::Any).to_string(),
+                    params: params,
+                });
+            }
+        }
+
+        return funcs;
     }
 
     // Execute the program

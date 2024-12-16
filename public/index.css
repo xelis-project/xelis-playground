@@ -312,3 +312,26 @@ html, body {
 .export-program-size {
   font-size: .8rem;
 }
+
+#function_list {
+  color: white;
+  padding: 1rem;
+  overflow: auto;
+}
+
+#function_list > div {
+  margin: 1rem 0;
+}
+
+#function_list > :first-child {
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+#function_list > div > div {
+  padding-left: 1rem;
+}
+
+#function_list > div > :first-child {
+  padding-left: 0;
+}
