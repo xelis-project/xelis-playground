@@ -17,8 +17,12 @@
 
 <body>
   <div id="app">
-    <div id="function_list">
+    <button id="btn_close_func_list" type="button" title="Close function list" class="hidden">
+      <div>Hide functions</div>
+    </button>
+    <div id="function_list" class="hidden">
       <div>Functions</div>
+      <!-- populated by JS -->
     </div>
     <div id="screen_left">
       <div class="controls">
@@ -105,6 +109,7 @@
           </button>
         </div>
       </div>
+      <input id="btn_open_func_list" type="button" title="Open function list" value="Functions" />
       <div class="editor-wrap">
         <div id="editor_lines"></div>
         <textarea id="input_editor" is="highlighted-code" language="silex" spellcheck="false">
@@ -165,7 +170,7 @@
         </button>
         <div>Output</div>
         <div id="output">
-
+          <!-- populated by JS -->
         </div>
       </div>
     </div>

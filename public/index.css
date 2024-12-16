@@ -53,6 +53,7 @@ html, body {
 #screen_left {
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 @media screen and (min-width: 768px) {
@@ -315,23 +316,94 @@ html, body {
 
 #function_list {
   color: white;
-  padding: 1rem;
   overflow: auto;
+  border-bottom: .1rem solid #3f3f3f;
 }
 
-#function_list > div {
-  margin: 1rem 0;
+@media screen and (min-width: 768px) {
+  #function_list {
+    border-right: .1rem solid #3f3f3f;
+    border-bottom: none;
+  }
 }
 
-#function_list > :first-child {
+#function_list > :nth-child(1) {
   font-size: 1.5rem;
-  margin: 0;
+  padding: 1rem;
+  color: #02ffcf;
 }
 
-#function_list > div > div {
-  padding-left: 1rem;
+#function_list > :nth-child(2) {
+  display: flex;
+  gap: 2rem;
+  overflow: auto;
+  padding: 1rem;
+  padding-top: 0;
 }
 
-#function_list > div > :first-child {
+@media screen and (min-width: 768px) {
+  #function_list > :nth-child(2) {
+    flex-direction: column;
+  }
+}
+
+#function_list > :nth-child(2) > div > div {
+  padding-left: .5rem;
+}
+
+#function_list > :nth-child(2) > div > :first-child {
+  margin-bottom: .5rem;
   padding-left: 0;
+}
+
+#btn_open_func_list {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translate(33%, -50%) rotate(-90deg);
+  border: none;
+  background: transparent;
+  color: white;
+  padding: .5rem 1rem;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  border-top-left-radius: .25rem;
+  border-top-right-radius: .25rem;
+  border: thin solid white;
+  backdrop-filter: blur(1px);
+  opacity: .5;
+  z-index: 1;
+  border-bottom: none;
+}
+
+#btn_open_func_list:hover {
+  background: white;
+  color: black;
+  opacity: 1;
+}
+
+#btn_close_func_list {
+  background: #222222;
+  border: none;
+  cursor: pointer;
+  color: white;
+  padding: 1rem;
+  opacity: .3;
+  width: 100%;
+  white-space: nowrap;
+}
+
+@media screen and (min-width: 768px) {
+  #btn_close_func_list {
+    width: 20px;
+  }
+
+  #btn_close_func_list > div {
+    transform: translate(0, -40px) rotate(90deg);
+  }
+}
+
+#btn_close_func_list:hover {
+  opacity: .6;
 }
