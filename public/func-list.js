@@ -26,14 +26,19 @@ export function load_function_list(silex) {
         if (!el_on_type) {
             el_on_type = document.createElement(`div`);
             const title = document.createElement(`div`)
-            title.innerText = f.on_type() === `any` ? `func` : f.on_type();
+            title.innerText = f.on_type() ? f.on_type() : `func`;
             el_on_type.append(title);
             el_on_types.set(f.on_type(), el_on_type);
             el_wrap.append(el_on_type);
         }
 
         const el_func = document.createElement(`div`);
-        el_func.innerHTML = `${f.name()}(${f.params().join(", ")}) -> ${f.return_type()}`;
+        if (f.return_type()) {
+            el_func.innerHTML = `${f.name()}(${f.params().join(", ")}) -> ${f.return_type()}`;
+        } else {
+            el_func.innerHTML = `${f.name()}(${f.params().join(", ")})`;
+        }
+
         el_on_type.append(el_func);
     });
 }

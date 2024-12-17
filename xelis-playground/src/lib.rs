@@ -116,8 +116,8 @@ impl ExecutionResult {
 #[wasm_bindgen]
 pub struct Func {
     name: String,
-    on_type: String,
-    return_type: String,
+    on_type: Option<String>,
+    return_type: Option<String>,
     params: Vec<String>,
 }
 
@@ -127,11 +127,11 @@ impl Func {
         return self.name.clone();
     }
 
-    pub fn on_type(&self) -> String {
+    pub fn on_type(&self) -> Option<String> {
         return self.on_type.clone();
     }
 
-    pub fn return_type(&self) -> String {
+    pub fn return_type(&self) -> Option<String> {
         return self.return_type.clone();
     }
 
@@ -239,8 +239,8 @@ impl Silex {
 
                 funcs.push(Func {
                     name: f.name.to_string(),
-                    on_type: f.on_type.clone().unwrap_or(Type::Any).to_string(),
-                    return_type: f.return_type.clone().unwrap_or(Type::Any).to_string(),
+                    on_type: f.on_type.clone().map(|v| v.to_string()),
+                    return_type: f.return_type.clone().map(|v| v.to_string()),
                     params: params,
                 });
             }
