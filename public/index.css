@@ -318,6 +318,7 @@ html, body {
   color: white;
   overflow: auto;
   border-bottom: .1rem solid #3f3f3f;
+  font-family: monospace;
 }
 
 @media screen and (min-width: 768px) {
@@ -349,6 +350,7 @@ html, body {
 
 #function_list > :nth-child(2) > div > div {
   padding-left: .5rem;
+  white-space: nowrap;
 }
 
 #function_list > :nth-child(2) > div > :first-child {

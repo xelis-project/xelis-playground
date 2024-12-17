@@ -1,16 +1,19 @@
-use std::sync::{atomic::{AtomicBool, Ordering}, mpsc, Mutex};
+use std::sync::{
+    atomic::{AtomicBool, Ordering},
+    mpsc, Mutex,
+};
 
 use humantime::format_duration;
+use tokio_with_wasm as tokio;
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 use xelis_builder::EnvironmentBuilder;
 use xelis_bytecode::Module;
+use xelis_common::serializer::Serializer;
 use xelis_compiler::Compiler;
 use xelis_lexer::Lexer;
 use xelis_parser::Parser;
-use xelis_vm::VM;
 use xelis_types::{Type, Value};
-use tokio_with_wasm as tokio;
-use xelis_common::serializer::Serializer;
+use xelis_vm::VM;
 
 #[wasm_bindgen]
 pub struct Silex {
@@ -32,12 +35,12 @@ impl Program {
         self.entries.clone()
     }
 
-    pub fn to_bytes(&self) {
-        //self.module.to_bytes()
+    pub fn to_bytes(&self) -> Vec<u8> {
+        self.module.to_bytes()
     }
 
-    pub fn to_hex(&self) {
-        //self.module.to_hex()
+    pub fn to_hex(&self) -> String {
+        self.module.to_hex()
     }
 }
 
@@ -113,7 +116,8 @@ impl ExecutionResult {
 #[wasm_bindgen]
 pub struct Func {
     name: String,
-    f_type: String,
+    on_type: String,
+    return_type: String,
     params: Vec<String>,
 }
 
@@ -123,8 +127,12 @@ impl Func {
         return self.name.clone();
     }
 
-    pub fn f_type(&self) -> String {
-        return self.f_type.clone();
+    pub fn on_type(&self) -> String {
+        return self.on_type.clone();
+    }
+
+    pub fn return_type(&self) -> String {
+        return self.return_type.clone();
     }
 
     pub fn params(&self) -> Vec<String> {
@@ -143,12 +151,15 @@ impl Silex {
         let (sender, receiver) = mpsc::channel();
 
         *LOGS_SENDER.lock().unwrap() = Some(sender);
-        environment.get_mut_function("println", None, vec![Type::Any])
+        environment
+            .get_mut_function("println", None, vec![Type::Any])
             .set_on_call(move |_, args, _| -> _ {
                 let param = &args[0];
                 let lock = LOGS_SENDER.lock().unwrap();
                 let sender = lock.as_ref().unwrap();
-                sender.send(format!("{}", param.as_ref().as_value())).unwrap();
+                sender
+                    .send(format!("{}", param.as_ref().as_value()))
+                    .unwrap();
                 Ok(None)
             });
 
@@ -165,19 +176,26 @@ impl Silex {
             .collect::<Result<Vec<_>, _>>()?;
 
         let parser = Parser::with(tokens.into_iter(), &self.environment);
-        let (program, mapper) = parser.parse()
-            .map_err(|err| anyhow::anyhow!("{:#}", err))?;
+        let (program, mapper) = parser.parse().map_err(|err| anyhow::anyhow!("{:#}", err))?;
 
         // Collect all the available entry functions
         let mut entries = Vec::new();
         let env_offset = self.environment.get_functions().len() as u16;
         for (i, func) in program.functions().iter().enumerate() {
             if func.is_entry() {
-                let mapping = mapper.functions().get_function(&(i as u16 + env_offset)).unwrap();
-                let parameters = mapping.parameters.iter()
-                    .map(|(name, _type)| Parameter { name: name.to_string(), _type: _type.clone() })
+                let mapping = mapper
+                    .functions()
+                    .get_function(&(i as u16 + env_offset))
+                    .unwrap();
+                let parameters = mapping
+                    .parameters
+                    .iter()
+                    .map(|(name, _type)| Parameter {
+                        name: name.to_string(),
+                        _type: _type.clone(),
+                    })
                     .collect();
-    
+
                 entries.push(Entry {
                     id: entries.len(),
                     chunk_id: i as u16,
@@ -212,19 +230,17 @@ impl Silex {
         let mapper = self.environment.get_functions_mapper();
 
         let mut funcs = Vec::new();
-        for (t, list) in mapper.get_declared_functions().iter() {
-            //let ps: Vec<Type> = v.parameters.clone().into_iter().map(|(_, t)| t).collect();
-            //let func_cost = self.environment.get_mut_function(v.name, Some(Type::String), ps).get_cost();
-
+        for (_t, list) in mapper.get_declared_functions().iter() {
             for f in list.iter() {
                 let mut params: Vec<String> = Vec::new();
                 for p in f.parameters.clone() {
-                    params.push(p.1.to_string());
+                    params.push(format!("{}: {}", p.0.to_string(), p.1.to_string()));
                 }
-    
+
                 funcs.push(Func {
                     name: f.name.to_string(),
-                    f_type: t.unwrap_or(&Type::Any).to_string(),
+                    on_type: f.on_type.clone().unwrap_or(Type::Any).to_string(),
+                    return_type: f.return_type.clone().unwrap_or(Type::Any).to_string(),
                     params: params,
                 });
             }
@@ -234,12 +250,20 @@ impl Silex {
     }
 
     // Execute the program
-    pub async fn execute_program(&self, program: Program, entry_id: usize, max_gas: Option<u64>, params: Vec<JsValue>) -> Result<ExecutionResult, JsValue> {
+    pub async fn execute_program(
+        &self,
+        program: Program,
+        entry_id: usize,
+        max_gas: Option<u64>,
+        params: Vec<JsValue>,
+    ) -> Result<ExecutionResult, JsValue> {
         if self.has_program_running() {
             return Err(JsValue::from_str("A program is already running"));
         }
 
-        let entry = program.entries.get(entry_id)
+        let entry = program
+            .entries
+            .get(entry_id)
             .ok_or_else(|| JsValue::from_str("Invalid entry point"))?;
 
         if entry.parameters.len() != params.len() {
@@ -249,29 +273,52 @@ impl Silex {
         let mut values = Vec::with_capacity(params.len());
         for (value, param) in params.into_iter().zip(entry.parameters.iter()) {
             let v = match param._type {
-                Type::U8 => Value::U8(value.as_f64().map(|v| v as u8)
-                    .ok_or_else(|| JsValue::from_str("Expected a u8 type"))?
+                Type::U8 => Value::U8(
+                    value
+                        .as_f64()
+                        .map(|v| v as u8)
+                        .ok_or_else(|| JsValue::from_str("Expected a u8 type"))?,
                 ),
-                Type::U16 => Value::U16(value.as_f64().map(|v| v as u16)
-                    .ok_or_else(|| JsValue::from_str("Expected a u16 type"))?
+                Type::U16 => Value::U16(
+                    value
+                        .as_f64()
+                        .map(|v| v as u16)
+                        .ok_or_else(|| JsValue::from_str("Expected a u16 type"))?,
                 ),
-                Type::U32 => Value::U32(value.as_f64().map(|v| v as u32)
-                    .ok_or_else(|| JsValue::from_str("Expected a u32 type"))?
+                Type::U32 => Value::U32(
+                    value
+                        .as_f64()
+                        .map(|v| v as u32)
+                        .ok_or_else(|| JsValue::from_str("Expected a u32 type"))?,
                 ),
-                Type::U64 => Value::U64(value.as_f64().map(|v| v as u64)
-                    .ok_or_else(|| JsValue::from_str("Expected a u64 type"))?
+                Type::U64 => Value::U64(
+                    value
+                        .as_f64()
+                        .map(|v| v as u64)
+                        .ok_or_else(|| JsValue::from_str("Expected a u64 type"))?,
                 ),
-                Type::U128 => Value::U128(value.as_f64().map(|v| v as u128)
-                    .ok_or_else(|| JsValue::from_str("Expected a u128 type"))?
+                Type::U128 => Value::U128(
+                    value
+                        .as_f64()
+                        .map(|v| v as u128)
+                        .ok_or_else(|| JsValue::from_str("Expected a u128 type"))?,
                 ),
-                Type::U256 => Value::U256(value.as_f64().map(|v| (v as u128).into())
-                    .ok_or_else(|| JsValue::from_str("Expected a u256 type"))?
+                Type::U256 => Value::U256(
+                    value
+                        .as_f64()
+                        .map(|v| (v as u128).into())
+                        .ok_or_else(|| JsValue::from_str("Expected a u256 type"))?,
                 ),
-                Type::String => Value::String(value.as_string()
-                    .ok_or_else(|| JsValue::from_str("Expected a string type"))?
+                Type::String => Value::String(
+                    value
+                        .as_string()
+                        .ok_or_else(|| JsValue::from_str("Expected a string type"))?,
                 ),
                 _ => {
-                    return Err(JsValue::from_str(&format!("Unsupported parameter type: {}", param._type)));
+                    return Err(JsValue::from_str(&format!(
+                        "Unsupported parameter type: {}",
+                        param._type
+                    )));
                 }
             };
 
@@ -291,9 +338,10 @@ impl Silex {
                 context.set_gas_limit(max_gas);
             }
             context.set_memory_price_per_byte(1);
-    
+
             vm.invoke_entry_chunk_with_args(chunk_id, values.into_iter())
-                .map_err(|err| format!("{:#}", err)).unwrap();
+                .map_err(|err| format!("{:#}", err))
+                .unwrap();
 
             let start = web_time::Instant::now();
             let res = vm.run();
@@ -309,7 +357,8 @@ impl Silex {
                 }),
                 Err(err) => Err(format!("{:#}", err)),
             }
-        }).await;
+        })
+        .await;
 
         // Mark it as not running
         self.is_running.store(false, Ordering::Relaxed);
@@ -324,7 +373,7 @@ impl Silex {
                 let mut result = result;
                 result.logs = logs;
                 Ok(result)
-            },
+            }
             Err(err) => Err(JsValue::from_str(&err)),
         }
     }

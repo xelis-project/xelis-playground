@@ -19,21 +19,21 @@ export function load_function_list(silex) {
     const el_wrap = document.createElement(`div`);
     function_list.append(el_wrap);
 
-    let el_types = new Map();
+    let el_on_types = new Map();
     funcs.forEach((f) => {
-        let el_type = el_types.get(f.f_type());
+        let el_on_type = el_on_types.get(f.on_type());
         
-        if (!el_type) {
-            el_type = document.createElement(`div`);
+        if (!el_on_type) {
+            el_on_type = document.createElement(`div`);
             const title = document.createElement(`div`)
-            title.innerText = f.f_type();
-            el_type.append(title);
-            el_types.set(f.f_type(), el_type);
-            el_wrap.append(el_type);
+            title.innerText = f.on_type() === `any` ? `func` : f.on_type();
+            el_on_type.append(title);
+            el_on_types.set(f.on_type(), el_on_type);
+            el_wrap.append(el_on_type);
         }
 
         const el_func = document.createElement(`div`);
-        el_func.innerHTML = f.name() + "(" + f.params() + ")";
-        el_type.append(el_func);
+        el_func.innerHTML = `${f.name()}(${f.params().join(", ")}) -> ${f.return_type()}`;
+        el_on_type.append(el_func);
     });
 }
