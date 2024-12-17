@@ -392,8 +392,7 @@ html, body {
   border-top-left-radius: .25rem;
   border-top-right-radius: .25rem;
   border: thin solid white;
-  backdrop-filter: blur(1px);
-  opacity: .5;
+  backdrop-filter: blur(2px);
   z-index: 1;
   border-bottom: none;
 }
