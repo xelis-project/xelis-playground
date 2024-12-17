@@ -4,6 +4,7 @@ import { buildCustomSelects } from './custom-select/index.js';
 import './split-layout.js';
 import { text_dot_loading } from './text-dot-loading.js';
 import './export-modal.js';
+import { load_function_list } from './func-list.js';
 
 HighlightedCode.useTheme('tomorrow-night-bright'); // github-dark
 
@@ -23,47 +24,8 @@ const examples_select = document.getElementById('examples_select');
 const btn_clear = document.getElementById('btn_clear');
 const editor_lines = document.getElementById('editor_lines');
 const btn_export = document.getElementById('btn_export');
-const function_list = document.getElementById('function_list');
-const btn_close_func_list = document.getElementById('btn_close_func_list');
-const btn_open_func_list = document.getElementById('btn_open_func_list');
 
-btn_close_func_list.addEventListener("click", () => {
-    function_list.classList.add('hidden');
-    btn_close_func_list.classList.add('hidden');
-    btn_open_func_list.classList.remove('hidden');
-});
-
-btn_open_func_list.addEventListener("click", () => {
-    function_list.classList.remove('hidden');
-    btn_open_func_list.classList.add('hidden');
-    btn_close_func_list.classList.remove('hidden');
-});
-
-function load_function_list() {
-    let funcs = silex.get_env_functions();
-    const el_wrap = document.createElement(`div`);
-    function_list.append(el_wrap);
-
-    let el_types = new Map();
-    funcs.forEach((f) => {
-        let el_type = el_types.get(f.f_type());
-        
-        if (!el_type) {
-            el_type = document.createElement(`div`);
-            const title = document.createElement(`div`)
-            title.innerText = f.f_type();
-            el_type.append(title);
-            el_types.set(f.f_type(), el_type);
-            el_wrap.append(el_type);
-        }
-
-        const el_func = document.createElement(`div`);
-        el_func.innerHTML = f.name() + "(" + f.params() + ")";
-        el_type.append(el_func);
-    });
-}
-
-load_function_list();
+load_function_list(silex);
 
 let program_code = null;
 let program_entry_index = null;
