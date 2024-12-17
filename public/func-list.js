@@ -2,16 +2,31 @@ const function_list = document.getElementById('function_list');
 const btn_close_func_list = document.getElementById('btn_close_func_list');
 const btn_open_func_list = document.getElementById('btn_open_func_list');
 
-btn_close_func_list.addEventListener("click", () => {
-    function_list.classList.add('hidden');
-    btn_close_func_list.classList.add('hidden');
-    btn_open_func_list.classList.remove('hidden');
-});
-
-btn_open_func_list.addEventListener("click", () => {
+function open_list_functions() {
     function_list.classList.remove('hidden');
     btn_open_func_list.classList.add('hidden');
     btn_close_func_list.classList.remove('hidden');
+    localStorage.setItem(`list-functions`, true);
+}
+
+function close_list_functions() {
+    function_list.classList.add('hidden');
+    btn_close_func_list.classList.add('hidden');
+    btn_open_func_list.classList.remove('hidden');
+    localStorage.setItem(`list-functions`, false);
+}
+
+const list_functions = localStorage.getItem(`list-functions`);
+if (list_functions === `true`) {
+    open_list_functions();
+}
+
+btn_close_func_list.addEventListener("click", () => {
+    close_list_functions();
+});
+
+btn_open_func_list.addEventListener("click", () => {
+    open_list_functions();
 });
 
 export function load_function_list(silex) {
