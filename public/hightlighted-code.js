@@ -256,8 +256,8 @@ if (!customElements.get(TAG)) {
         box-sizing: border-box;
         pointer-events: ${(FF && target.disabled) ? 'all' : 'none'};
         tab-size: ${target.tabSize || 2};
-        top: ${top + scrollY}px;
-        left: ${left + scrollX}px;
+        top: 0;
+        /*left: 0;*/
         width: ${width}px;
         height: ${height}px;
         font: ${font};
