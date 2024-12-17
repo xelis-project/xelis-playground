@@ -4,7 +4,7 @@ import { buildCustomSelects } from './custom-select/index.js';
 import './split-layout.js';
 import { text_dot_loading } from './text-dot-loading.js';
 import './export-modal.js';
-import { load_function_list } from './func-list.js';
+import { load_funcs } from './func-list.js';
 
 HighlightedCode.useTheme('tomorrow-night-bright'); // github-dark
 
@@ -25,7 +25,7 @@ const btn_clear = document.getElementById('btn_clear');
 const editor_lines = document.getElementById('editor_lines');
 const btn_export = document.getElementById('btn_export');
 
-load_function_list(silex);
+load_funcs(silex);
 
 let program_code = null;
 let program_entry_index = null;
