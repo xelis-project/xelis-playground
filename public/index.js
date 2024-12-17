@@ -317,7 +317,7 @@ function set_editor_lines() {
     const lines = text.split("\n");
     const count = lines.length;
     editor_lines.textContent = "";
-    for (let i = 0; i < count; i++) {
+    for (let i = 1; i <= count; i++) {
         const line = document.createElement(`div`);
         line.innerHTML = i;
         editor_lines.appendChild(line);
