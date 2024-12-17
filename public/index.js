@@ -250,7 +250,6 @@ async function run_code() {
         const params = get_program_params();
         btn_compile.setAttribute("disabled", "");
         let result = await silex.execute_program(program, entry.id(), max_gas, params);
-        btn_compile.removeAttribute("disabled");
         stop_dot_loading();
 
         let logs = result.logs();
@@ -271,6 +270,7 @@ async function run_code() {
 
     btn_run_set_run();
     btn_export.removeAttribute("disabled");
+    btn_compile.removeAttribute("disabled");
 
     // scroll down the output does not work for some reason
     // output.scrollTop = output.scrollHeight;
