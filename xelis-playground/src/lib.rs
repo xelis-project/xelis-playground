@@ -1,14 +1,17 @@
+mod storage;
+
 use std::sync::{
     atomic::{AtomicBool, Ordering},
     mpsc, Mutex,
 };
 
 use humantime::format_duration;
+use storage::MockStorage;
 use tokio_with_wasm as tokio;
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 use xelis_builder::EnvironmentBuilder;
 use xelis_bytecode::Module;
-use xelis_common::serializer::Serializer;
+use xelis_common::{contract::{build_environment, StorageWrapper}, serializer::Serializer};
 use xelis_compiler::Compiler;
 use xelis_lexer::Lexer;
 use xelis_parser::Parser;
@@ -87,11 +90,29 @@ impl Entry {
 }
 
 #[wasm_bindgen]
+pub struct StorageEntry {
+    key: String,
+    value: String,
+}
+
+#[wasm_bindgen]
+impl StorageEntry {
+    pub fn key(&self) -> String {
+        self.key.clone()
+    }
+
+    pub fn value(&self) -> String {
+        self.value.clone()
+    }
+}
+
+#[wasm_bindgen]
 pub struct ExecutionResult {
     value: String,
     logs: Vec<String>,
     elapsed_time: String,
     used_gas: u64,
+    storage: MockStorage,
 }
 
 #[wasm_bindgen]
@@ -111,6 +132,17 @@ impl ExecutionResult {
     pub fn used_gas(&self) -> u64 {
         self.used_gas
     }
+
+    pub fn storage(&self) -> Vec<StorageEntry> {
+        self.storage
+            .data
+            .iter()
+            .map(|(k, v)| StorageEntry {
+                key: format!("{}", k),
+                value: format!("{}", v),
+            })
+            .collect()
+    }
 }
 
 #[wasm_bindgen]
@@ -124,19 +156,19 @@ pub struct Func {
 #[wasm_bindgen]
 impl Func {
     pub fn name(&self) -> String {
-        return self.name.clone();
+        self.name.clone()
     }
 
     pub fn on_type(&self) -> Option<String> {
-        return self.on_type.clone();
+        self.on_type.clone()
     }
 
     pub fn return_type(&self) -> Option<String> {
-        return self.return_type.clone();
+        self.return_type.clone()
     }
 
     pub fn params(&self) -> Vec<String> {
-        return self.params.clone();
+        self.params.clone()
     }
 }
 
@@ -146,7 +178,7 @@ static LOGS_SENDER: Mutex<Option<mpsc::Sender<String>>> = Mutex::new(None);
 impl Silex {
     #[wasm_bindgen(constructor)]
     pub fn new() -> Self {
-        let mut environment = EnvironmentBuilder::default();
+        let mut environment = build_environment::<MockStorage>();
         // Patch the environment to include a println function that sends logs to the receiver
         let (sender, receiver) = mpsc::channel();
 
@@ -228,25 +260,34 @@ impl Silex {
 
     pub fn get_env_functions(&self) -> Vec<Func> {
         let mapper = self.environment.get_functions_mapper();
+        fn type_to_string(env: &EnvironmentBuilder, ty: &Type) -> String {
+            match ty {
+                Type::Opaque(opaque) => env.get_opaque_name(opaque).unwrap().to_string(),
+                Type::Struct(ty) => env.get_struct_manager().get_name_by_ref(ty).unwrap().to_string(),
+                Type::Enum(ty) => env.get_enum_manager().get_name_by_ref(ty).unwrap().to_string(),
+                Type::Array(ty) => format!("{}[]", type_to_string(env, ty)),
+                Type::Optional(ty) => format!("optional<{}>", type_to_string(env, ty)),
+                _ => ty.to_string(),
+            }
+        }
 
         let mut funcs = Vec::new();
         for (_t, list) in mapper.get_declared_functions().iter() {
             for f in list.iter() {
-                let mut params: Vec<String> = Vec::new();
-                for p in f.parameters.clone() {
-                    params.push(format!("{}: {}", p.0.to_string(), p.1.to_string()));
-                }
+                let params: Vec<String> = f.parameters.iter().map(|(name, ty)| 
+                    format!("{}: {}", name, type_to_string(&self.environment, &ty))
+                ).collect();
 
                 funcs.push(Func {
                     name: f.name.to_string(),
-                    on_type: f.on_type.clone().map(|v| v.to_string()),
-                    return_type: f.return_type.clone().map(|v| v.to_string()),
+                    on_type: f.on_type.as_ref().map(|v| type_to_string(&self.environment, v)),
+                    return_type: f.return_type.as_ref().map(|v| type_to_string(&self.environment, v)),
                     params: params,
                 });
             }
         }
 
-        return funcs;
+        funcs
     }
 
     // Execute the program
@@ -331,22 +372,35 @@ impl Silex {
         let chunk_id = entry.chunk_id;
         let environment = self.environment.environment().clone();
         let res = tokio::task::spawn_blocking(move || {
-            let mut vm = VM::new(&program.module, &environment);
+            // Fake storage
+            // TODO: allow user to configure data in it before running the program
+            let mut storage = MockStorage {
+                data: Default::default(),
+            };
 
-            let context = vm.context_mut();
-            if let Some(max_gas) = max_gas {
-                context.set_gas_limit(max_gas);
-            }
-            context.set_memory_price_per_byte(1);
+            let (res, elapsed_time, used_gas) = {
+                // Create the VM, this will initialize the context also
+                let mut vm = VM::new(&program.module, &environment);
+    
+                let context = vm.context_mut();
+                context.insert(StorageWrapper(&mut storage));
+    
+                if let Some(max_gas) = max_gas {
+                    context.set_gas_limit(max_gas);
+                }
+                context.set_memory_price_per_byte(1);
+    
+                vm.invoke_entry_chunk_with_args(chunk_id, values.into_iter())
+                    .map_err(|err| format!("{:#}", err))
+                    .unwrap();
+    
+                let start = web_time::Instant::now();
+                let res = vm.run();
+                let elapsed_time = start.elapsed();
+                let used_gas = vm.context().current_gas_usage();
 
-            vm.invoke_entry_chunk_with_args(chunk_id, values.into_iter())
-                .map_err(|err| format!("{:#}", err))
-                .unwrap();
-
-            let start = web_time::Instant::now();
-            let res = vm.run();
-            let elapsed_time = start.elapsed();
-            let used_gas = vm.context().current_gas_usage();
+                (res, elapsed_time, used_gas)
+            };
 
             match res {
                 Ok(value) => Ok(ExecutionResult {
@@ -354,6 +408,7 @@ impl Silex {
                     logs: Vec::new(),
                     elapsed_time: format_duration(elapsed_time).to_string(),
                     used_gas,
+                    storage,
                 }),
                 Err(err) => Err(format!("{:#}", err)),
             }

@@ -62,9 +62,9 @@ function load_function_list(funcs) {
 
         const el_func = document.createElement(`div`);
         if (f.return_type()) {
-            el_func.innerHTML = `${f.name()}(${f.params().join(", ")}) -> ${f.return_type()}`;
+            el_func.innerText = `${f.name()}(${f.params().join(", ")}) -> ${f.return_type()}`;
         } else {
-            el_func.innerHTML = `${f.name()}(${f.params().join(", ")})`;
+            el_func.innerText = `${f.name()}(${f.params().join(", ")})`;
         }
 
         el_on_type.append(el_func);
