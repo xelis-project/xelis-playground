@@ -19,6 +19,7 @@ web-time = "1.1.0"
 humantime = "2.1.0"
 tokio_with_wasm = { version = "0.7.4", features = ["rt"] }
 wasm-bindgen-futures = "0.4.45"
+indexmap = "2.7.0"
 
 [lib]
 crate-type = ["cdylib", "rlib"]

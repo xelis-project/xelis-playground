@@ -1,17 +1,18 @@
 mod storage;
 
-use std::sync::{
+use std::{collections::HashMap, sync::{
     atomic::{AtomicBool, Ordering},
     mpsc, Mutex,
-};
+}};
 
 use humantime::format_duration;
+use indexmap::IndexMap;
 use storage::MockStorage;
 use tokio_with_wasm as tokio;
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 use xelis_builder::EnvironmentBuilder;
 use xelis_bytecode::Module;
-use xelis_common::{contract::{build_environment, StorageWrapper}, serializer::Serializer};
+use xelis_common::{block::{Block, BlockHeader, BlockVersion}, contract::{build_environment, ChainState, DeterministicRandom, StorageWrapper}, crypto::{elgamal::CompressedPublicKey, Hash}, serializer::Serializer};
 use xelis_compiler::Compiler;
 use xelis_lexer::Lexer;
 use xelis_parser::Parser;
@@ -377,14 +378,38 @@ impl Silex {
             let mut storage = MockStorage {
                 data: Default::default(),
             };
+            // TODO: configurable
+            let deposits = IndexMap::new();
+            // TODO: configurable
+            let header = BlockHeader::new(BlockVersion::V0, 0, 0, Default::default(), Default::default(), CompressedPublicKey::new(Default::default()), Default::default());
+            let block = Block::with(header, Vec::new());
+            // TODO: configurable
+            let random = DeterministicRandom::new(&Hash::zero(), &Hash::zero(), &Hash::max());
+
+            let zero_hash = Hash::zero();
+
+            let mut chain_state = ChainState {
+                debug_mode: true,
+                mainnet: false,
+                random,
+                block: &block,
+                contract: &zero_hash,
+                block_hash: &zero_hash,
+                topoheight: 0,
+                tx_hash: &zero_hash,
+                deposits: &deposits,
+                transfers: Vec::new(),
+                storage: HashMap::new(),
+            };
 
             let (res, elapsed_time, used_gas) = {
                 // Create the VM, this will initialize the context also
                 let mut vm = VM::new(&program.module, &environment);
-    
+
                 let context = vm.context_mut();
                 context.insert(StorageWrapper(&mut storage));
-    
+                context.insert_mut(&mut chain_state);
+
                 if let Some(max_gas) = max_gas {
                     context.set_gas_limit(max_gas);
                 }
@@ -401,6 +426,14 @@ impl Silex {
 
                 (res, elapsed_time, used_gas)
             };
+
+            // Merge chain state into mock storage
+            for (k, v) in chain_state.storage.into_iter() {
+                match v {
+                    Some(v) => storage.data.insert(k, v),
+                    None => storage.data.remove(&k),
+                };
+            }
 
             match res {
                 Ok(value) => Ok(ExecutionResult {
@@ -424,8 +457,7 @@ impl Silex {
         let logs: Vec<String> = self.logs_receiver.try_iter().collect();
 
         match handle {
-            Ok(result) => {
-                let mut result = result;
+            Ok(mut result) => {
                 result.logs = logs;
                 Ok(result)
             }

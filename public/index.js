@@ -263,6 +263,16 @@ async function run_code() {
         output.textContent += `Exit code: ${result.value()}\n`;
         output.textContent += `Executed in: ${result.elapsed_time()}\n`;
         output.textContent += `Gas usage: ${result.used_gas()}\n`;
+
+        // Also print the storage
+        const storage = result.storage();
+        console.log(storage);
+        if (storage.length > 0) {
+            output.textContent += `-------- Storage --------\n`;
+            storage.forEach((item) => {
+                output.textContent += `${item.key()}: ${item.value()}\n`;
+            });
+        }
     } catch (e) {
         if (stop_dot_loading) stop_dot_loading();
         output.innerHTML += output_error("Error: " + e + "\n");
