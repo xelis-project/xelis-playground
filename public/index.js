@@ -262,7 +262,7 @@ async function run_code() {
         output.textContent += `-------- Result --------\n`;
         output.textContent += `Exit code: ${result.value()}\n`;
         output.textContent += `Executed in: ${result.elapsed_time()}\n`;
-        output.textContent += `Gas usage: ${result.used_gas()}\n`;
+        output.textContent += `Gas usage: ${result.used_gas()} (${result.used_gas_formatted()} XEL)\n`;
 
         // Also print the storage
         const storage = result.storage();

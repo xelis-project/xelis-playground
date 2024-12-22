@@ -12,7 +12,13 @@ use tokio_with_wasm as tokio;
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 use xelis_builder::EnvironmentBuilder;
 use xelis_bytecode::Module;
-use xelis_common::{block::{Block, BlockHeader, BlockVersion}, contract::{build_environment, ChainState, DeterministicRandom, StorageWrapper}, crypto::{elgamal::CompressedPublicKey, Hash}, serializer::Serializer};
+use xelis_common::{
+    block::{Block, BlockHeader, BlockVersion},
+    contract::{build_environment, ChainState, DeterministicRandom, StorageWrapper},
+    crypto::{elgamal::CompressedPublicKey, Hash},
+    serializer::Serializer,
+    utils::format_xelis
+};
 use xelis_compiler::Compiler;
 use xelis_lexer::Lexer;
 use xelis_parser::Parser;
@@ -132,6 +138,10 @@ impl ExecutionResult {
 
     pub fn used_gas(&self) -> u64 {
         self.used_gas
+    }
+
+    pub fn used_gas_formatted(&self) -> String {
+        format_xelis(self.used_gas)
     }
 
     pub fn storage(&self) -> Vec<StorageEntry> {
