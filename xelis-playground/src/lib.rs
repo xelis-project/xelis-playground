@@ -424,11 +424,10 @@ impl Silex {
                     context.set_gas_limit(max_gas);
                 }
                 context.set_memory_price_per_byte(1);
-    
-                vm.invoke_entry_chunk_with_args(chunk_id, values.into_iter())
-                    .map_err(|err| format!("{:#}", err))
-                    .unwrap();
-    
+
+                vm.invoke_entry_chunk_with_args(chunk_id, values.into_iter().rev())
+                    .map_err(|err| format!("{:#}", err))?;
+
                 let start = web_time::Instant::now();
                 let res = vm.run();
                 let elapsed_time = start.elapsed();
