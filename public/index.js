@@ -110,6 +110,7 @@ function add_entry_params(entry, index) {
         input.autocomplete = `off`;
         input.autocapitalize = `off`;
         input.placeholder = `required`;
+        input.setAttribute(`data-type`, param._type());
         input.classList.add('input');
         input.name = `entry_params_${index}_input`;
 
@@ -187,11 +188,17 @@ function get_program_params() {
     const inputs = document.querySelectorAll(`input[name="entry_params_${program_entry_index}_input"]`);
     const params = [];
     inputs.forEach((element) => {
-        const value = parseFloat(element.value);
-        if (!isNaN(value)) {
-            params.push(value);
-        } else {
-            params.push(element.value);
+        const data_type = element.getAttribute(`data-type`);
+
+        // TODO: other types maybe?
+        switch (data_type) {
+            case "string":
+                params.push(element.value);
+                break;
+            default: // default to numbers
+                const value = parseFloat(element.value);
+                params.push(value);
+                break;
         }
     });
     return params;
