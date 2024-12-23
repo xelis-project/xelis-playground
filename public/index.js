@@ -111,7 +111,7 @@ function add_entry_params(entry, index) {
         input.autocapitalize = `off`;
         input.placeholder = `required`;
         input.classList.add('input');
-        input.name = `entry_params_${param_index}_input`;
+        input.name = `entry_params_${index}_input`;
 
         item.appendChild(title);
         item.appendChild(input);
