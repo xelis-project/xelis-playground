@@ -224,7 +224,7 @@ function btn_run_set_run() {
     btn_run.removeAttribute(`disabled`);
 }
 
-async function run_code() {
+async function run_program() {
     const max_gas = input_max_gas.value || undefined;
     if (max_gas < 0) {
         output.innerHTML = output_error("Error: Max gas cannot be negative.\n");
@@ -287,7 +287,7 @@ async function run_code() {
 }
 
 btn_run.addEventListener('click', async () => {
-    await run_code();
+    await run_program();
 });
 
 btn_clear.addEventListener('click', () => {
