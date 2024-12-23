@@ -172,8 +172,10 @@ html, body {
 }
 
 .spec-column {
+  display: flex;
   flex-direction: column;
   align-items: start !important;
+  gap: .5rem;
 }
 
 .spec-param {
