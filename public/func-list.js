@@ -8,12 +8,12 @@ let funcs = [];
 
 search_func_list.addEventListener("input", (e) => {
     const search_value = e.target.value;
+    localStorage.setItem(`list-functions-search`, search_value);
     clear_function_list();
-    const filtered_funcs = funcs.filter((f) => {
-        return f.name().indexOf(search_value) !== -1;
-    });
-    load_function_list(filtered_funcs);
+    load_function_list();
 });
+
+search_func_list.value = localStorage.getItem(`list-functions-search`) || ``;
 
 function open_list_functions() {
     function_list.classList.remove('hidden');
@@ -46,9 +46,14 @@ function clear_function_list() {
     function_list_items.innerHTML = ``;
 }
 
-function load_function_list(funcs) {
+function load_function_list() {
     let el_on_types = new Map();
-    funcs.forEach((f) => {
+
+    const filtered_funcs = funcs.filter((f) => {
+        return f.name().indexOf(search_func_list.value) !== -1;
+    });
+
+    filtered_funcs.forEach((f) => {
         let el_on_type = el_on_types.get(f.on_type());
 
         if (!el_on_type) {
