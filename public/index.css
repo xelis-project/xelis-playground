@@ -344,9 +344,12 @@ html, body {
 }
 
 #function_list > :nth-child(2) {
-  width: 100%;
-  margin: 0 1rem 1rem 1rem;
+  padding: 0 1rem 1rem 1rem;
+}
+
+#function_list > :nth-child(2) > input {
   box-sizing: border-box;
+  width: 100%;
   padding: .5rem;
   border: none;
   outline: none;
