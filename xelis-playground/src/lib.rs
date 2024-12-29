@@ -1,9 +1,9 @@
 mod storage;
 
-use std::{collections::HashMap, sync::{
+use std::sync::{
     atomic::{AtomicBool, Ordering},
     mpsc, Mutex,
-}};
+};
 
 use humantime::format_duration;
 use indexmap::IndexMap;
@@ -14,7 +14,7 @@ use xelis_builder::EnvironmentBuilder;
 use xelis_bytecode::Module;
 use xelis_common::{
     block::{Block, BlockHeader, BlockVersion},
-    contract::{build_environment, ChainState, DeterministicRandom, StorageWrapper},
+    contract::{build_environment, ChainState, ContractCache, DeterministicRandom, ContractProviderWrapper},
     crypto::{elgamal::CompressedPublicKey, Hash},
     serializer::Serializer,
     utils::format_xelis
@@ -387,6 +387,7 @@ impl Silex {
             // TODO: allow user to configure data in it before running the program
             let mut storage = MockStorage {
                 data: Default::default(),
+                balances: Default::default(),
             };
             // TODO: configurable
             let deposits = IndexMap::new();
@@ -408,8 +409,8 @@ impl Silex {
                 topoheight: 0,
                 tx_hash: &zero_hash,
                 deposits: &deposits,
-                transfers: Vec::new(),
-                storage: HashMap::new(),
+                cache: None,
+                changes: ContractCache::new(),
             };
 
             let (res, elapsed_time, used_gas) = {
@@ -417,7 +418,7 @@ impl Silex {
                 let mut vm = VM::new(&program.module, &environment);
 
                 let context = vm.context_mut();
-                context.insert(StorageWrapper(&mut storage));
+                context.insert(ContractProviderWrapper(&mut storage));
                 context.insert_mut(&mut chain_state);
 
                 if let Some(max_gas) = max_gas {
@@ -437,7 +438,8 @@ impl Silex {
             };
 
             // Merge chain state into mock storage
-            for (k, v) in chain_state.storage.into_iter() {
+            let cache = chain_state.changes;
+            for (k, (_, v)) in cache.storage.into_iter() {
                 match v {
                     Some(v) => storage.data.insert(k, v),
                     None => storage.data.remove(&k),
