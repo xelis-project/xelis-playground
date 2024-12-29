@@ -1487,7 +1487,7 @@ dependencies = [
 [[package]]
 name = "xelis_common"
 version = "1.16.0"
-source = "git+https://github.com/xelis-project/xelis-blockchain?branch=smart-contracts#be51fb59431a685c168e43b5a343315af2788309"
+source = "git+https://github.com/xelis-project/xelis-blockchain?branch=smart-contracts#77ff4461e61062f15d05163338913047a9c9b5e1"
 dependencies = [
  "anyhow",
  "async-trait",
