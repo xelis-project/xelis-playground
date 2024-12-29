@@ -183,6 +183,28 @@ impl Func {
     }
 }
 
+#[wasm_bindgen]
+pub struct ConstFunc {
+    name: String,
+    for_type: String,
+    params: Vec<String>,
+}
+
+#[wasm_bindgen]
+impl ConstFunc {
+    pub fn name(&self) -> String {
+        self.name.clone()
+    }
+
+    pub fn for_type(&self) -> String {
+        self.for_type.clone()
+    }
+
+    pub fn params(&self) -> Vec<String> {
+        self.params.clone()
+    }
+}
+
 static LOGS_SENDER: Mutex<Option<mpsc::Sender<String>>> = Mutex::new(None);
 
 #[wasm_bindgen]
@@ -269,31 +291,53 @@ impl Silex {
         self.is_running.load(Ordering::Relaxed)
     }
 
+    fn type_to_string(env: &EnvironmentBuilder, ty: &Type) -> String {
+        match ty {
+            Type::Opaque(opaque) => env.get_opaque_name(opaque).unwrap().to_string(),
+            Type::Struct(ty) => env.get_struct_manager().get_name_by_ref(ty).unwrap().to_string(),
+            Type::Enum(ty) => env.get_enum_manager().get_name_by_ref(ty).unwrap().to_string(),
+            Type::Array(ty) => format!("{}[]", Self::type_to_string(env, ty)),
+            Type::Optional(ty) => format!("optional<{}>", Self::type_to_string(env, ty)),
+            _ => ty.to_string(),
+        }
+    }
+
     pub fn get_env_functions(&self) -> Vec<Func> {
         let mapper = self.environment.get_functions_mapper();
-        fn type_to_string(env: &EnvironmentBuilder, ty: &Type) -> String {
-            match ty {
-                Type::Opaque(opaque) => env.get_opaque_name(opaque).unwrap().to_string(),
-                Type::Struct(ty) => env.get_struct_manager().get_name_by_ref(ty).unwrap().to_string(),
-                Type::Enum(ty) => env.get_enum_manager().get_name_by_ref(ty).unwrap().to_string(),
-                Type::Array(ty) => format!("{}[]", type_to_string(env, ty)),
-                Type::Optional(ty) => format!("optional<{}>", type_to_string(env, ty)),
-                _ => ty.to_string(),
-            }
-        }
+
 
         let mut funcs = Vec::new();
         for (_t, list) in mapper.get_declared_functions().iter() {
             for f in list.iter() {
                 let params: Vec<String> = f.parameters.iter().map(|(name, ty)| 
-                    format!("{}: {}", name, type_to_string(&self.environment, &ty))
+                    format!("{}: {}", name, Self::type_to_string(&self.environment, &ty))
                 ).collect();
 
                 funcs.push(Func {
                     name: f.name.to_string(),
-                    on_type: f.on_type.as_ref().map(|v| type_to_string(&self.environment, v)),
-                    return_type: f.return_type.as_ref().map(|v| type_to_string(&self.environment, v)),
-                    params: params,
+                    on_type: f.on_type.as_ref().map(|v| Self::type_to_string(&self.environment, v)),
+                    return_type: f.return_type.as_ref().map(|v| Self::type_to_string(&self.environment, v)),
+                    params,
+                });
+            }
+        }
+
+        funcs
+    }
+
+    pub fn get_constants_functions(&self) -> Vec<ConstFunc> {
+        let mut funcs = Vec::new();
+        for (for_type, mappings) in self.environment.get_const_functions_mapper().get_mappings() {
+            let for_type = Self::type_to_string(&self.environment, for_type);
+            for (name, const_fn) in mappings.iter() {
+                let params: Vec<String> = const_fn.parameters.iter().map(|(name, ty)| 
+                    format!("{}: {}", name, Self::type_to_string(&self.environment, ty))
+                ).collect();
+
+                funcs.push(ConstFunc {
+                    name: name.to_string(),
+                    for_type: for_type.clone(),
+                    params,
                 });
             }
         }

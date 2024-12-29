@@ -5,6 +5,7 @@ const btn_open_func_list = document.getElementById('btn_open_func_list');
 const search_func_list = document.getElementById('search_func_list');
 
 let funcs = [];
+let const_funcs = [];
 
 search_func_list.addEventListener("input", (e) => {
     const search_value = e.target.value;
@@ -58,7 +59,7 @@ function load_function_list() {
 
         if (!el_on_type) {
             el_on_type = document.createElement(`div`);
-            const title = document.createElement(`div`)
+            const title = document.createElement(`div`);
             title.innerText = f.on_type() ? f.on_type() : `func`;
             el_on_type.append(title);
             el_on_types.set(f.on_type(), el_on_type);
@@ -74,9 +75,31 @@ function load_function_list() {
 
         el_on_type.append(el_func);
     });
+
+    const filtered_const_funcs = const_funcs.filter((f) => {
+        return f.name().indexOf(search_func_list.value) !== -1;
+    });
+
+    filtered_const_funcs.forEach((f) => {
+        let el_on_type = el_on_types.get(f.for_type());
+
+        if (!el_on_type) {
+            el_on_type = document.createElement(`div`);
+            const title = document.createElement(`div`);
+            title.innerText = f.for_type();
+            el_on_type.append(title);
+            el_on_types.set(f.for_type(), el_on_type);
+            function_list_items.append(el_on_type);
+        }
+
+        const el_func = document.createElement(`div`);
+        el_func.innerText = `${f.for_type()}::${f.name()}(${f.params().join(", ")}) -> ${f.for_type()}`;
+        el_on_type.append(el_func);
+    });
 }
 
 export function load_funcs(silex) {
     funcs = silex.get_env_functions();
-    load_function_list(funcs);
+    const_funcs = silex.get_constants_functions();
+    load_function_list();
 }
