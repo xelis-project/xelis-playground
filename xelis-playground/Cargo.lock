@@ -88,13 +88,13 @@ checksum = "7c02d123df017efcdfbd739ef81735b36c5ba83ec3c59c80a9d7ecc718f92e50"
 
 [[package]]
 name = "async-trait"
-version = "0.1.83"
+version = "0.1.84"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "721cae7de5c34fbb2acd27e21e6d2cf7b886dce0c27388d46c4e6c47ea4318dd"
+checksum = "1b1244b10dcd56c92219da4e14caa97e312079e185f04ba3eea25061561dc0a0"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.94",
 ]
 
 [[package]]
@@ -207,7 +207,7 @@ checksum = "3fa76293b4f7bb636ab88fd78228235b5248b4d05cc589aed610f954af5d7c7a"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.94",
 ]
 
 [[package]]
@@ -218,9 +218,9 @@ checksum = "1fd0f2584146f6f2ef48085050886acf353beff7305ebd1ae69500e27c67f64b"
 
 [[package]]
 name = "cc"
-version = "1.2.6"
+version = "1.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8d6dbb628b8f8555f86d0323c2eb39e3ec81901f4b83e091db8a6a76d316a333"
+checksum = "a012a0df96dd6d06ba9a1b29d6402d1a5d77c6befd2566afdc26e10603dc93d7"
 dependencies = [
  "shlex",
 ]
@@ -353,7 +353,7 @@ source = "git+https://github.com/xelis-project/curve25519-dalek?branch=main#cfce
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.94",
 ]
 
 [[package]]
@@ -541,7 +541,7 @@ checksum = "a0eb5a3343abf848c0984fe4604b2b105da9539376e24fc0a3b0007411ae4fd9"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.94",
 ]
 
 [[package]]
@@ -897,7 +897,7 @@ checksum = "5a9bf7cf98d04a2b28aead066b7496853d4779c9cc183c440dbac457641e19a0"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.94",
 ]
 
 [[package]]
@@ -963,9 +963,9 @@ dependencies = [
 
 [[package]]
 name = "syn"
-version = "2.0.93"
+version = "2.0.94"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9c786062daee0d6db1132800e623df74274a0a87322d8e183338e01b3d98d058"
+checksum = "987bc0be1cdea8b10216bd06e2ca407d40b9543468fafd3ddfb02f36e77f71f3"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1004,7 +1004,7 @@ checksum = "4fee6c4efc90059e10f81e6d42c60a18f76588c3d74cb83a0b242a2b6c7504c1"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.94",
 ]
 
 [[package]]
@@ -1015,7 +1015,7 @@ checksum = "7b50fa271071aae2e6ee85f842e2e28ba8cd2c5fb67f11fcb1fd70b276f9e7d4"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.94",
 ]
 
 [[package]]
@@ -1058,7 +1058,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8ff8fa1b71e329058cc97c093972aeb51dd7e658bd5197f294665639194bbc4c"
 dependencies = [
  "quote",
- "syn 2.0.93",
+ "syn 2.0.94",
 ]
 
 [[package]]
@@ -1145,7 +1145,7 @@ dependencies = [
  "log",
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.94",
  "wasm-bindgen-shared",
 ]
 
@@ -1180,7 +1180,7 @@ checksum = "30d7a95b763d3c45903ed6c81f156801839e5ee968bb07e534c44df0fcd330c2"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.94",
  "wasm-bindgen-backend",
  "wasm-bindgen-shared",
 ]
@@ -1326,9 +1326,9 @@ checksum = "589f6da84c646204747d1270a2a5661ea66ed1cced2631d546fdfb155959f9ec"
 
 [[package]]
 name = "winnow"
-version = "0.6.20"
+version = "0.6.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "36c1fec1a2bb5866f07c25f68c26e565c4c200aebb96d7e55710c19d3e8ac49b"
+checksum = "39281189af81c07ec09db316b302a3e67bf9bd7cbf6c820b50e35fee9c2fa980"
 dependencies = [
  "memchr",
 ]
@@ -1345,7 +1345,7 @@ dependencies = [
 [[package]]
 name = "xelis-ast"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#83e12fde1aad8d0362de474c25e3d4487ee9f615"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#75e50cd50d3ad11aa972c08b78a6cd67a704b8b6"
 dependencies = [
  "indexmap",
  "xelis-types",
@@ -1354,7 +1354,7 @@ dependencies = [
 [[package]]
 name = "xelis-builder"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#83e12fde1aad8d0362de474c25e3d4487ee9f615"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#75e50cd50d3ad11aa972c08b78a6cd67a704b8b6"
 dependencies = [
  "anyhow",
  "paste",
@@ -1367,7 +1367,7 @@ dependencies = [
 [[package]]
 name = "xelis-bytecode"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#83e12fde1aad8d0362de474c25e3d4487ee9f615"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#75e50cd50d3ad11aa972c08b78a6cd67a704b8b6"
 dependencies = [
  "indexmap",
  "serde",
@@ -1377,7 +1377,7 @@ dependencies = [
 [[package]]
 name = "xelis-compiler"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#83e12fde1aad8d0362de474c25e3d4487ee9f615"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#75e50cd50d3ad11aa972c08b78a6cd67a704b8b6"
 dependencies = [
  "log",
  "thiserror 2.0.9",
@@ -1390,7 +1390,7 @@ dependencies = [
 [[package]]
 name = "xelis-environment"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#83e12fde1aad8d0362de474c25e3d4487ee9f615"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#75e50cd50d3ad11aa972c08b78a6cd67a704b8b6"
 dependencies = [
  "anyhow",
  "better_any",
@@ -1416,7 +1416,7 @@ dependencies = [
 [[package]]
 name = "xelis-lexer"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#83e12fde1aad8d0362de474c25e3d4487ee9f615"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#75e50cd50d3ad11aa972c08b78a6cd67a704b8b6"
 dependencies = [
  "log",
  "thiserror 2.0.9",
@@ -1427,7 +1427,7 @@ dependencies = [
 [[package]]
 name = "xelis-parser"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#83e12fde1aad8d0362de474c25e3d4487ee9f615"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#75e50cd50d3ad11aa972c08b78a6cd67a704b8b6"
 dependencies = [
  "anyhow",
  "indexmap",
@@ -1463,7 +1463,7 @@ dependencies = [
 [[package]]
 name = "xelis-types"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#83e12fde1aad8d0362de474c25e3d4487ee9f615"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#75e50cd50d3ad11aa972c08b78a6cd67a704b8b6"
 dependencies = [
  "anyhow",
  "indexmap",
@@ -1476,7 +1476,7 @@ dependencies = [
 [[package]]
 name = "xelis-vm"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#83e12fde1aad8d0362de474c25e3d4487ee9f615"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#75e50cd50d3ad11aa972c08b78a6cd67a704b8b6"
 dependencies = [
  "thiserror 2.0.9",
  "xelis-bytecode",
@@ -1487,7 +1487,7 @@ dependencies = [
 [[package]]
 name = "xelis_common"
 version = "1.16.0"
-source = "git+https://github.com/xelis-project/xelis-blockchain?branch=smart-contracts#77ff4461e61062f15d05163338913047a9c9b5e1"
+source = "git+https://github.com/xelis-project/xelis-blockchain?branch=smart-contracts#43344a9d9947b2888e1974c5657840ba31634f08"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1539,7 +1539,7 @@ checksum = "fa4f8080344d4671fb4e831a13ad1e68092748387dfc4f55e356242fae12ce3e"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.94",
 ]
 
 [[package]]
@@ -1559,5 +1559,5 @@ checksum = "ce36e65b0d2999d2aafac989fb249189a141aee1f53c612c1f37d72631959f69"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.94",
 ]
