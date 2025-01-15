@@ -454,6 +454,7 @@ impl Silex {
                 tx_hash: &zero_hash,
                 deposits: &deposits,
                 cache: None,
+                outputs: Vec::new(),
                 changes: ContractCache::new(),
             };
 

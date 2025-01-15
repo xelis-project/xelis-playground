@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use xelis_common::{block::TopoHeight, contract::{ContractProvider, ContractStorage}, crypto::Hash};
+use xelis_common::{asset::AssetData, block::TopoHeight, contract::{ContractProvider, ContractStorage}, crypto::{Hash, PublicKey}};
 use xelis_vm::Constant;
 
 pub struct MockStorage {
@@ -9,15 +9,15 @@ pub struct MockStorage {
 }
 
 impl ContractStorage for MockStorage {
-    fn load(&self, _: &Hash, key: &Constant, topoheight: TopoHeight) -> Result<Option<(TopoHeight, Option<Constant>)>, anyhow::Error> {
+    fn load_data(&self, _: &Hash, key: &Constant, topoheight: TopoHeight) -> Result<Option<(TopoHeight, Option<Constant>)>, anyhow::Error> {
         Ok(Some((topoheight, self.data.get(key).cloned())))
     }
 
-    fn has(&self, _: &Hash, key: &Constant, _: TopoHeight) -> Result<bool, anyhow::Error> {
+    fn has_data(&self, _: &Hash, key: &Constant, _: TopoHeight) -> Result<bool, anyhow::Error> {
         Ok(self.data.contains_key(&key))
     }
 
-    fn load_latest_topoheight(&self, _: &Hash, _: &Constant, topoheight: TopoHeight) -> Result<Option<TopoHeight>, anyhow::Error> {
+    fn load_data_latest_topoheight(&self, _: &Hash, _: &Constant, topoheight: TopoHeight) -> Result<Option<TopoHeight>, anyhow::Error> {
         Ok(Some(topoheight))
     }
 }
@@ -25,5 +25,21 @@ impl ContractStorage for MockStorage {
 impl ContractProvider for MockStorage {
     fn get_contract_balance_for_asset(&self, contract: &Hash, asset: &Hash, topoheight: TopoHeight) -> Result<Option<(TopoHeight, u64)>, anyhow::Error> {
         Ok(Some((topoheight, *self.balances.get(contract).and_then(|m| m.get(asset)).unwrap_or(&0))))
+    }
+
+    fn account_exists(&self, _: &PublicKey, _: TopoHeight) -> Result<bool, anyhow::Error> {
+        Ok(false)
+    }
+
+    fn load_asset_data(&self, _: &Hash, _: TopoHeight) -> Result<Option<AssetData>, anyhow::Error> {
+        Ok(None)
+    }
+
+    fn asset_exists(&self, _: &Hash, _: TopoHeight) -> Result<bool, anyhow::Error> {
+        Ok(false)
+    }
+
+    fn register_asset(&mut self, _: &Hash, _: TopoHeight, _: AssetData) -> Result<(), anyhow::Error> {
+        Ok(())
     }
 }
