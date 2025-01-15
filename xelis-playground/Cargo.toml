@@ -12,7 +12,7 @@ xelis_parser = { git = "https://github.com/xelis-project/xelis-vm.git", branch =
 xelis_lexer = { git = "https://github.com/xelis-project/xelis-vm.git", branch = "dev", package = "xelis-lexer" }
 xelis_builder = { git = "https://github.com/xelis-project/xelis-vm.git", branch = "dev", package = "xelis-builder" }
 xelis_types = { git = "https://github.com/xelis-project/xelis-vm.git", branch = "dev", package = "xelis-types" }
-xelis_common = { git = "https://github.com/xelis-project/xelis-blockchain", branch = "smart-contracts", package = "xelis_common" }
+xelis_common = { git = "https://github.com/xelis-project/xelis-blockchain", branch = "dev", package = "xelis_common" }
 
 anyhow = "1.0.93"
 web-time = "1.1.0"
