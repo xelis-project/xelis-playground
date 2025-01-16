@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e # Exit on error (if cmd fails)
 
 # Make sure Clang is installed
 if command -v clang &> /dev/null; then
