@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Make sure Clang is installed
+if command -v clang &> /dev/null; then
+  echo "Clang is installed."
+else
+  sudo apt-get install -y clang
+fi
+
 # Make sure Cargo is installed and needed as a dependency to create the WASM lib
 if command -v cargo &> /dev/null; then
   echo "Cargo is installed."
