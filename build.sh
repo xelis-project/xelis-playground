@@ -2,12 +2,12 @@
 set -e # Exit on error (if cmd fails)
 
 # Make sure Clang is installed
-if command -v clang &> /dev/null; then
-  echo "Clang is installed."
-else
-  echo "Installing Clang..."
-  apt-get install -y clang
-fi
+# if command -v clang &> /dev/null; then
+#   echo "Clang is installed."
+# else
+#   echo "Installing Clang..."
+#   apt-get install -y clang
+# fi
 
 # Make sure Cargo is installed and needed as a dependency to create the WASM lib
 if command -v cargo &> /dev/null; then
