@@ -1,6 +1,11 @@
 use std::collections::HashMap;
 
-use xelis_common::{asset::AssetData, block::TopoHeight, contract::{ContractProvider, ContractStorage}, crypto::{Hash, PublicKey}};
+use xelis_common::{
+    asset::AssetData,
+    block::TopoHeight,
+    contract::{ContractProvider, ContractStorage},
+    crypto::{Hash, PublicKey}
+};
 use xelis_vm::Constant;
 
 pub struct MockStorage {
@@ -31,7 +36,7 @@ impl ContractProvider for MockStorage {
         Ok(false)
     }
 
-    fn load_asset_data(&self, _: &Hash, _: TopoHeight) -> Result<Option<AssetData>, anyhow::Error> {
+    fn load_asset_data(&self, _: &Hash, _: TopoHeight) -> Result<Option<(TopoHeight, AssetData)>, anyhow::Error> {
         Ok(None)
     }
 
@@ -39,7 +44,7 @@ impl ContractProvider for MockStorage {
         Ok(false)
     }
 
-    fn register_asset(&mut self, _: &Hash, _: TopoHeight, _: AssetData) -> Result<(), anyhow::Error> {
-        Ok(())
+    fn load_asset_supply(&self, _: &Hash, _: TopoHeight) -> Result<Option<(TopoHeight, u64)>, anyhow::Error> {
+        Ok(None)
     }
 }
