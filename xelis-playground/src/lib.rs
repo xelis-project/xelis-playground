@@ -389,9 +389,15 @@ impl Silex {
                     .ok_or_else(|| JsValue::from_str("Expected a string type"))?,
             ),
             Type::Bool => Value::Boolean(
-                value
-                    .as_bool()
-                    .ok_or_else(|| JsValue::from_str("Expected a bool type"))?,
+                if value.is_string() {
+                    value
+                        .as_string()
+                        .unwrap() == "true"
+                } else {
+                    value
+                        .as_bool()
+                        .ok_or_else(|| JsValue::from_str("Expected a bool type"))?
+                }
             ),
             Type::Optional(ty) => {
                 if value.is_null() {
