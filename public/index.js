@@ -184,22 +184,37 @@ program_entries_select.addEventListener('change', (e) => {
     if (params_container) params_container.classList.remove(`hidden`);
 });
 
+function parse_param(param, ty) {
+    let is_optional = ty.startsWith("optional<");
+
+    if (is_optional) {
+        if (param === "" || param === null) {
+            return null;
+        }
+
+        // Split the inner type
+        const inner_ty = ty.slice(9, -1);
+        return parse_param(param, inner_ty);
+    }
+
+    switch (ty) {
+        case "string":
+            return param;
+        case "bool":
+            return param === "true";
+        default:
+            return parseFloat(param);
+    }
+}
+
 function get_program_params() {
     const inputs = document.querySelectorAll(`input[name="entry_params_${program_entry_index}_input"]`);
     const params = [];
     inputs.forEach((element) => {
         const data_type = element.getAttribute(`data-type`);
-
-        // TODO: other types maybe?
-        switch (data_type) {
-            case "string":
-                params.push(element.value);
-                break;
-            default: // default to numbers
-                const value = parseFloat(element.value);
-                params.push(value);
-                break;
-        }
+        const value = element.value;
+        const parsed_value = parse_param(value, data_type);
+        params.push(parsed_value);
     });
     return params;
 }
