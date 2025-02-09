@@ -345,6 +345,70 @@ impl Silex {
         funcs
     }
 
+    fn parse_js_value_to_val(value: JsValue, param: &Type) -> Result<Value, JsValue> {
+        Ok(match param {
+            Type::U8 => Value::U8(
+                value
+                    .as_f64()
+                    .map(|v| v as u8)
+                    .ok_or_else(|| JsValue::from_str("Expected a u8 type"))?,
+            ),
+            Type::U16 => Value::U16(
+                value
+                    .as_f64()
+                    .map(|v| v as u16)
+                    .ok_or_else(|| JsValue::from_str("Expected a u16 type"))?,
+            ),
+            Type::U32 => Value::U32(
+                value
+                    .as_f64()
+                    .map(|v| v as u32)
+                    .ok_or_else(|| JsValue::from_str("Expected a u32 type"))?,
+            ),
+            Type::U64 => Value::U64(
+                value
+                    .as_f64()
+                    .map(|v| v as u64)
+                    .ok_or_else(|| JsValue::from_str("Expected a u64 type"))?,
+            ),
+            Type::U128 => Value::U128(
+                value
+                    .as_f64()
+                    .map(|v| v as u128)
+                    .ok_or_else(|| JsValue::from_str("Expected a u128 type"))?,
+            ),
+            Type::U256 => Value::U256(
+                value
+                    .as_f64()
+                    .map(|v| (v as u128).into())
+                    .ok_or_else(|| JsValue::from_str("Expected a u256 type"))?,
+            ),
+            Type::String => Value::String(
+                value
+                    .as_string()
+                    .ok_or_else(|| JsValue::from_str("Expected a string type"))?,
+            ),
+            Type::Bool => Value::Boolean(
+                value
+                    .as_bool()
+                    .ok_or_else(|| JsValue::from_str("Expected a bool type"))?,
+            ),
+            Type::Optional(ty) => {
+                if value.is_null() {
+                    Value::Null
+                } else {
+                    Self::parse_js_value_to_val(value, ty)?
+                }
+            }
+            _ => {
+                return Err(JsValue::from_str(&format!(
+                    "Unsupported parameter type parsing: {}",
+                    param
+                )));
+            }
+        })
+    }
+
     // Execute the program
     pub async fn execute_program(
         &self,
@@ -368,57 +432,7 @@ impl Silex {
 
         let mut values = Vec::with_capacity(params.len());
         for (value, param) in params.into_iter().zip(entry.parameters.iter()) {
-            let v = match param._type {
-                Type::U8 => Value::U8(
-                    value
-                        .as_f64()
-                        .map(|v| v as u8)
-                        .ok_or_else(|| JsValue::from_str("Expected a u8 type"))?,
-                ),
-                Type::U16 => Value::U16(
-                    value
-                        .as_f64()
-                        .map(|v| v as u16)
-                        .ok_or_else(|| JsValue::from_str("Expected a u16 type"))?,
-                ),
-                Type::U32 => Value::U32(
-                    value
-                        .as_f64()
-                        .map(|v| v as u32)
-                        .ok_or_else(|| JsValue::from_str("Expected a u32 type"))?,
-                ),
-                Type::U64 => Value::U64(
-                    value
-                        .as_f64()
-                        .map(|v| v as u64)
-                        .ok_or_else(|| JsValue::from_str("Expected a u64 type"))?,
-                ),
-                Type::U128 => Value::U128(
-                    value
-                        .as_f64()
-                        .map(|v| v as u128)
-                        .ok_or_else(|| JsValue::from_str("Expected a u128 type"))?,
-                ),
-                Type::U256 => Value::U256(
-                    value
-                        .as_f64()
-                        .map(|v| (v as u128).into())
-                        .ok_or_else(|| JsValue::from_str("Expected a u256 type"))?,
-                ),
-                Type::String => Value::String(
-                    value
-                        .as_string()
-                        .ok_or_else(|| JsValue::from_str("Expected a string type"))?,
-                ),
-                _ => {
-                    return Err(JsValue::from_str(&format!(
-                        "Unsupported parameter type: {}",
-                        param._type
-                    )));
-                }
-            };
-
-            values.push(v);
+            values.push(Self::parse_js_value_to_val(value, &param._type)?);
         }
 
         // Mark it as running
