@@ -467,9 +467,8 @@ impl Silex {
                 topoheight: 0,
                 tx_hash: &zero_hash,
                 deposits: &deposits,
-                cache: None,
                 outputs: Vec::new(),
-                changes: ContractCache::new(),
+                cache: ContractCache::new(),
             };
 
             let (res, elapsed_time, used_gas) = {
@@ -497,7 +496,7 @@ impl Silex {
             };
 
             // Merge chain state into mock storage
-            let cache = chain_state.changes;
+            let cache = chain_state.cache;
             for (k, (_, v)) in cache.storage.into_iter() {
                 match v {
                     Some(v) => storage.data.insert(k, v),
