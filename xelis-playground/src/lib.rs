@@ -14,8 +14,8 @@ use xelis_builder::EnvironmentBuilder;
 use xelis_bytecode::Module;
 use xelis_common::{
     block::{Block, BlockHeader, BlockVersion},
-    contract::{build_environment, ChainState, ContractCache, DeterministicRandom, ContractProviderWrapper},
-    crypto::{elgamal::CompressedPublicKey, Hash},
+    contract::{build_environment, ChainState, ContractCache, ContractProviderWrapper, DeterministicRandom},
+    crypto::{elgamal::CompressedPublicKey, Address, Hash, Signature},
     serializer::Serializer,
     utils::format_xelis
 };
@@ -400,14 +400,39 @@ impl Silex {
         })
     }
 
-    fn parse_js_value_to_const(value: JsValue, param: &Type) -> Result<Constant, JsValue> {
+    fn parse_js_value_to_const(&self, value: JsValue, param: &Type) -> Result<Constant, JsValue> {
         Ok(match param {
             // TODO: support others types
             Type::Optional(ty) => {
                 if value.is_null() || value.is_undefined() || value.as_string().map(|v| v.is_empty()).unwrap_or(false) {
                     Value::Null.into()
                 } else {
-                    Constant::Optional(Some(Self::parse_js_value_to_const(value, ty)?.into()))
+                    Constant::Optional(Some(self.parse_js_value_to_const(value, ty)?.into()))
+                }
+            },
+            Type::Opaque(ty) => {
+                let name = self.environment.get_opaque_name(ty)
+                    .ok_or_else(|| JsValue::from_str("Failed to get opaque name"))?;
+
+                match name {
+                    "Hash" => {
+                        let value = value.as_string().ok_or_else(|| JsValue::from_str("Expected a string value"))?;
+                        let hash = Hash::from_hex(&value).map_err(|_| JsValue::from_str("Failed to parse as hash value"))?;
+                        Value::Opaque(hash.into()).into()
+                    },
+                    "Address" => {
+                        let value = value.as_string().ok_or_else(|| JsValue::from_str("Expected a string value"))?;
+                        let address = Address::from_string(&value)
+                            .map_err(|e| JsValue::from_str(&format!("Failed to parse as address value: {}", e)))?;
+
+                        Value::Opaque(address.into()).into()
+                    },
+                    "Signature" => {
+                        let value = value.as_string().ok_or_else(|| JsValue::from_str("Expected a string value"))?;
+                        let signature = Signature::from_hex(&value).map_err(|_| JsValue::from_str("Failed to parse as signature value"))?;
+                        Value::Opaque(signature.into()).into()
+                    }
+                    _ => return Err(JsValue::from_str(&format!("Unsupported opaque type parsing: {}", name)))
                 }
             },
             _ => Constant::Default(Self::parse_js_value_to_val(value, param)?)
@@ -437,7 +462,7 @@ impl Silex {
 
         let mut values = Vec::with_capacity(params.len());
         for (value, param) in params.into_iter().zip(entry.parameters.iter()) {
-            values.push(Self::parse_js_value_to_const(value, &param.ty)?);
+            values.push(self.parse_js_value_to_const(value, &param.ty)?);
         }
 
         // Mark it as running
