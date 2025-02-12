@@ -58,7 +58,8 @@ impl Program {
 #[derive(Debug, Clone)]
 pub struct Parameter {
     name: String,
-    _type: Type,
+    type_name: String,
+    ty: Type
 }
 
 #[wasm_bindgen]
@@ -67,8 +68,8 @@ impl Parameter {
         self.name.clone()
     }
 
-    pub fn _type(&self) -> String {
-        self._type.to_string()
+    pub fn type_name(&self) -> String {
+        self.type_name.clone()
     }
 }
 
@@ -257,7 +258,8 @@ impl Silex {
                     .iter()
                     .map(|(name, _type)| Parameter {
                         name: name.to_string(),
-                        _type: _type.clone(),
+                        type_name: Self::type_to_string(&self.environment, _type),
+                        ty: _type.clone(),
                     })
                     .collect();
 
@@ -432,7 +434,7 @@ impl Silex {
 
         let mut values = Vec::with_capacity(params.len());
         for (value, param) in params.into_iter().zip(entry.parameters.iter()) {
-            values.push(Self::parse_js_value_to_val(value, &param._type)?);
+            values.push(Self::parse_js_value_to_val(value, &param.ty)?);
         }
 
         // Mark it as running

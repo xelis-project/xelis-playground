@@ -103,14 +103,14 @@ function add_entry_params(entry, index) {
         item.classList.add(`spec-param`);
 
         const title = document.createElement(`div`);
-        title.textContent = `${param.name()} (${param._type()})`;
+        title.textContent = `${param.name()} (${param.type_name()})`;
 
         const input = document.createElement(`input`);
         input.type = "text";
         input.autocomplete = `off`;
         input.autocapitalize = `off`;
         input.placeholder = `required`;
-        input.setAttribute(`data-type`, param._type());
+        input.setAttribute(`data-type`, param.type_name());
         input.classList.add('input');
         input.name = `entry_params_${index}_input`;
 
