@@ -23,7 +23,7 @@ use xelis_compiler::Compiler;
 use xelis_lexer::Lexer;
 use xelis_parser::Parser;
 use xelis_types::{Type, Value};
-use xelis_vm::VM;
+use xelis_vm::{Constant, VM};
 
 #[wasm_bindgen]
 pub struct Silex {
@@ -347,67 +347,70 @@ impl Silex {
         funcs
     }
 
+    fn parse_str_to_number<T: std::str::FromStr>(value: Option<String>) -> Result<T, JsValue> {
+        value
+            .ok_or_else(|| JsValue::from_str("Expected a string value"))?
+            .parse::<T>()
+            .map_err(|_| JsValue::from_str("Failed to parse the value as a number"))
+    }
+
     fn parse_js_value_to_val(value: JsValue, param: &Type) -> Result<Value, JsValue> {
         Ok(match param {
-            Type::U8 => Value::U8(
-                value
-                    .as_f64()
-                    .map(|v| v as u8)
-                    .ok_or_else(|| JsValue::from_str("Expected a u8 type"))?,
-            ),
-            Type::U16 => Value::U16(
-                value
-                    .as_f64()
-                    .map(|v| v as u16)
-                    .ok_or_else(|| JsValue::from_str("Expected a u16 type"))?,
-            ),
-            Type::U32 => Value::U32(
-                value
-                    .as_f64()
-                    .map(|v| v as u32)
-                    .ok_or_else(|| JsValue::from_str("Expected a u32 type"))?,
-            ),
-            Type::U64 => Value::U64(
-                value
-                    .as_f64()
-                    .map(|v| v as u64)
-                    .ok_or_else(|| JsValue::from_str("Expected a u64 type"))?,
-            ),
-            Type::U128 => Value::U128(
-                value
-                    .as_f64()
-                    .map(|v| v as u128)
-                    .ok_or_else(|| JsValue::from_str("Expected a u128 type"))?,
-            ),
-            Type::U256 => Value::U256(
-                value
-                    .as_f64()
-                    .map(|v| (v as u128).into())
-                    .ok_or_else(|| JsValue::from_str("Expected a u256 type"))?,
-            ),
+            Type::U8 => Value::U8(Self::parse_str_to_number(value.as_string())?),
+            Type::U16 => Value::U16(Self::parse_str_to_number(value.as_string())?),
+            Type::U32 => Value::U32(Self::parse_str_to_number(value.as_string())?),
+            Type::U64 => Value::U64(Self::parse_str_to_number(value.as_string())?),
+            Type::U128 => Value::U128(Self::parse_str_to_number(value.as_string())?),
+            Type::U256 => Value::U256(Self::parse_str_to_number(value.as_string())?),
             Type::String => Value::String(
                 value
                     .as_string()
-                    .ok_or_else(|| JsValue::from_str("Expected a string type"))?,
+                    .ok_or_else(|| JsValue::from_str("Expected a string value"))?,
             ),
             Type::Bool => Value::Boolean(
                 value
-                    .as_bool()
-                    .ok_or_else(|| JsValue::from_str("Expected a bool type"))?
+                    .as_string()
+                    .ok_or_else(|| JsValue::from_str("Expected a string value"))?
+                    .parse::<bool>()
+                    .map_err(|_| JsValue::from_str("Failed to parse as bool value"))?,
             ),
-            Type::Optional(ty) => {
-                if value.is_null() {
-                    Value::Null
-                } else {
-                    Self::parse_js_value_to_val(value, ty)?
+            Type::Blob => {
+                let value = value.as_string().ok_or_else(|| JsValue::from_str("Expected a string (hex) value"))?;
+                let bytes = hex::decode(value).map_err(|_| JsValue::from_str("Failed to parse as blob (hex) value"))?;
+                Value::Blob(bytes)
+            },
+            Type::Range(inner) => {
+                let value = value.as_string().ok_or_else(|| JsValue::from_str("Expected a string value"))?;
+                let parts: Vec<&str> = value.split("..").collect();
+                if parts.len() != 2 {
+                    return Err(JsValue::from_str("Invalid range format"));
                 }
-            }
+
+                let start = Self::parse_js_value_to_val(JsValue::from_str(parts[0]), inner)?;
+                let end = Self::parse_js_value_to_val(JsValue::from_str(parts[1]), inner)?;
+
+                Value::Range(Box::new(start), Box::new(end), (**inner).clone())
+            },
             _ => {
                 return Err(JsValue::from_str(&format!(
                     "Unsupported parameter type parsing: {}",
                     param
                 )));
             }
+        })
+    }
+
+    fn parse_js_value_to_const(value: JsValue, param: &Type) -> Result<Constant, JsValue> {
+        Ok(match param {
+            // TODO: support others types
+            Type::Optional(ty) => {
+                if value.is_null() || value.is_undefined() || value.as_string().map(|v| v.is_empty()).unwrap_or(false) {
+                    Value::Null.into()
+                } else {
+                    Constant::Optional(Some(Self::parse_js_value_to_const(value, ty)?.into()))
+                }
+            },
+            _ => Constant::Default(Self::parse_js_value_to_val(value, param)?)
         })
     }
 
@@ -434,7 +437,7 @@ impl Silex {
 
         let mut values = Vec::with_capacity(params.len());
         for (value, param) in params.into_iter().zip(entry.parameters.iter()) {
-            values.push(Self::parse_js_value_to_val(value, &param.ty)?);
+            values.push(Self::parse_js_value_to_const(value, &param.ty)?);
         }
 
         // Mark it as running

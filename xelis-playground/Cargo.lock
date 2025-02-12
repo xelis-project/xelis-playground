@@ -1472,6 +1472,7 @@ name = "xelis-playground"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "hex",
  "humantime",
  "indexmap",
  "tokio_with_wasm",
