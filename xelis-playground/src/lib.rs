@@ -161,6 +161,7 @@ impl ExecutionResult {
 pub struct Func {
     name: String,
     on_type: Option<String>,
+    on_instance: bool,
     return_type: Option<String>,
     params: Vec<String>,
 }
@@ -173,6 +174,10 @@ impl Func {
 
     pub fn on_type(&self) -> Option<String> {
         self.on_type.clone()
+    }
+
+    pub fn is_on_instance(&self) -> bool {
+        self.on_instance
     }
 
     pub fn return_type(&self) -> Option<String> {
@@ -318,6 +323,7 @@ impl Silex {
                 funcs.push(Func {
                     name: f.name.to_string(),
                     on_type: f.on_type.as_ref().map(|v| Self::type_to_string(&self.environment, v)),
+                    on_instance: f.require_instance && f.on_type.is_some(),
                     return_type: f.return_type.as_ref().map(|v| Self::type_to_string(&self.environment, v)),
                     params,
                 });
