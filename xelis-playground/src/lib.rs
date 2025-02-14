@@ -14,7 +14,7 @@ use xelis_builder::EnvironmentBuilder;
 use xelis_bytecode::Module;
 use xelis_common::{
     block::{Block, BlockHeader, BlockVersion},
-    contract::{build_environment, ChainState, ContractCache, ContractProviderWrapper, DeterministicRandom},
+    contract::{build_environment, ChainState, ContractCache, ContractEventTracker, ContractProviderWrapper, DeterministicRandom},
     crypto::{elgamal::CompressedPublicKey, Address, Hash, Signature},
     serializer::Serializer,
     utils::format_xelis
@@ -505,6 +505,7 @@ impl Silex {
                 deposits: &deposits,
                 outputs: Vec::new(),
                 cache: ContractCache::new(),
+                tracker: ContractEventTracker::default()
             };
 
             let (res, elapsed_time, used_gas) = {
