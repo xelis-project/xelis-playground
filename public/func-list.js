@@ -73,8 +73,8 @@ function load_function_list() {
             el_func.innerText = `${f.name()}(${f.params().join(", ")})`;
         }
 
-        if (!f.is_on_instance()) {
-            el_func.innerText = ` (static)`;
+        if (!f.is_on_instance() && f.on_type()) {
+            el_func.innerText = `(static) ` + el_func.innerText;
         }
 
         el_on_type.append(el_func);
