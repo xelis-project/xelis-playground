@@ -6,23 +6,23 @@ use xelis_common::{
     contract::{ContractProvider, ContractStorage},
     crypto::{Hash, PublicKey}
 };
-use xelis_vm::Constant;
+use xelis_vm::ValueCell;
 
 pub struct MockStorage {
-    pub data: HashMap<Constant, Constant>,
+    pub data: HashMap<ValueCell, ValueCell>,
     pub balances: HashMap<Hash, HashMap<Hash, u64>>,
 }
 
 impl ContractStorage for MockStorage {
-    fn load_data(&self, _: &Hash, key: &Constant, topoheight: TopoHeight) -> Result<Option<(TopoHeight, Option<Constant>)>, anyhow::Error> {
+    fn load_data(&self, _: &Hash, key: &ValueCell, topoheight: TopoHeight) -> Result<Option<(TopoHeight, Option<ValueCell>)>, anyhow::Error> {
         Ok(Some((topoheight, self.data.get(key).cloned())))
     }
 
-    fn has_data(&self, _: &Hash, key: &Constant, _: TopoHeight) -> Result<bool, anyhow::Error> {
+    fn has_data(&self, _: &Hash, key: &ValueCell, _: TopoHeight) -> Result<bool, anyhow::Error> {
         Ok(self.data.contains_key(&key))
     }
 
-    fn load_data_latest_topoheight(&self, _: &Hash, _: &Constant, topoheight: TopoHeight) -> Result<Option<TopoHeight>, anyhow::Error> {
+    fn load_data_latest_topoheight(&self, _: &Hash, _: &ValueCell, topoheight: TopoHeight) -> Result<Option<TopoHeight>, anyhow::Error> {
         Ok(Some(topoheight))
     }
 }

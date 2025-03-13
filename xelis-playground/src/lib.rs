@@ -22,8 +22,8 @@ use xelis_common::{
 use xelis_compiler::Compiler;
 use xelis_lexer::Lexer;
 use xelis_parser::Parser;
-use xelis_types::{Type, Value};
-use xelis_vm::{Constant, VM};
+use xelis_types::Type;
+use xelis_vm::{Primitive, ValueCell, VM};
 
 #[wasm_bindgen]
 pub struct Silex {
@@ -229,7 +229,7 @@ impl Silex {
                 let lock = LOGS_SENDER.lock().unwrap();
                 let sender = lock.as_ref().unwrap();
                 sender
-                    .send(format!("{}", param.as_ref().as_value()))
+                    .send(format!("{}", param.as_ref()?))
                     .unwrap();
                 Ok(None)
             });
@@ -360,31 +360,26 @@ impl Silex {
             .map_err(|_| JsValue::from_str("Failed to parse the value as a number"))
     }
 
-    fn parse_js_value_to_val(value: JsValue, param: &Type) -> Result<Value, JsValue> {
+    fn parse_js_value_to_val(value: JsValue, param: &Type) -> Result<Primitive, JsValue> {
         Ok(match param {
-            Type::U8 => Value::U8(Self::parse_str_to_number(value.as_string())?),
-            Type::U16 => Value::U16(Self::parse_str_to_number(value.as_string())?),
-            Type::U32 => Value::U32(Self::parse_str_to_number(value.as_string())?),
-            Type::U64 => Value::U64(Self::parse_str_to_number(value.as_string())?),
-            Type::U128 => Value::U128(Self::parse_str_to_number(value.as_string())?),
-            Type::U256 => Value::U256(Self::parse_str_to_number(value.as_string())?),
-            Type::String => Value::String(
+            Type::U8 => Primitive::U8(Self::parse_str_to_number(value.as_string())?),
+            Type::U16 => Primitive::U16(Self::parse_str_to_number(value.as_string())?),
+            Type::U32 => Primitive::U32(Self::parse_str_to_number(value.as_string())?),
+            Type::U64 => Primitive::U64(Self::parse_str_to_number(value.as_string())?),
+            Type::U128 => Primitive::U128(Self::parse_str_to_number(value.as_string())?),
+            Type::U256 => Primitive::U256(Self::parse_str_to_number(value.as_string())?),
+            Type::String => Primitive::String(
                 value
                     .as_string()
                     .ok_or_else(|| JsValue::from_str("Expected a string value"))?,
             ),
-            Type::Bool => Value::Boolean(
+            Type::Bool => Primitive::Boolean(
                 value
                     .as_string()
                     .ok_or_else(|| JsValue::from_str("Expected a string value"))?
                     .parse::<bool>()
                     .map_err(|_| JsValue::from_str("Failed to parse as bool value"))?,
             ),
-            Type::Blob => {
-                let value = value.as_string().ok_or_else(|| JsValue::from_str("Expected a string (hex) value"))?;
-                let bytes = hex::decode(value).map_err(|_| JsValue::from_str("Failed to parse as blob (hex) value"))?;
-                Value::Blob(bytes)
-            },
             Type::Range(inner) => {
                 let value = value.as_string().ok_or_else(|| JsValue::from_str("Expected a string value"))?;
                 let parts: Vec<&str> = value.split("..").collect();
@@ -395,7 +390,7 @@ impl Silex {
                 let start = Self::parse_js_value_to_val(JsValue::from_str(parts[0]), inner)?;
                 let end = Self::parse_js_value_to_val(JsValue::from_str(parts[1]), inner)?;
 
-                Value::Range(Box::new(start), Box::new(end), (**inner).clone())
+                Primitive::Range(Box::new((start, end)))
             },
             _ => {
                 return Err(JsValue::from_str(&format!(
@@ -406,15 +401,21 @@ impl Silex {
         })
     }
 
-    fn parse_js_value_to_const(&self, value: JsValue, param: &Type) -> Result<Constant, JsValue> {
+    fn parse_js_value_to_const(&self, value: JsValue, param: &Type) -> Result<ValueCell, JsValue> {
         Ok(match param {
             // TODO: support others types
             Type::Optional(ty) => {
                 if value.is_null() || value.is_undefined() || value.as_string().map(|v| v.is_empty()).unwrap_or(false) {
-                    Value::Null.into()
+                    Primitive::Null.into()
                 } else {
-                    Constant::Optional(Some(self.parse_js_value_to_const(value, ty)?.into()))
+                    self.parse_js_value_to_const(value, ty)?
                 }
+            },
+            Type::Bytes => {
+                // TODO: support u8 array
+                let value = value.as_string().ok_or_else(|| JsValue::from_str("Expected a string (hex) value"))?;
+                let bytes = hex::decode(value).map_err(|_| JsValue::from_str("Failed to parse as blob (hex) value"))?;
+                ValueCell::Bytes(bytes)
             },
             Type::Opaque(ty) => {
                 let name = self.environment.get_opaque_name(ty)
@@ -424,24 +425,24 @@ impl Silex {
                     "Hash" => {
                         let value = value.as_string().ok_or_else(|| JsValue::from_str("Expected a string value"))?;
                         let hash = Hash::from_hex(&value).map_err(|_| JsValue::from_str("Failed to parse as hash value"))?;
-                        Value::Opaque(hash.into()).into()
+                        Primitive::Opaque(hash.into()).into()
                     },
                     "Address" => {
                         let value = value.as_string().ok_or_else(|| JsValue::from_str("Expected a string value"))?;
                         let address = Address::from_string(&value)
                             .map_err(|e| JsValue::from_str(&format!("Failed to parse as address value: {}", e)))?;
 
-                        Value::Opaque(address.into()).into()
+                        Primitive::Opaque(address.into()).into()
                     },
                     "Signature" => {
                         let value = value.as_string().ok_or_else(|| JsValue::from_str("Expected a string value"))?;
                         let signature = Signature::from_hex(&value).map_err(|_| JsValue::from_str("Failed to parse as signature value"))?;
-                        Value::Opaque(signature.into()).into()
+                        Primitive::Opaque(signature.into()).into()
                     }
                     _ => return Err(JsValue::from_str(&format!("Unsupported opaque type parsing: {}", name)))
                 }
             },
-            _ => Constant::Default(Self::parse_js_value_to_val(value, param)?)
+            _ => ValueCell::Default(Self::parse_js_value_to_val(value, param)?)
         })
     }
 
