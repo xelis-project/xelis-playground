@@ -88,9 +88,9 @@ checksum = "7c02d123df017efcdfbd739ef81735b36c5ba83ec3c59c80a9d7ecc718f92e50"
 
 [[package]]
 name = "async-trait"
-version = "0.1.87"
+version = "0.1.88"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d556ec1359574147ec0c4fc5eb525f3f23263a592b1a9c07e0a75b427de55c97"
+checksum = "e539d3fca749fcee5236ab05e93a52867dd549cc157c8cb7f99595f3cedffdb5"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1393,7 +1393,7 @@ dependencies = [
 [[package]]
 name = "xelis-ast"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#6884aeed17365eab82a8378504486c9fc42fa8cd"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#00f95a168c63d51f924f26bde5f012c5da818cb6"
 dependencies = [
  "indexmap",
  "xelis-types",
@@ -1402,7 +1402,7 @@ dependencies = [
 [[package]]
 name = "xelis-builder"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#6884aeed17365eab82a8378504486c9fc42fa8cd"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#00f95a168c63d51f924f26bde5f012c5da818cb6"
 dependencies = [
  "anyhow",
  "log",
@@ -1416,7 +1416,7 @@ dependencies = [
 [[package]]
 name = "xelis-bytecode"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#6884aeed17365eab82a8378504486c9fc42fa8cd"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#00f95a168c63d51f924f26bde5f012c5da818cb6"
 dependencies = [
  "indexmap",
  "serde",
@@ -1426,7 +1426,7 @@ dependencies = [
 [[package]]
 name = "xelis-compiler"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#6884aeed17365eab82a8378504486c9fc42fa8cd"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#00f95a168c63d51f924f26bde5f012c5da818cb6"
 dependencies = [
  "log",
  "thiserror 2.0.12",
@@ -1439,7 +1439,7 @@ dependencies = [
 [[package]]
 name = "xelis-environment"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#6884aeed17365eab82a8378504486c9fc42fa8cd"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#00f95a168c63d51f924f26bde5f012c5da818cb6"
 dependencies = [
  "anyhow",
  "better_any",
@@ -1465,7 +1465,7 @@ dependencies = [
 [[package]]
 name = "xelis-lexer"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#6884aeed17365eab82a8378504486c9fc42fa8cd"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#00f95a168c63d51f924f26bde5f012c5da818cb6"
 dependencies = [
  "log",
  "thiserror 2.0.12",
@@ -1476,7 +1476,7 @@ dependencies = [
 [[package]]
 name = "xelis-parser"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#6884aeed17365eab82a8378504486c9fc42fa8cd"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#00f95a168c63d51f924f26bde5f012c5da818cb6"
 dependencies = [
  "anyhow",
  "indexmap",
@@ -1513,7 +1513,7 @@ dependencies = [
 [[package]]
 name = "xelis-types"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#6884aeed17365eab82a8378504486c9fc42fa8cd"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#00f95a168c63d51f924f26bde5f012c5da818cb6"
 dependencies = [
  "anyhow",
  "indexmap",
@@ -1527,7 +1527,7 @@ dependencies = [
 [[package]]
 name = "xelis-vm"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#6884aeed17365eab82a8378504486c9fc42fa8cd"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#00f95a168c63d51f924f26bde5f012c5da818cb6"
 dependencies = [
  "indexmap",
  "log",
@@ -1540,7 +1540,7 @@ dependencies = [
 [[package]]
 name = "xelis_common"
 version = "1.17.0"
-source = "git+https://github.com/xelis-project/xelis-blockchain?branch=dev#ef00838622be7e3ea8a771c9e2931556eb43b5ed"
+source = "git+https://github.com/xelis-project/xelis-blockchain?branch=dev#4f3a7721bda3d1fd698fa9c0c93f1775c3ee7b25"
 dependencies = [
  "anyhow",
  "async-trait",
