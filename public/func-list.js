@@ -74,7 +74,7 @@ function load_function_list() {
         }
 
         if (!f.is_on_instance() && f.on_type()) {
-            el_func.innerText = `(static) ` + el_func.innerText;
+            el_func.innerText = `${f.on_type()}::` + el_func.innerText;
         }
 
         el_on_type.append(el_func);
@@ -84,20 +84,26 @@ function load_function_list() {
         return f.name().indexOf(search_func_list.value) !== -1;
     });
 
+    let el_const_on_types = new Map();
+
+    const separator = document.createElement(`h3`);
+    separator.innerText = `-- Const functions (executed at compile time only) --`;
+    function_list_items.append(separator);
+
     filtered_const_funcs.forEach((f) => {
-        let el_on_type = el_on_types.get(f.for_type());
+        let el_on_type = el_const_on_types.get(f.for_type());
 
         if (!el_on_type) {
             el_on_type = document.createElement(`div`);
             const title = document.createElement(`div`);
             title.innerText = f.for_type();
             el_on_type.append(title);
-            el_on_types.set(f.for_type(), el_on_type);
+            el_const_on_types.set(f.for_type(), el_on_type);
             function_list_items.append(el_on_type);
         }
 
         const el_func = document.createElement(`div`);
-        el_func.innerText = `${f.for_type()}::${f.name()}(${f.params().join(", ")}) -> ${f.for_type()}`;
+        el_func.innerText = `(const) ${f.for_type()}::${f.name()}(${f.params().join(", ")}) -> ${f.for_type()}`;
         el_on_type.append(el_func);
     });
 }
