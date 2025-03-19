@@ -25,6 +25,10 @@ impl ContractStorage for MockStorage {
     fn load_data_latest_topoheight(&self, _: &Hash, _: &ValueCell, topoheight: TopoHeight) -> Result<Option<TopoHeight>, anyhow::Error> {
         Ok(Some(topoheight))
     }
+
+    fn has_contract(&self, _: &Hash, _: TopoHeight) -> Result<bool, anyhow::Error> {
+        Ok(false)
+    }
 }
 
 impl ContractProvider for MockStorage {

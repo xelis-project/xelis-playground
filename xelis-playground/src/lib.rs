@@ -506,7 +506,8 @@ impl Silex {
                 deposits: &deposits,
                 outputs: Vec::new(),
                 cache: ContractCache::new(),
-                tracker: ContractEventTracker::default()
+                tracker: ContractEventTracker::default(),
+                global_caches: &Default::default()
             };
 
             let (res, elapsed_time, used_gas) = {
