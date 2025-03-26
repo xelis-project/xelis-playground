@@ -497,7 +497,7 @@ impl Silex {
             let mut chain_state = ChainState {
                 debug_mode: true,
                 mainnet: false,
-                random,
+                random: None,
                 block: &block,
                 contract: &zero_hash,
                 block_hash: &zero_hash,
@@ -507,6 +507,7 @@ impl Silex {
                 outputs: Vec::new(),
                 cache: ContractCache::new(),
                 tracker: ContractEventTracker::default(),
+                assets: Default::default(),
                 global_caches: &Default::default()
             };
 
