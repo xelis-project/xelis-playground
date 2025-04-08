@@ -1,26 +1,8 @@
-
-// The closing brace/quote is automatically added.
-// If the user types the closing character, we want to ignore it.
-
 import {EditorFeatures} from "./EditorFeatures.js";
 
 EditorFeatures.prototype.auto_surround = function () {
     const ef = this;
     const editor = this.editor;
-
-    editor.addEventListener("selectionchange", (e) => {
-        // getSelection broken in Firefox
-        ef.prev_start = ef.sel_start;
-        ef.prev_end = ef.sel_end;
-        ef.sel_start = editor.selectionStart;
-        ef.sel_end = editor.selectionEnd;
-
-        if(ef.sel_start !== ef.sel_end) {
-            ef.selected_text = editor.value.substring(ef.sel_start, ef.sel_end);
-        } else {
-            ef.selected_text = "";
-        }
-    });
 
     editor.addEventListener('keydown', (e) => {
         let key = e.key;
@@ -62,7 +44,7 @@ EditorFeatures.prototype.auto_surround = function () {
                 break;
             case ef.QUOTE_CHARS.includes(key): //quote
                 close_key = key;
-                if (ef.did_ignore_closing_char(ef.QUOTE_CHARS, ef.QUOTE_CHARS, key)) {4
+                if (ef.did_ignore_closing_char(ef.QUOTE_CHARS, ef.QUOTE_CHARS, key)) {
                     ef.selected_text = "";
                     return;
                 }

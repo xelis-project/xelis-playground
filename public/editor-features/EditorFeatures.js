@@ -39,13 +39,14 @@ export class EditorFeatures {
         }
 
         if(this.features.auto_surround) {
+            // editor-selection.js todo: improve.
             this.auto_surround();
             console.log("Auto surround enabled.");
         } else {
             console.log("Auto surround disabled.");
         }
 
-        this.editor.addEventListener("selectionchange", (e) => {
+        this.editor.addEventListener("selectionchange", () => {
             // getSelection broken in Firefox
             this.prev_start = this.sel_start;
             this.prev_end = this.sel_end;
@@ -67,6 +68,8 @@ export class EditorFeatures {
         return new EditorFeatures(editor, features);
     }
 
+    // The closing brace/quote is automatically added.
+    // If the user types the closing character, we want to ignore it.
     did_ignore_closing_char(open, close, key) {
         const ef = this;
         const editor = ef.editor;
