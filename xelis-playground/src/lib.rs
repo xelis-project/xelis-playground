@@ -14,7 +14,7 @@ use xelis_builder::EnvironmentBuilder;
 use xelis_bytecode::Module;
 use xelis_common::{
     block::{Block, BlockHeader, BlockVersion},
-    contract::{build_environment, ChainState, ContractCache, ContractEventTracker, ContractProviderWrapper, DeterministicRandom},
+    contract::{build_environment, ChainState, ContractCache, ContractEventTracker, ContractProviderWrapper},
     crypto::{elgamal::CompressedPublicKey, Address, Hash, Signature},
     serializer::Serializer,
     utils::format_xelis
@@ -489,9 +489,6 @@ impl Silex {
             // TODO: configurable
             let header = BlockHeader::new(BlockVersion::V0, 0, 0, Default::default(), Default::default(), CompressedPublicKey::new(Default::default()), Default::default());
             let block = Block::with(header, Vec::new());
-            // TODO: configurable
-            let random = DeterministicRandom::new(&Hash::zero(), &Hash::zero(), &Hash::max());
-
             let zero_hash = Hash::zero();
 
             let mut chain_state = ChainState {
