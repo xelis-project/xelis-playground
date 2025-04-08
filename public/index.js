@@ -5,7 +5,7 @@ import './split-layout.js';
 import {text_dot_loading} from './text-dot-loading.js';
 import './export-modal.js';
 import {load_funcs} from './func-list.js';
-import './editor-selection.js';
+import EditorFeatures from './editor-features/index.js';
 
 HighlightedCode.useTheme('tomorrow-night-bright'); // github-dark
 
@@ -361,3 +361,5 @@ input_editor.addEventListener('input', (e) => {
     set_editor_lines();
     program_changed();
 });
+
+EditorFeatures.forEditor(input_editor);
