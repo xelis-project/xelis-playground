@@ -1541,6 +1541,7 @@ dependencies = [
  "hex",
  "humantime",
  "indexmap",
+ "tokio",
  "tokio_with_wasm",
  "wasm-bindgen",
  "wasm-bindgen-futures",
@@ -1585,7 +1586,7 @@ dependencies = [
 [[package]]
 name = "xelis_common"
 version = "1.17.0"
-source = "git+https://github.com/xelis-project/xelis-blockchain?branch=dev#799c640996e302121ac712e8a897a2931ebd6712"
+source = "git+https://github.com/xelis-project/xelis-blockchain?branch=dev#533f833f0b2a4564de43575952ff75db7beddd53"
 dependencies = [
  "anyhow",
  "async-trait",

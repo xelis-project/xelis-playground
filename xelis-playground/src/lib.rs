@@ -8,14 +8,20 @@ use std::sync::{
 use humantime::format_duration;
 use indexmap::IndexMap;
 use storage::MockStorage;
+#[cfg(all(
+    target_arch = "wasm32",
+    target_vendor = "unknown",
+    target_os = "unknown"
+))]
 use tokio_with_wasm as tokio;
+
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 use xelis_builder::EnvironmentBuilder;
 use xelis_bytecode::Module;
 use xelis_common::{
     block::{Block, BlockHeader, BlockVersion},
     contract::{build_environment, ChainState, ContractCache, ContractEventTracker, ContractProviderWrapper},
-    crypto::{elgamal::CompressedPublicKey, Address, Hash, Signature},
+    crypto::{elgamal::CompressedPublicKey, Address, Hash, Signature, proofs::RangeProof},
     serializer::Serializer,
     transaction::{InvokeContractPayload, Reference, Transaction, TransactionType, TxVersion},
     utils::format_xelis
@@ -446,38 +452,15 @@ impl Silex {
         })
     }
 
-    // Execute the program
-    pub async fn execute_program(
+    async fn execute_program_internal(
         &self,
         program: Program,
-        entry_id: usize,
+        entry_id: u16,
         max_gas: Option<u64>,
-        params: Vec<JsValue>,
-    ) -> Result<ExecutionResult, JsValue> {
-        if self.has_program_running() {
-            return Err(JsValue::from_str("A program is already running"));
-        }
-
-        let entry = program
-            .entries
-            .get(entry_id)
-            .ok_or_else(|| JsValue::from_str("Invalid entry point"))?;
-
-        if entry.parameters.len() != params.len() {
-            return Err(JsValue::from_str("Invalid number of parameters"));
-        }
-
-        let mut values = Vec::with_capacity(params.len());
-        for (value, param) in params.into_iter().zip(entry.parameters.iter()) {
-            values.push(self.parse_js_value_to_const(value, &param.ty)?);
-        }
-
-        // Mark it as running
-        self.is_running.store(true, Ordering::Relaxed);
-
-        let chunk_id = entry.chunk_id;
+        values: Vec<ValueCell>,
+    ) -> Result<ExecutionResult, String> {
         let environment = self.environment.environment().clone();
-        let res = tokio::task::spawn_blocking(move || {
+        tokio::task::spawn_blocking(move || {
             // Fake storage
             // TODO: allow user to configure data in it before running the program
             let mut storage = MockStorage {
@@ -493,7 +476,7 @@ impl Silex {
                     contract: Hash::zero(),
                     deposits: Default::default(),
                     parameters: Vec::new(),
-                    chunk_id: entry_id as _,
+                    chunk_id: entry_id,
                     max_gas: max_gas.unwrap_or(0),
                 }),
                 0,
@@ -501,7 +484,7 @@ impl Silex {
                 Default::default(),
                 {
                     let proof_hex = b"cc15f1b1e654ffd25bb89f4069303245d3c477ce93abb380eb4941096c06000006141de8f618c3392c5071bc3b76467bea32bc0d8fbf9257a3c44a59b596825f9a09332365fffdb56060d4fdfba8a513cbab3f607c0812aefec7124914cf796caa1a4263cdc0d3488e3e6b5bd04d524667e2b49bb8f55cf418fd8af8cd23ef667bd574ab23bf8c71b1bf9a5f52a2ca5a9320bf43a6be8bb2cc864a6745e6de07931382c2b90873b690e7da04b6fd9ddd3f22c060aed621da691bd54e0b6e9f0b3283b6fc7bcaa4ba06a7f3151a49ba5082462b8ba76b93b2934b6c99fe9e730572e026e9a85930896d0120d06115e60cb68bc6bd18335288ca01f8591924da7e563ac102237e476357b37ecd834715272c5eb705c5bc3799602d922cfa153665565926daf7df42276e834afe1fa444fabf17e7596f09936bcc27f913053fac3906ce8a10dbe1caf1c1e02428d8f2773fc307ae7c7d2fe63102e605c89efa730a4e217dd6b2481f49803efdc44b25d80236e0c10ecab006136ba423ec75bbf7532286a1d063e16e13903104e8274666169288cb9f65a414a04e3dacb7d368931e647a149554f3c78e326e111e5da221cb4e8152d3525f0b32ff2b814b7352647674f1a36e49f8603e3d3996910f52154b871c72138e288b00b471026638646f201c0c0b358872fa6bc81a2ce1c2f068b4513828eda4def4ae1c2e9c02ef58043412dd31411c5cec7acd9bfdcf5f8ead03f13801bc4bc529726e6b25f85b80db23fc8659a09b8c590a51ec015065d437e77d84b0d3c3d529d1c6301441d2dd335042f64b1ced343c32b25416bd5d43e4ff02d4382cc18f1f5cfc0144decc51ac0d9863f1124589ec6f0fe388b464db7db4d5f16ff101da37a3efed71a4d4514915eccc94dc7832bf4c0b52165ac937e5b0dff2d0a2e7b68802a8759e4bae58815f6e2ec7683006561f27f1855ad8840036c580c81ebadf36ddfdf7470996068c05f186a67cefb751e33b5624d577357372486bae3fd509aea9b6d4c72296afdd05";
-                    Serializer::from_bytes(&hex::decode(proof_hex).unwrap()).unwrap()
+                    RangeProof::from_bytes(&hex::decode(proof_hex).unwrap()).unwrap()
                 },
                 Reference {
                     hash: Hash::zero(),
@@ -555,7 +538,7 @@ impl Silex {
                 }
                 context.set_memory_price_per_byte(1);
 
-                vm.invoke_entry_chunk_with_args(chunk_id, values.into_iter().rev())
+                vm.invoke_entry_chunk_with_args(entry_id, values.into_iter().rev())
                     .map_err(|err| format!("{:#}", err))?;
 
                 let start = web_time::Instant::now();
@@ -585,13 +568,44 @@ impl Silex {
                 }),
                 Err(err) => Err(format!("{:#}", err)),
             }
-        })
-        .await;
+        }).await.unwrap()
+    }
+
+    // Execute the program
+    pub async fn execute_program(
+        &self,
+        program: Program,
+        entry_id: usize,
+        max_gas: Option<u64>,
+        params: Vec<JsValue>,
+    ) -> Result<ExecutionResult, JsValue> {
+        if self.has_program_running() {
+            return Err(JsValue::from_str("A program is already running"));
+        }
+
+        let entry = program
+            .entries
+            .get(entry_id)
+            .ok_or_else(|| JsValue::from_str("Invalid entry point"))?;
+
+        if entry.parameters.len() != params.len() {
+            return Err(JsValue::from_str("Invalid number of parameters"));
+        }
+
+        let mut values = Vec::with_capacity(params.len());
+        for (value, param) in params.into_iter().zip(entry.parameters.iter()) {
+            values.push(self.parse_js_value_to_const(value, &param.ty)?);
+        }
+
+        // Mark it as running
+        self.is_running.store(true, Ordering::Relaxed);
+
+        let chunk_id = entry.chunk_id;
+        let handle = self.execute_program_internal(program, chunk_id, max_gas, values).await
+            .map_err(|err| JsValue::from_str(&format!("{:#}", err)));
 
         // Mark it as not running
         self.is_running.store(false, Ordering::Relaxed);
-
-        let handle = res.map_err(|err| JsValue::from_str(&format!("{:#}", err)))?;
 
         // collect all logs
         let logs: Vec<String> = self.logs_receiver.try_iter().collect();
@@ -601,7 +615,7 @@ impl Silex {
                 result.logs = logs;
                 Ok(result)
             }
-            Err(err) => Err(JsValue::from_str(&err)),
+            Err(err) => Err(err),
         }
     }
 }
