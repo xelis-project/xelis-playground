@@ -5,6 +5,7 @@ use std::sync::{
     mpsc, Mutex,
 };
 
+use cfg_if::cfg_if;
 use humantime::format_duration;
 use indexmap::IndexMap;
 use storage::MockStorage;
@@ -21,9 +22,9 @@ use xelis_bytecode::Module;
 use xelis_common::{
     block::{Block, BlockHeader, BlockVersion},
     contract::{build_environment, ChainState, ContractCache, ContractEventTracker, ContractProviderWrapper},
-    crypto::{elgamal::CompressedPublicKey, Address, Hash, Signature, proofs::RangeProof},
+    crypto::{elgamal::CompressedPublicKey, proofs::RangeProof, Address, Hash, Signature},
     serializer::Serializer,
-    transaction::{InvokeContractPayload, Reference, Transaction, TransactionType, TxVersion},
+    transaction::{ContractDeposit, InvokeContractPayload, Reference, Transaction, TransactionType, TxVersion},
     utils::format_xelis
 };
 use xelis_compiler::Compiler;
@@ -229,15 +230,23 @@ impl Silex {
         let (sender, receiver) = mpsc::channel();
 
         *LOGS_SENDER.lock().unwrap() = Some(sender);
+        
         environment
             .get_mut_function("println", None, vec![Type::Any])
             .set_on_call(move |_, args, _| -> _ {
                 let param = &args[0];
-                let lock = LOGS_SENDER.lock().unwrap();
-                let sender = lock.as_ref().unwrap();
-                sender
-                    .send(format!("{}", param.as_ref()?))
-                    .unwrap();
+                cfg_if! {
+                    if #[cfg(target_arch = "wasm32")] {
+                        let lock = LOGS_SENDER.lock().unwrap();
+                        let sender = lock.as_ref().unwrap();
+                        sender
+                            .send(format!("{}", param.as_ref()?))
+                            .unwrap();
+                    } else {
+                        println!("{}", param.as_ref()?);
+                    }
+                }
+
                 Ok(None)
             });
 
@@ -457,6 +466,7 @@ impl Silex {
         program: Program,
         entry_id: u16,
         max_gas: Option<u64>,
+        deposits: IndexMap<Hash, ContractDeposit>,
         values: Vec<ValueCell>,
     ) -> Result<ExecutionResult, String> {
         let environment = self.environment.environment().clone();
@@ -467,8 +477,6 @@ impl Silex {
                 data: Default::default(),
                 balances: Default::default(),
             };
-            // TODO: configurable
-            let deposits = IndexMap::new();
             let transaction = Transaction::new(
                 TxVersion::V0,
                 CompressedPublicKey::new(Default::default()),
@@ -524,6 +532,7 @@ impl Silex {
                 global_caches: &Default::default()
             };
 
+            let mut logs = Vec::new();
             let (res, elapsed_time, used_gas) = {
                 // Create the VM, this will initialize the context also
                 let mut vm = VM::new(&program.module, &environment);
@@ -538,11 +547,26 @@ impl Silex {
                 }
                 context.set_memory_price_per_byte(1);
 
-                vm.invoke_entry_chunk_with_args(entry_id, values.into_iter().rev())
+                // Invoke the constructor first if possible
+                let constructor = vm.invoke_hook_id(0)
                     .map_err(|err| format!("{:#}", err))?;
 
                 let start = web_time::Instant::now();
+                if constructor {
+                    logs.push("Executing constructor..".to_owned());
+                    let res = vm.run()
+                        .map_err(|err| format!("constructor: {:#}", err))?;
+
+                    if res != ValueCell::Default(Primitive::U64(0)) {
+                        return Err(format!("Constructor returned a non-zero exit code: {:#}", res));
+                    }
+                }
+
+                vm.invoke_entry_chunk_with_args(entry_id, values.into_iter().rev())
+                    .map_err(|err| format!("{:#}", err))?;
+
                 let res = vm.run();
+
                 let elapsed_time = start.elapsed();
                 let used_gas = vm.context().current_gas_usage();
 
@@ -561,7 +585,7 @@ impl Silex {
             match res {
                 Ok(value) => Ok(ExecutionResult {
                     value: format!("{}", value),
-                    logs: Vec::new(),
+                    logs,
                     elapsed_time: format_duration(elapsed_time).to_string(),
                     used_gas,
                     storage,
@@ -601,7 +625,8 @@ impl Silex {
         self.is_running.store(true, Ordering::Relaxed);
 
         let chunk_id = entry.chunk_id;
-        let handle = self.execute_program_internal(program, chunk_id, max_gas, values).await
+        // TODO: support deposits configuration
+        let handle = self.execute_program_internal(program, chunk_id, max_gas, Default::default(), values).await
             .map_err(|err| JsValue::from_str(&format!("{:#}", err)));
 
         // Mark it as not running
