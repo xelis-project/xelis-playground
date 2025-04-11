@@ -637,7 +637,7 @@ impl Silex {
 
         match handle {
             Ok(mut result) => {
-                result.logs = logs;
+                result.logs.extend(logs);
                 Ok(result)
             }
             Err(err) => Err(err),
