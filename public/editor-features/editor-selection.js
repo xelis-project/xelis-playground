@@ -4,6 +4,9 @@ EditorFeatures.prototype.auto_surround = function () {
     const ef = this;
     const editor = this.editor;
 
+    const BACKSPACE_KEY = 'Backspace';
+    const SHIFT_KEY = 'Shift';
+
     editor.addEventListener('keydown', (e) => {
         let key = e.key;
 
@@ -11,17 +14,17 @@ EditorFeatures.prototype.auto_surround = function () {
                 .concat(ef.CLOSE_CHARS)
                 .concat(ef.QUOTE_CHARS)
                 .includes(key)
-            && (key !== 'Shift') && (key !== 'Backspace');
+            && (key !== SHIFT_KEY) && (key !== BACKSPACE_KEY);
 
-        const is_close_bksp_with_no_selection = ef.CLOSE_CHARS.concat('Backspace').includes(key)
+        const is_close_bksp_with_no_selection = ef.CLOSE_CHARS.concat(BACKSPACE_KEY).includes(key)
             && !ef.in_empty_surround()
             && ef.sel_start !== ef.sel_end;
 
-        const is_bksp_outside_braces = ['Backspace'].includes(key)
+        const is_bksp_outside_braces = [BACKSPACE_KEY].includes(key)
             && !ef.in_empty_surround();
 
         if(is_normal_key || is_close_bksp_with_no_selection || is_bksp_outside_braces) {
-            ef.selected_text = "";
+            //ef.selected_text = "";
             ef.prev_key = null;
             return;
         }
@@ -31,7 +34,7 @@ EditorFeatures.prototype.auto_surround = function () {
         let close_key = "";
 
         switch(true) {
-            case key === "Shift":
+            case key === SHIFT_KEY:
                 return;
             case ef.OPEN_CHARS.includes(key):
                 close_key = ef.CLOSE_CHARS[ef.OPEN_CHARS.indexOf(key)];
@@ -50,7 +53,7 @@ EditorFeatures.prototype.auto_surround = function () {
                 }
                 break;
 
-            case key === 'Backspace':
+            case key === BACKSPACE_KEY:
                 const s = editor.value.substring(0, ef.sel_start-1);
                 const e = editor.value.substring(ef.sel_start+1);
                 editor.value = s + e;
