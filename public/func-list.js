@@ -51,7 +51,7 @@ function load_function_list() {
     let el_on_types = new Map();
 
     const filtered_funcs = funcs.filter((f) => {
-        return f.name().indexOf(search_func_list.value) !== -1;
+        return f.name().indexOf(search_func_list.value) !== -1 || f.syscall_id() == search_func_list.value;
     });
 
     filtered_funcs.forEach((f) => {
@@ -72,6 +72,8 @@ function load_function_list() {
         } else {
             el_func.innerText = `${f.name()}(${f.params().join(", ")})`;
         }
+
+        el_func.setAttribute(`title`, `Syscall id: ${f.syscall_id()}`);
 
         if (!f.is_on_instance() && f.on_type()) {
             el_func.innerText = `${f.on_type()}::` + el_func.innerText;
