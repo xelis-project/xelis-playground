@@ -1554,6 +1554,7 @@ dependencies = [
  "hex",
  "humantime",
  "indexmap",
+ "serde_json",
  "tokio",
  "tokio_with_wasm",
  "wasm-bindgen",

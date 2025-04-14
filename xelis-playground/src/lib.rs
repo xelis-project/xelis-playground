@@ -60,6 +60,11 @@ impl Program {
     pub fn to_hex(&self) -> String {
         self.module.to_hex()
     }
+
+    pub fn to_json(&self) -> String {
+        serde_json::to_string_pretty(&self.module).
+            expect("Failed to serialize module to JSON")
+    }
 }
 
 #[wasm_bindgen]
