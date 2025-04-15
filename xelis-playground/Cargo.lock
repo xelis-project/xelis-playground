@@ -644,9 +644,9 @@ checksum = "bbd2bcb4c963f2ddae06a2efc7e9f3591312473c50c6685e1f298068316e66fe"
 
 [[package]]
 name = "libc"
-version = "0.2.171"
+version = "0.2.172"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c19937216e9d3aa9956d9bb8dfc0b0c8beb6058fc4f7a4dc4d850edf86a237d6"
+checksum = "d750af042f7ef4f724306de029d18836c26c1765a54a6a3f094cbd23a7267ffa"
 
 [[package]]
 name = "log"
@@ -1450,7 +1450,7 @@ dependencies = [
 [[package]]
 name = "xelis-ast"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#3a065c8f51710b05455d218617317b2bb2b5b66a"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#468618f9d44598a6fb9d99d4a0903c3f0cc00a27"
 dependencies = [
  "indexmap",
  "xelis-types",
@@ -1459,7 +1459,7 @@ dependencies = [
 [[package]]
 name = "xelis-builder"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#3a065c8f51710b05455d218617317b2bb2b5b66a"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#468618f9d44598a6fb9d99d4a0903c3f0cc00a27"
 dependencies = [
  "anyhow",
  "log",
@@ -1473,7 +1473,7 @@ dependencies = [
 [[package]]
 name = "xelis-bytecode"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#3a065c8f51710b05455d218617317b2bb2b5b66a"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#468618f9d44598a6fb9d99d4a0903c3f0cc00a27"
 dependencies = [
  "indexmap",
  "serde",
@@ -1483,7 +1483,7 @@ dependencies = [
 [[package]]
 name = "xelis-compiler"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#3a065c8f51710b05455d218617317b2bb2b5b66a"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#468618f9d44598a6fb9d99d4a0903c3f0cc00a27"
 dependencies = [
  "log",
  "thiserror 2.0.12",
@@ -1496,7 +1496,7 @@ dependencies = [
 [[package]]
 name = "xelis-environment"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#3a065c8f51710b05455d218617317b2bb2b5b66a"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#468618f9d44598a6fb9d99d4a0903c3f0cc00a27"
 dependencies = [
  "anyhow",
  "better_any",
@@ -1522,7 +1522,7 @@ dependencies = [
 [[package]]
 name = "xelis-lexer"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#3a065c8f51710b05455d218617317b2bb2b5b66a"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#468618f9d44598a6fb9d99d4a0903c3f0cc00a27"
 dependencies = [
  "log",
  "thiserror 2.0.12",
@@ -1533,7 +1533,7 @@ dependencies = [
 [[package]]
 name = "xelis-parser"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#3a065c8f51710b05455d218617317b2bb2b5b66a"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#468618f9d44598a6fb9d99d4a0903c3f0cc00a27"
 dependencies = [
  "anyhow",
  "indexmap",
@@ -1573,7 +1573,7 @@ dependencies = [
 [[package]]
 name = "xelis-types"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#3a065c8f51710b05455d218617317b2bb2b5b66a"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#468618f9d44598a6fb9d99d4a0903c3f0cc00a27"
 dependencies = [
  "anyhow",
  "indexmap",
@@ -1587,7 +1587,7 @@ dependencies = [
 [[package]]
 name = "xelis-vm"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#3a065c8f51710b05455d218617317b2bb2b5b66a"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#468618f9d44598a6fb9d99d4a0903c3f0cc00a27"
 dependencies = [
  "indexmap",
  "log",
@@ -1600,7 +1600,7 @@ dependencies = [
 [[package]]
 name = "xelis_common"
 version = "1.17.0"
-source = "git+https://github.com/xelis-project/xelis-blockchain?branch=dev#3c444e7106f11e871122d63fa7b25e08ff251cbb"
+source = "git+https://github.com/xelis-project/xelis-blockchain?branch=dev#c09ce40dd0c35f3e734e97d030fe174d0a98a522"
 dependencies = [
  "anyhow",
  "async-trait",
