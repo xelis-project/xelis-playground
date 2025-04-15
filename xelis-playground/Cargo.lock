@@ -70,9 +70,9 @@ dependencies = [
 
 [[package]]
 name = "anyhow"
-version = "1.0.97"
+version = "1.0.98"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dcfed56ad506cb2c684a14971b8861fdc3baaaae314b9e5f9bb532cbe3ba7a4f"
+checksum = "e16d2d3311acee920a9eb8d33b8cbc1787ce4a264e85f964c2404b969bdcd487"
 
 [[package]]
 name = "arrayref"
@@ -1450,7 +1450,7 @@ dependencies = [
 [[package]]
 name = "xelis-ast"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#a8198084b4ab091fe603e9f389daee79cfa6c2ab"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#3a065c8f51710b05455d218617317b2bb2b5b66a"
 dependencies = [
  "indexmap",
  "xelis-types",
@@ -1459,7 +1459,7 @@ dependencies = [
 [[package]]
 name = "xelis-builder"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#a8198084b4ab091fe603e9f389daee79cfa6c2ab"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#3a065c8f51710b05455d218617317b2bb2b5b66a"
 dependencies = [
  "anyhow",
  "log",
@@ -1473,7 +1473,7 @@ dependencies = [
 [[package]]
 name = "xelis-bytecode"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#a8198084b4ab091fe603e9f389daee79cfa6c2ab"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#3a065c8f51710b05455d218617317b2bb2b5b66a"
 dependencies = [
  "indexmap",
  "serde",
@@ -1483,7 +1483,7 @@ dependencies = [
 [[package]]
 name = "xelis-compiler"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#a8198084b4ab091fe603e9f389daee79cfa6c2ab"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#3a065c8f51710b05455d218617317b2bb2b5b66a"
 dependencies = [
  "log",
  "thiserror 2.0.12",
@@ -1496,7 +1496,7 @@ dependencies = [
 [[package]]
 name = "xelis-environment"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#a8198084b4ab091fe603e9f389daee79cfa6c2ab"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#3a065c8f51710b05455d218617317b2bb2b5b66a"
 dependencies = [
  "anyhow",
  "better_any",
@@ -1522,7 +1522,7 @@ dependencies = [
 [[package]]
 name = "xelis-lexer"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#a8198084b4ab091fe603e9f389daee79cfa6c2ab"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#3a065c8f51710b05455d218617317b2bb2b5b66a"
 dependencies = [
  "log",
  "thiserror 2.0.12",
@@ -1533,7 +1533,7 @@ dependencies = [
 [[package]]
 name = "xelis-parser"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#a8198084b4ab091fe603e9f389daee79cfa6c2ab"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#3a065c8f51710b05455d218617317b2bb2b5b66a"
 dependencies = [
  "anyhow",
  "indexmap",
@@ -1554,6 +1554,7 @@ dependencies = [
  "hex",
  "humantime",
  "indexmap",
+ "serde_json",
  "tokio",
  "tokio_with_wasm",
  "wasm-bindgen",
@@ -1572,7 +1573,7 @@ dependencies = [
 [[package]]
 name = "xelis-types"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#a8198084b4ab091fe603e9f389daee79cfa6c2ab"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#3a065c8f51710b05455d218617317b2bb2b5b66a"
 dependencies = [
  "anyhow",
  "indexmap",
@@ -1586,7 +1587,7 @@ dependencies = [
 [[package]]
 name = "xelis-vm"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#a8198084b4ab091fe603e9f389daee79cfa6c2ab"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#3a065c8f51710b05455d218617317b2bb2b5b66a"
 dependencies = [
  "indexmap",
  "log",
@@ -1599,7 +1600,7 @@ dependencies = [
 [[package]]
 name = "xelis_common"
 version = "1.17.0"
-source = "git+https://github.com/xelis-project/xelis-blockchain?branch=dev#533f833f0b2a4564de43575952ff75db7beddd53"
+source = "git+https://github.com/xelis-project/xelis-blockchain?branch=dev#3c444e7106f11e871122d63fa7b25e08ff251cbb"
 dependencies = [
  "anyhow",
  "async-trait",

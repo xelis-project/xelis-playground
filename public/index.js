@@ -155,6 +155,19 @@ function compile_code() {
             add_entry_params(entry, index);
         });
 
+        
+        if (entries.length === 0) {
+            const opt = document.createElement(`option`);
+            opt.textContent = "No entries available";
+            opt.value = -1;
+            opt.classList.add(`disabled`);
+            program_entries_select.appendChild(opt);
+
+            btn_run.setAttribute('disabled', '');
+        } else {
+            btn_run.removeAttribute('disabled');
+        }
+
         buildCustomSelects();
 
         if (entries.length > 0) {
@@ -163,7 +176,7 @@ function compile_code() {
 
         program_code = code;
         output.innerHTML += output_success("Compiled successfully!\n");
-        btn_run.removeAttribute('disabled');
+
         btn_export.removeAttribute('disabled');
     } catch (e) {
         output.innerHTML += output_error("Error: " + e + "\n");

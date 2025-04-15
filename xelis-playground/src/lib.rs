@@ -60,6 +60,11 @@ impl Program {
     pub fn to_hex(&self) -> String {
         self.module.to_hex()
     }
+
+    pub fn to_json(&self) -> String {
+        serde_json::to_string_pretty(&self.module).
+            expect("Failed to serialize module to JSON")
+    }
 }
 
 #[wasm_bindgen]
@@ -172,6 +177,7 @@ pub struct Func {
     on_instance: bool,
     return_type: Option<String>,
     params: Vec<String>,
+    syscall_id: u16,
 }
 
 #[wasm_bindgen]
@@ -194,6 +200,10 @@ impl Func {
 
     pub fn params(&self) -> Vec<String> {
         self.params.clone()
+    }
+
+    pub fn syscall_id(&self) -> u16 {
+        self.syscall_id
     }
 }
 
@@ -329,8 +339,8 @@ impl Silex {
         let mapper = self.environment.get_functions_mapper();
         let mut funcs = Vec::new();
 
-        for (_t, list) in mapper.get_declared_functions().iter() {
-            for f in list.iter() {
+        for (_t, list) in mapper.get_declared_functions() {
+            for (f, syscall_id) in list {
                 let params: Vec<String> = f.parameters.iter().map(|(name, ty)| 
                     format!("{}: {}", name, Self::type_to_string(&self.environment, &ty))
                 ).collect();
@@ -341,6 +351,7 @@ impl Silex {
                     on_instance: f.require_instance && f.on_type.is_some(),
                     return_type: f.return_type.as_ref().map(|v| Self::type_to_string(&self.environment, v)),
                     params,
+                    syscall_id
                 });
             }
         }
