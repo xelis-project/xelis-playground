@@ -36,9 +36,6 @@ EditorFeatures.prototype.comment = function () {
         should_comment = false;
     }
 
-    const selectionStart = editor.selectionStart;
-    const selectionEnd = editor.selectionEnd;
-
     for (let i = 0; i < selected_lines.length; i++) {
 
         left = i === 0 ? last_pre_line_text : "";
