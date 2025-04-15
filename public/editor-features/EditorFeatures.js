@@ -20,6 +20,20 @@ export class EditorFeatures {
         auto_indent: true,
     }
 
+    performing_edit = false;
+
+    // Dunno why each editor would want it's own keymap,
+    // But who says "no" to more flexibility?
+    keymap = {
+        "Control-/": {
+            handler: EditorFeatures._comment
+        },
+
+        "Control-?": {
+            handler: EditorFeatures._comment
+        }
+    }
+
     constructor(editor, features) {
         this.editor = editor;
 
@@ -38,6 +52,8 @@ export class EditorFeatures {
             this.auto_indent();
         }
 
+        this.code_editing();
+
         if(this.features.auto_surround) {
             // editor-selection.js todo: improve.
             this.auto_surround();
@@ -47,6 +63,7 @@ export class EditorFeatures {
         }
 
         this.editor.addEventListener("selectionchange", () => {
+
             // getSelection broken in Firefox
             this.prev_start = this.sel_start;
             this.prev_end = this.sel_end;
@@ -59,10 +76,26 @@ export class EditorFeatures {
             } else {
                 this.selected_text = "";
             }
+
         });
 
         this.editor.editor_features = this;
     }
+
+    // set_selection() {
+    //     // getSelection broken in Firefox
+    //     this.prev_start = this.sel_start;
+    //     this.prev_end = this.sel_end;
+    //
+    //     this.sel_start = this.editor.selectionStart;
+    //     this.sel_end = this.editor.selectionEnd;
+    //
+    //     if(this.sel_start !== this.sel_end) {
+    //         this.selected_text = this.editor.value.substring(this.sel_start, this.sel_end);
+    //     } else {
+    //         this.selected_text = "";
+    //     }
+    // }
 
     static forEditor(editor, features) {
         return new EditorFeatures(editor, features);
@@ -118,6 +151,12 @@ export class EditorFeatures {
         return false;
     }
 
+    auto_surround() {
+        // implementation in editor-selection.js;
+        // if we are in here, well...
+        console.log("Editor auto_surround implementation missing.");
+    }
+
     auto_indent() {
         const editor_features = this;
         const editor = this.editor;
@@ -125,13 +164,14 @@ export class EditorFeatures {
         // Count the number of tabs on current line.
         // if last char before return is "{,(,[" or whitespace (trim), add extra return and tab
         // otherwise indent to current tab count.
-        
         editor.addEventListener('keydown', (e) => {
             let key = e.key;
 
             if(key !== editor_features.RETURN_CHAR) {
                 return false;
             }
+
+            //editor_features.set_selection();
 
             const editor_pre_text = editor.value.substring(0, editor_features.sel_start);
             const editor_post_text = editor.value.substring(editor_features.sel_end);
@@ -180,8 +220,48 @@ export class EditorFeatures {
             editor_features.prev_key = key;
         });
     }
+
+    code_editing() {
+        const ef = this;
+        const editor = this.editor;
+        //const edit_keys = '/<>?';
+
+        let ctrl_pressed = false;
+
+        editor.addEventListener('keydown', (e) => {
+            let key = e.key;
+
+            if(key === 'Control') {
+                ctrl_pressed = true;
+                return;
+            }
+
+            if(ctrl_pressed) {
+                const cmd = this.keymap[`Control-${key}`];
+
+                e.preventDefault();
+                if (cmd !== undefined && cmd !== null) {
+                    cmd.handler(ef);
+                }
+            }
+        });
+
+        editor.addEventListener('keyup', (e) => {
+            let key = e.key;
+
+            if(key === 'Control') {
+                ctrl_pressed = false;
+            }
+        });
+    }
+
+    static _comment(editor_features) {
+        editor_features.comment();
+    }
+
+    comment() {
+        // implementation comment.js
+        // if we are in here, well...
+        console.log("Editor commenting implementation missing.");
+    }
 }
-
-
-
-

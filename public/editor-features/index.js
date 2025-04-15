@@ -1,5 +1,6 @@
 import {EditorFeatures} from "./EditorFeatures.js";
 import "./editor-selection.js";
+import "./comment.js";
 
 export default EditorFeatures;
 
