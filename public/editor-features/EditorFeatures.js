@@ -20,8 +20,6 @@ export class EditorFeatures {
         auto_indent: true,
     }
 
-    performing_edit = false;
-
     // Dunno why each editor would want it's own keymap,
     // But who says "no" to more flexibility?
     keymap = {
@@ -81,21 +79,6 @@ export class EditorFeatures {
 
         this.editor.editor_features = this;
     }
-
-    // set_selection() {
-    //     // getSelection broken in Firefox
-    //     this.prev_start = this.sel_start;
-    //     this.prev_end = this.sel_end;
-    //
-    //     this.sel_start = this.editor.selectionStart;
-    //     this.sel_end = this.editor.selectionEnd;
-    //
-    //     if(this.sel_start !== this.sel_end) {
-    //         this.selected_text = this.editor.value.substring(this.sel_start, this.sel_end);
-    //     } else {
-    //         this.selected_text = "";
-    //     }
-    // }
 
     static forEditor(editor, features) {
         return new EditorFeatures(editor, features);
@@ -237,6 +220,11 @@ export class EditorFeatures {
             }
 
             if(ctrl_pressed) {
+
+                if(!"\?\/".includes(key)) {
+                    return;
+                }
+
                 const cmd = this.keymap[`Control-${key}`];
 
                 e.preventDefault();
