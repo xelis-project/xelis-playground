@@ -7,8 +7,6 @@ EditorFeatures.prototype.comment = function () {
     const ef = this;
     const editor = ef.editor;
 
-    ef.performing_edit = true;
-
     let editor_pre_text = editor.value.substring(0, ef.sel_start);
     let editor_post_text = editor.value.substring(ef.sel_end);
 
@@ -61,5 +59,4 @@ EditorFeatures.prototype.comment = function () {
     editor.selectionStart = editor_pre_text.length + editor_selected_text.length;
     editor.selectionEnd = editor_pre_text.length + editor_selected_text.length;;
 
-    ef.performing_edit = false;
 };
