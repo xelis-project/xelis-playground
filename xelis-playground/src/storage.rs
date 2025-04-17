@@ -4,7 +4,8 @@ use xelis_common::{
     asset::AssetData,
     block::TopoHeight,
     contract::{ContractProvider, ContractStorage},
-    crypto::{Hash, PublicKey}
+    crypto::{Hash, PublicKey},
+    account::CiphertextCache,
 };
 use xelis_vm::ValueCell;
 
@@ -49,6 +50,10 @@ impl ContractProvider for MockStorage {
     }
 
     fn load_asset_supply(&self, _: &Hash, _: TopoHeight) -> Result<Option<(TopoHeight, u64)>, anyhow::Error> {
+        Ok(None)
+    }
+
+    fn get_account_balance_for_asset(&self, _: &PublicKey, _: &Hash, _: TopoHeight) -> Result<Option<(TopoHeight, CiphertextCache)>, anyhow::Error> {
         Ok(None)
     }
 }
