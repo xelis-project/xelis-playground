@@ -20,12 +20,7 @@ use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 use xelis_builder::EnvironmentBuilder;
 use xelis_bytecode::Module;
 use xelis_common::{
-    block::{Block, BlockHeader, BlockVersion},
-    contract::{build_environment, ChainState, ContractCache, ContractEventTracker, ContractProviderWrapper},
-    crypto::{elgamal::CompressedPublicKey, proofs::RangeProof, Address, Hash, Signature},
-    serializer::Serializer,
-    transaction::{ContractDeposit, InvokeContractPayload, Reference, Transaction, TransactionType, TxVersion},
-    utils::format_xelis
+    block::{Block, BlockHeader, BlockVersion}, contract::{build_environment, ChainState, ContractCache, ContractEventTracker, ContractProviderWrapper}, crypto::{elgamal::CompressedPublicKey, proofs::RangeProof, Address, Hash, Signature}, immutable::Immutable, serializer::Serializer, transaction::{ContractDeposit, InvokeContractPayload, Reference, Transaction, TransactionType, TxVersion}, utils::format_xelis
 };
 use xelis_compiler::Compiler;
 use xelis_lexer::Lexer;
@@ -518,12 +513,12 @@ impl Silex {
                 BlockVersion::V0,
                 0,
                 0,
-                Default::default(),
+                Immutable::Owned(Default::default()),
                 Default::default(),
                 CompressedPublicKey::new(Default::default()),
                 Default::default()
             );
-            let block = Block::with(header, Vec::new());
+            let block = Block::new(Immutable::Owned(header), Vec::new());
             let zero_hash = Hash::zero();
 
             let mut chain_state = ChainState {
