@@ -284,7 +284,7 @@ impl Silex {
                     .iter()
                     .map(|(name, _type)| Parameter {
                         name: name.to_string(),
-                        type_name: Self::type_to_string(&self.environment, _type),
+                        type_name: _type.to_string(),
                         ty: _type.clone(),
                     })
                     .collect();
@@ -319,17 +319,6 @@ impl Silex {
         self.is_running.load(Ordering::Relaxed)
     }
 
-    fn type_to_string(env: &EnvironmentBuilder, ty: &Type) -> String {
-        match ty {
-            Type::Opaque(opaque) => env.get_opaque_name(opaque).unwrap().to_string(),
-            Type::Struct(ty) => env.get_struct_manager().get_name_by_ref(ty).unwrap().to_string(),
-            Type::Enum(ty) => env.get_enum_manager().get_name_by_ref(ty).unwrap().to_string(),
-            Type::Array(ty) => format!("{}[]", Self::type_to_string(env, ty)),
-            Type::Optional(ty) => format!("optional<{}>", Self::type_to_string(env, ty)),
-            _ => ty.to_string(),
-        }
-    }
-
     pub fn get_env_functions(&self) -> Vec<Func> {
         let mapper = self.environment.get_functions_mapper();
         let mut funcs = Vec::new();
@@ -337,14 +326,14 @@ impl Silex {
         for (_t, list) in mapper.get_declared_functions() {
             for (f, syscall_id) in list {
                 let params: Vec<String> = f.parameters.iter().map(|(name, ty)| 
-                    format!("{}: {}", name, Self::type_to_string(&self.environment, &ty))
+                    format!("{}: {}", name, ty)
                 ).collect();
 
                 funcs.push(Func {
                     name: f.name.to_string(),
-                    on_type: f.on_type.as_ref().map(|v| Self::type_to_string(&self.environment, v)),
+                    on_type: f.on_type.as_ref().map(Type::to_string),
                     on_instance: f.require_instance && f.on_type.is_some(),
-                    return_type: f.return_type.as_ref().map(|v| Self::type_to_string(&self.environment, v)),
+                    return_type: f.return_type.as_ref().map(Type::to_string),
                     params,
                     syscall_id
                 });
@@ -357,15 +346,14 @@ impl Silex {
     pub fn get_constants_functions(&self) -> Vec<ConstFunc> {
         let mut funcs = Vec::new();
         for (for_type, mappings) in self.environment.get_const_functions_mapper().get_mappings() {
-            let for_type = Self::type_to_string(&self.environment, for_type);
             for (name, const_fn) in mappings.iter() {
                 let params: Vec<String> = const_fn.parameters.iter().map(|(name, ty)| 
-                    format!("{}: {}", name, Self::type_to_string(&self.environment, ty))
+                    format!("{}: {}", name, ty)
                 ).collect();
 
                 funcs.push(ConstFunc {
                     name: name.to_string(),
-                    for_type: for_type.clone(),
+                    for_type: for_type.to_string(),
                     params,
                 });
             }
