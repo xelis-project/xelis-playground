@@ -6,6 +6,7 @@ import {text_dot_loading} from './text-dot-loading.js';
 import './export-modal.js';
 import {load_funcs} from './func-list.js';
 import EditorFeatures from './editor-features/index.js';
+import {XelisXvmParser, ParameterBuilder} from "./parameter-builder/index.js";
 
 HighlightedCode.useTheme('tomorrow-night-bright'); // github-dark
 
@@ -16,8 +17,6 @@ console.log("WASM module loaded!");
 const silex = new Silex();
 const input_editor = document.getElementById('input_editor');
 const output = document.getElementById('output');
-const program_entries_select = document.getElementById('program_entries_select');
-const program_entry_params = document.getElementById('program_entry_params');
 const btn_run = document.getElementById('btn_run');
 const btn_compile = document.getElementById('btn_compile');
 const input_max_gas = document.getElementById('input_max_gas');
@@ -25,11 +24,25 @@ const examples_select = document.getElementById('examples_select');
 const btn_clear = document.getElementById('btn_clear');
 const editor_lines = document.getElementById('editor_lines');
 const btn_export = document.getElementById('btn_export');
+const edit_params_btn = document.getElementById('edit-entry-params-btn');
+const pb_ui = document.getElementById('modal_parameter_builder');
+
+const pb_main_container = document.querySelector('div.parameter-builder-container');
+const parameter_display = document.getElementById('parameter-display');
+const pba_readonly = document.getElementById('pba-readonly');
+const entry_call_container = document.querySelector(`#entry-call-container`);
+const signature_container = document.querySelector(`#signature-container`);
+const entry_call_btn = document.querySelector(`#entry-call-btn`);
+const signature_btn = document.querySelector(`#signature-btn`);
+const copy_btn = document.querySelector(`#copy-ec-btn`);
+const entry_menu = document.getElementById('entry-menu');
+
 
 load_funcs(silex);
 
 let program_code = null;
 let program_entry_index = null;
+let xelis_xvm_param_parser = null;
 
 globalThis.get_program = function () {
     return silex.compile(program_code);
@@ -43,8 +56,14 @@ function set_editor_code(code) {
 
 function program_changed() {
     if (program_code && program_code !== input_editor.value) {
+
         btn_run.setAttribute("disabled", "");
         btn_export.setAttribute("disabled", "");
+        edit_params_btn.setAttribute('disabled', '');
+        entry_call_btn.setAttribute('disabled', '');
+        signature_btn.setAttribute('disabled', '');
+        copy_btn.setAttribute('disabled', '');
+
         output.innerHTML = "";
         reset_entries();
         program_code = null;
@@ -76,55 +95,64 @@ function save_code() {
 }
 
 function reset_entries() {
-    program_entries_select.innerHTML = '<option>Not compiled yet</option>';
-    program_entry_params.innerHTML = 'None';
+    entry_call_container.replaceChildren();
     buildCustomSelects();
 }
 
 function clear_entries() {
-    program_entries_select.innerHTML = '';
-    program_entry_params.innerHTML = '';
+    entry_call_container.replaceChildren();
+    entry_menu.replaceChildren();
 }
 
 function add_entry(entry, index) {
-    const opt = document.createElement(`option`);
-    opt.textContent = entry.name();
-    opt.value = index;
-    program_entries_select.appendChild(opt);
-}
+    const link = document.createElement(`a`);
+    link.href = "#";
+    link.classList.add(`entry-link`);
+    link.setAttribute(`data-entry-index`, index);
+    link.textContent = entry.name();
+    entry_menu.appendChild(link);
 
-function add_entry_params(entry, index) {
-    const container = document.createElement(`div`);
-    container.id = `entry_params_${index}`;
-    container.classList.add(`spec-column`, `hidden`);
-    const params = entry.parameters();
+    link.addEventListener('click', (e) => {
+       // const entry_index = e.target.getAttribute(`data-entry-index`);
+        program_entry_index = index;
 
-    params.forEach((param, param_index) => {
-        const item = document.createElement(`div`);
-        item.classList.add(`spec-param`);
+        const params = xelis_xvm_param_parser.parameter_builder_data[program_entry_index].parameters;
 
-        const title = document.createElement(`div`);
-        title.textContent = `${param.name()} (${param.type_name()})`;
+        if(params.length > 0) {
+            edit_params_btn.removeAttribute('disabled');
+        } else {
+            edit_params_btn.setAttribute('disabled', '');
+        }
 
-        const input = document.createElement(`input`);
-        input.type = "text";
-        input.autocomplete = `off`;
-        input.autocapitalize = `off`;
-        input.placeholder = `required`;
-        input.setAttribute(`data-type`, param.type_name());
-        input.classList.add('input');
-        input.name = `entry_params_${index}_input`;
+        const entry_name = xelis_xvm_param_parser.parameter_builder_data[program_entry_index].name;
+        const e_name_ro = document.querySelector(`#hud-entry-name`);
+        e_name_ro.textContent = `${entry_name}`;
 
-        item.appendChild(title);
-        item.appendChild(input);
-        container.appendChild(item);
+        signature_container.replaceChildren();
+        params.forEach((param, index) => {
+            const p_elem = document.createElement("parameter");
+            const label = document.createElement("label");
+            const sig = document.createElement("signature");
+
+            label.textContent = `${param.name}: `;
+            sig.textContent = `${param.signature}`;
+            p_elem.appendChild(label);
+            p_elem.appendChild(sig);
+            signature_container.appendChild(p_elem);
+        });
+
+        entry_menu.style.display = 'none';
+        entry_menu.classList.remove('dropdown-content');
+
+
+        setTimeout(function() {
+            entry_menu.style.display = '';
+            entry_menu.classList.add('dropdown-content');
+        }, 500);
+
+        update_ro_argument_display();
     });
 
-    if (params.length === 0) {
-        container.innerHTML = `None`;
-    }
-
-    program_entry_params.appendChild(container);
 }
 
 function output_error(text, append = false) {
@@ -135,6 +163,7 @@ function output_success(text, append = false) {
     return `<span class="out-success">${text}</span>`
 }
 
+
 function compile_code() {
     try {
         save_code();
@@ -143,26 +172,59 @@ function compile_code() {
         btn_run.setAttribute('disabled', '');
         btn_export.setAttribute("disabled", "");
 
+        edit_params_btn.setAttribute('disabled', '');
+        entry_call_btn.setAttribute('disabled', '');
+        signature_btn.setAttribute('disabled', '');
+        copy_btn.setAttribute('disabled', '');
+
+
         const code = input_editor.value;
         localStorage.setItem('code', code);
 
         output.textContent += "------- Compiling -------\n";
         const program = silex.compile(code);
 
+        xelis_xvm_param_parser = new XelisXvmParser();
+
         const entries = program.entries();
         entries.forEach((entry, index) => {
+            xelis_xvm_param_parser.make_schema_from_entry(entry);
             add_entry(entry, index);
-            add_entry_params(entry, index);
+
+            let pb_entry_container = document.getElementById(`pb_entry_container_${index}`);
+            let pb_input_container = null;
+            let arg_container = null;
+
+            if (pb_entry_container !== null) {
+                pb_input_container = pb_entry_container.querySelector(`div.pb-input-container`);
+                arg_container = pb_entry_container.querySelector(`div.pb-arguments-container`);
+            } else {
+                pb_entry_container = document.createElement(`div`);
+                pb_entry_container.id = `pb_entry_container_${index}`;
+                pb_entry_container.classList.add(`pb_entry_container`);
+
+                pb_input_container = document.createElement(`div`);
+                pb_input_container.classList.add(`pb-input-container`);
+
+                arg_container = document.createElement(`div`);
+                arg_container.classList.add(`pb-arguments-container`);
+
+                pb_entry_container.appendChild(pb_input_container);
+                pb_entry_container.appendChild(arg_container);
+                pb_main_container.appendChild(pb_entry_container);
+            }
+
+            pb_entry_container.setAttribute('data-pbe-index', index);
+
+            let pb_opts = {};
+            pb_opts.pb_container = pb_input_container;
+            pb_opts.arg_container = arg_container;
+
+            const parsed_entry = xelis_xvm_param_parser.parameter_builder_data[index];
+            ParameterBuilder.build_from_schema(parsed_entry.parameters, pb_opts);
         });
 
-        
         if (entries.length === 0) {
-            const opt = document.createElement(`option`);
-            opt.textContent = "No entries available";
-            opt.value = -1;
-            opt.classList.add(`disabled`);
-            program_entries_select.appendChild(opt);
-
             btn_run.setAttribute('disabled', '');
         } else {
             btn_run.removeAttribute('disabled');
@@ -171,32 +233,31 @@ function compile_code() {
         buildCustomSelects();
 
         if (entries.length > 0) {
-            program_entries_select.dispatchEvent(new Event('change'));
+            const first_menu_link = document.querySelector(`#entry-menu a`);
+            first_menu_link.click();
         }
 
         program_code = code;
         output.innerHTML += output_success("Compiled successfully!\n");
 
         btn_export.removeAttribute('disabled');
+        edit_params_btn.removeAttribute('disabled');
+        entry_call_btn.removeAttribute('disabled');
+        entry_call_btn.classList.add('selected');
+        signature_btn.removeAttribute('disabled');
+        copy_btn.removeAttribute('disabled');
+
+        //update_ro_argument_display();
+
+        // console.log(xelis_xvm_param_parser.parameter_builder_data);
+
+        //const xvm_signature_builder_test = new XelisXvmParser();
+        //console.log(xvm_signature_builder_test.signature_to_json("struct(StructType(Struct { id: 1, fields: [String, Array(U8)] }))"));
+
     } catch (e) {
         output.innerHTML += output_error("Error: " + e + "\n");
     }
 }
-
-btn_compile.addEventListener('click', () => {
-    compile_code();
-});
-
-program_entries_select.addEventListener('change', (e) => {
-    program_entry_index = e.target.value;
-
-    Array.from(program_entry_params.children).forEach((element) => {
-        element.classList.add(`hidden`);
-    });
-
-    const params_container = document.getElementById(`entry_params_${program_entry_index}`);
-    if (params_container) params_container.classList.remove(`hidden`);
-});
 
 // function parse_param(param, ty) {
 //     let is_optional = ty.startsWith("optional<");
@@ -222,41 +283,23 @@ program_entries_select.addEventListener('change', (e) => {
 // }
 
 function get_program_params() {
-    const inputs = document.querySelectorAll(`input[name="entry_params_${program_entry_index}_input"]`);
     const params = [];
-    inputs.forEach((element) => {
-        const data_type = element.getAttribute(`data-type`);
-        const value = element.value;
-        // const parsed_value = parse_param(value, data_type);
-        params.push(value);
+    const pbe_params_elems = document.querySelectorAll(`#pb_entry_container_${program_entry_index} > div.pb-arguments-container > pre`);
+    pbe_params_elems.forEach(pbe => {
+        const content = pbe.textContent;
+        params.push(typeof content === 'number' ? content.toString() : content);
     });
+
     return params;
 }
 
 function btn_run_set_running() {
-    btn_run.innerHTML = `
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="spin">
-            <path d="M12 22C17.5228 22 22 17.5228 22 12H19C19 15.866 15.866 19 12 19V22Z" />
-            <path d="M2 12C2 6.47715 6.47715 2 12 2V5C8.13401 5 5 8.13401 5 12H2Z" />
-        </svg>
-        Running
-    `;
+    btn_run.textContent = "Running";
     btn_run.setAttribute(`disabled`, "");
 }
 
 function btn_run_set_run() {
-    btn_run.innerHTML = `
-        <svg width="16" height="16" viewBox="-0.5 0 7 7" fill="currentColor">
-            <g transform="translate(-347.000000, -3766.000000)">
-                <g transform="translate(56.000000, 160.000000)">
-                <path
-                    d="M296.494737,3608.57322 L292.500752,3606.14219 C291.83208,3605.73542 291,3606.25002 291,3607.06891 L291,3611.93095 C291,3612.7509 291.83208,3613.26444 292.500752,3612.85767 L296.494737,3610.42771 C297.168421,3610.01774 297.168421,3608.98319 296.494737,3608.57322">
-                </path>
-                </g>
-            </g>
-        </svg>
-        Run
-    `;
+    btn_run.textContent = "Run";
     btn_run.removeAttribute(`disabled`);
 }
 
@@ -322,14 +365,6 @@ async function run_program() {
     // output.scrollTop = output.scrollHeight;
 }
 
-btn_run.addEventListener('click', async () => {
-    await run_program();
-});
-
-btn_clear.addEventListener('click', () => {
-    output.textContent = "";
-});
-
 // examples are using spaces indentation - fix by replacing with tabulation
 function replace_spaces_indentation(data) {
     return data.replace(/^( +)/gm, (match) => {
@@ -374,5 +409,79 @@ input_editor.addEventListener('input', (e) => {
     set_editor_lines();
     program_changed();
 });
+
+/** Opens the parameter builder modal.
+ * TODO: Best to move this into the program window, and get rid of the modal.
+ * */
+edit_params_btn.addEventListener('click', () => {
+    pb_ui.classList.remove('hidden');
+
+    for (const pbe of pb_main_container.children) {
+        if(parseInt(pbe.getAttribute("data-pbe-index")) === program_entry_index) {
+            const entry_stat = document.querySelector(`.entry-stat > span`);
+            if(entry_stat !== null) {
+                entry_stat.textContent = `${xelis_xvm_param_parser.parameter_builder_data[program_entry_index].name}`;
+            }
+
+            const param_stat = document.querySelector(`.param-stat > span`);
+            if(param_stat !== null) {
+                param_stat.textContent = `${xelis_xvm_param_parser.parameter_builder_data[program_entry_index].parameters.length}`;
+            }
+
+            pbe.classList.remove('hide');
+        } else {
+            pbe.classList.add('hide');
+        }
+    }
+});
+
+function update_ro_argument_display() {
+    if(entry_call_container !== null) {
+        entry_call_container.replaceChildren();
+        const e_name = xelis_xvm_param_parser.parameter_builder_data[program_entry_index].name;
+        const func_name = document.createElement(`entry-name`);
+        func_name.classList.add(`code`);
+        func_name.textContent = `${e_name}(`;
+        entry_call_container.appendChild(func_name);
+        const pba_container = document.querySelector(`#pb_entry_container_${program_entry_index} > div.pb-arguments-container`);
+        if(pba_container.hasChildNodes()) {
+            for (const node of pba_container.childNodes) {
+                entry_call_container.appendChild(node.cloneNode(true));
+            }
+        }
+        const close_func_name = document.createElement(`entry-name`);
+        close_func_name.classList.add(`code`);
+        close_func_name.textContent = `)`;
+        entry_call_container.appendChild(close_func_name);
+    }
+}
+
+btn_run.addEventListener('click', async () => {
+    await run_program();
+});
+
+btn_clear.addEventListener('click', () => {
+    output.textContent = "";
+});
+
+entry_call_btn.addEventListener('click', () => {
+    signature_container.classList.add('hide');
+    entry_call_container.classList.remove('hide');
+});
+
+signature_btn.addEventListener('click', () => {
+    signature_container.classList.remove('hide');
+    entry_call_container.classList.add('hide');
+});
+
+btn_compile.addEventListener('click', () => {
+    compile_code();
+});
+
+/* We update the readonly display whenever the parameter builder changes */
+document.addEventListener("pb-argument-did-change", () => {
+    update_ro_argument_display();
+});
+
 
 EditorFeatures.forEditor(input_editor);

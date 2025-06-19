@@ -157,9 +157,9 @@ html, body {
   border-bottom: thin solid #6d6d6d;
 }
 
-#spec>div {
+#spec>div:not(#entry-controls) {
   padding: 1rem;
-  display: flex;
+  /*display: flex;*/
   gap: .8rem;
   align-items: center;
   border-bottom: .1rem solid #3f3f3f;
@@ -167,9 +167,9 @@ html, body {
   color: white;
 }
 
-#spec>div>:nth-child(1) {
-  font-weight: bold;
-}
+/*#spec>div>:nth-child(1) {*/
+/*  font-weight: bold;*/
+/*}*/
 
 .spec-column {
   display: flex;
@@ -274,6 +274,7 @@ html, body {
 
 .out-err {
   background-color: red;
+  color: white;
   padding: .1rem .25rem;
   position: relative;
   top: .4rem;

@@ -126,56 +126,36 @@
     <div id="screen_right">
       <div class="controls">
         <div class="title">Program</div>
-        <div class="flex-row">
-          <button id="btn_run" class="btn" disabled title="Execute the code. Compile first!">
-            <svg width="1.2rem" height="1.2rem" viewBox="-0.5 0 7 7" fill="currentColor">
-              <g transform="translate(-347.000000, -3766.000000)">
-                <g transform="translate(56.000000, 160.000000)">
-                  <path
-                    d="M296.494737,3608.57322 L292.500752,3606.14219 C291.83208,3605.73542 291,3606.25002 291,3607.06891 L291,3611.93095 C291,3612.7509 291.83208,3613.26444 292.500752,3612.85767 L296.494737,3610.42771 C297.168421,3610.01774 297.168421,3608.98319 296.494737,3608.57322">
-                  </path>
-                </g>
-              </g>
-            </svg>
-            Run
-          </button>
-          <button id="btn_export" class="btn" disabled title="Open export code modal">
-            <svg width="1.2rem" height="1.2rem" viewBox="0 0 16 16">
-              <path fill="currentColor" fill-rule="evenodd"
-                d="M14,9.00421 C14.5523,9.00421 15,9.45192 15,10.00418 L15,13.00418 C15,14.10878 14.1046,15.00418 13,15.00418 L3,15.00418 C1.89543,15.00418 1,14.10878 1,13.00418 L1,10.00418 C1,9.45192 1.44772,9.00421 2,9.00421 C2.55228,9.00421 3,9.45192 3,10.00418 L3,13.00418 L13,13.00418 L13,10.00418 C13,9.45192 13.4477,9.00421 14,9.00421 Z M8,1.59 L11.7071,5.2971 C12.0976,5.68763 12.0976,6.32079 11.7071,6.71132 C11.3166,7.10184 10.6834,7.10184 10.2929,6.71132 L9,5.41842 L9,10.00418 C9,10.55648 8.55228,11.00418 8,11.00418 C7.44772,11.00418 7,10.55648 7,10.00418 L7,5.41842 L5.70711,6.71132 C5.31658,7.10184 4.68342,7.10184 4.29289,6.71132 C3.90237,6.32079 3.90237,5.68763 4.29289,5.2971 L8,1.59 Z" />
-            </svg>
-            Export
-          </button>
-        </div>
       </div>
-      <div id="spec">
-        <div>
-          <div>Entry</div>
-          <div class="custom-select" no-header>
-            <select id="program_entries_select">
-              <option>Not compiled yet</option>
-            </select>
+      <div id="program-spec">
+        <div id="entry-controls">
+          <div class="dropdown">
+            <div class="entry-stat-ro stats"><label>Entry</label><span id="hud-entry-name" class="entry-name">- none -</span></div>
+            <div id="entry-menu" class="dropdown-content"></div>
+          </div>
+
+          <div class="options-container">
+            <button id="pb_ui_btn" class="opt-btn blue first" disabled>Configure</button>
+            <button id="btn_run" class="opt-btn green" title="Execute the code." disabled>Run</button>
+            <button id="btn_export" class="opt-btn yellow" disabled>Export</button>
           </div>
         </div>
-        <div class="spec-column">
-          <div>Parameters</div>
-          <div id="program_entry_params">
-            None
+        <div id="parameter-display" class="">
+          <h2 class="title1">Parameters</h2>
+          <div id="pba-readonly" class="pb-arguments-container readonly">
+            <div id="entry-call-container"></div>
+            <div id="signature-container" class="hide code"></div>
+            <div class="pb-arg-btns"><button id="edit-entry-params-btn" class="opt-btn blue" disabled>Edit</button><button id="entry-call-btn" class="opt-btn blue" disabled>Entry Call</button><button id="signature-btn" class="opt-btn blue" disabled>XVM SiG</button><button id="copy-ec-btn" class="opt-btn blue" disabled>Copy</button></div>
           </div>
         </div>
         <div>
-          <div>Max Gas</div>
-          <input id="input_max_gas" type="number" placeholder="infinite" class="input" />
+          <h2 class="title1">Max Gas</h2>
+          <input id="input_max_gas" type="number" placeholder="infinite" class="large-input" />
         </div>
       </div>
       <div id="output_container">
-        <button id="btn_clear" class="btn-clear" title="Clear output">
-          <svg width="1.8rem" height="1.8rem" viewBox="0 0 16 16" fill="currentColor">
-            <path
-              d="M10 12.6l.7.7 1.6-1.6 1.6 1.6.8-.7L13 11l1.7-1.6-.8-.8-1.6 1.7-1.6-1.7-.7.8 1.6 1.6-1.6 1.6zM1 4h14V3H1v1zm0 3h14V6H1v1zm8 2.5V9H1v1h8v-.5zM9 13v-1H1v1h8z" />
-          </svg>
-        </button>
-        <div>Output</div>
+        <button id="btn_clear" class="opt-btn blue" title="Clear output">Clear</button>
+        <div><h2 class="title1">Output</h2></div>
         <div id="output">
           <!-- populated by JS -->
         </div>
@@ -215,6 +195,26 @@
         </div>
       </div>
     </div>
+
+    <div id="modal_parameter_builder" class="modal hidden">
+      <link rel="stylesheet" href="./parameter-builder/resources/css/type.css">
+      <link rel="stylesheet" href="./parameter-builder/resources/css/style.css">
+      <link rel="stylesheet" href="./parameter-builder/resources/css/parameter-builder.css">
+      <div class="modal-backdrop"></div>
+      <div class="modal-frame">
+        <div class="modal-title">Parameters</div>
+        <div id="pb-modal-content" class="modal-content">
+          <div class="hud">
+            <div class="entry-stat stats"><label>Entry</label><span class="entry-name">-NONE-</span></div>
+            <div class="param-stat stats"><label>Params</label><span></span></div>
+            <div class="status-stat stats"><label>Status</label><span>unset</span></div>
+          </div>
+          <div class="parameter-builder-container">
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
   <script src="./index.js" type="module"></script>
 </body>
