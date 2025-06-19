@@ -20,7 +20,32 @@ use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 use xelis_builder::EnvironmentBuilder;
 use xelis_bytecode::Module;
 use xelis_common::{
-    block::{Block, BlockHeader, BlockVersion}, contract::{build_environment, ChainState, ContractCache, ContractEventTracker, ContractProviderWrapper}, crypto::{elgamal::CompressedPublicKey, proofs::RangeProof, Address, Hash, Signature}, immutable::Immutable, serializer::Serializer, transaction::{ContractDeposit, InvokeContractPayload, Reference, Transaction, TransactionType, TxVersion}, utils::format_xelis
+    block::{Block, BlockHeader, BlockVersion},
+    contract::{
+        build_environment,
+        ChainState,
+        ContractCache,
+        ContractEventTracker,
+        ContractProviderWrapper
+    },
+    crypto::{
+        elgamal::CompressedPublicKey,
+        proofs::RangeProof,
+        Address,
+        Hash,
+        Signature
+    },
+    immutable::Immutable,
+    serializer::Serializer,
+    transaction::{
+        ContractDeposit,
+        InvokeContractPayload,
+        Reference,
+        Transaction,
+        TransactionType,
+        TxVersion
+    },
+    utils::format_xelis
 };
 use xelis_compiler::Compiler;
 use xelis_lexer::Lexer;
@@ -66,7 +91,6 @@ impl Program {
 #[derive(Debug, Clone)]
 pub struct Parameter {
     name: String,
-    type_name: String,
     ty: Type
 }
 
@@ -76,8 +100,13 @@ impl Parameter {
         self.name.clone()
     }
 
+    pub fn type_json(&self) -> JsValue {
+        serde_wasm_bindgen::to_value(&self.ty)
+            .expect("Expected valid serialization")
+    }
+
     pub fn type_name(&self) -> String {
-        self.type_name.clone()
+        self.ty.to_string()
     }
 }
 
@@ -284,7 +313,6 @@ impl Silex {
                     .iter()
                     .map(|(name, _type)| Parameter {
                         name: name.to_string(),
-                        type_name: _type.to_string(),
                         ty: _type.clone(),
                     })
                     .collect();
