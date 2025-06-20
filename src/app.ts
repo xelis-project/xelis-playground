@@ -1,11 +1,13 @@
+import ace from 'ace-builds';
+import 'ace-builds/src-noconflict/mode-rust';
+import 'ace-builds/src-noconflict/theme-tomorrow_night_bright';
+
 import { Silex } from '../public/xelis_playground';
-import HighlightedCode from './highlighted_code';
 import { CustomSelect } from './custom_select';
 import { SplitLayout } from "./split_layout";
 import { TextDotLoading } from './text_dot_loading';
 import { ModalExport } from "./model_export";
 import { FuncList } from './func_list';
-import { EditorFeatures } from './editor_features';
 
 export class App {
     silex: Silex;
@@ -14,9 +16,8 @@ export class App {
     modal_export: ModalExport;
     split_layout: SplitLayout;
     custom_select: CustomSelect;
-    editor_features: EditorFeatures;
 
-    input_editor: HTMLInputElement;
+    editor: ace.Editor;
     output: HTMLElement;
     program_entries_select: HTMLSelectElement;
     program_entry_params: HTMLElement;
@@ -34,7 +35,6 @@ export class App {
 
     constructor(silex: Silex) {
         this.silex = silex;
-        this.input_editor = document.getElementById('input_editor') as HTMLInputElement;
         this.output = document.getElementById('output') as HTMLElement;
         this.program_entries_select = document.getElementById('program_entries_select') as HTMLSelectElement;
         this.program_entry_params = document.getElementById('program_entry_params') as HTMLElement;
@@ -52,18 +52,23 @@ export class App {
         this.btn_run.addEventListener('click', async () => await this.run_program());
         this.btn_clear.addEventListener('click', () => this.clear_output());
         this.examples_select.addEventListener('change', async (e) => await this.handle_examples_change(e));
-        this.input_editor.addEventListener('input', (e) => this.handle_input_change(e));
         this.tabsize_select.addEventListener('change', (e) => this.handle_tabsize_change(e));
-
-        this.load_save();
 
         this.split_layout = new SplitLayout();
         this.func_list = new FuncList();
         this.func_list.load_funcs(this.silex);
         this.custom_select = new CustomSelect();
-        this.editor_features = new EditorFeatures(this.input_editor, { auto_indent: true, auto_surround: true });
 
-        HighlightedCode.useTheme('tomorrow-night-bright');
+        const editor_element = document.getElementById('input_editor') as HTMLPreElement;
+        this.editor = ace.edit(editor_element);
+        this.editor.session.setMode("ace/mode/rust");
+        this.editor.setTheme("ace/theme/tomorrow_night_bright");
+        this.editor.setOptions({
+            enableAutoIndent: true,
+            wrapBehavioursEnabled: true // auto surround
+        });
+
+        this.load_save();
     }
 
     load_save() {
@@ -80,17 +85,16 @@ export class App {
 
     set_tabsize(tabsize: string) {
         this.tabsize_select.value = tabsize;
-        this.input_editor.setAttribute(`tab-size`, tabsize);
+        this.editor.setOption("tabSize", parseInt(tabsize));
     }
 
     set_editor_code(code: string) {
-        this.input_editor.value = code;
+        this.editor.setValue(code);
         this.program_changed();
-        this.set_editor_lines();
     }
 
     program_changed() {
-        if (this.program_code && this.program_code !== this.input_editor.value) {
+        if (this.program_code && this.program_code !== this.editor.getValue()) {
             this.btn_run.setAttribute("disabled", "");
             this.btn_export.setAttribute("disabled", "");
             this.output.innerHTML = "";
@@ -101,8 +105,7 @@ export class App {
     }
 
     save_code() {
-        const code = this.input_editor.value;
-        localStorage.setItem('code', code);
+        localStorage.setItem('code', this.editor.getValue());
     }
 
     reset_entries() {
@@ -173,7 +176,7 @@ export class App {
             this.btn_run.setAttribute('disabled', '');
             this.btn_export.setAttribute("disabled", "");
 
-            const code = this.input_editor.value;
+            const code = this.editor.getValue();
             localStorage.setItem('code', code);
 
             this.output.textContent += "------- Compiling -------\n";
@@ -352,20 +355,7 @@ export class App {
     }
 
     handle_input_change(e: Event) {
-        this.set_editor_lines();
         this.program_changed();
-    }
-
-    set_editor_lines() {
-        const text = this.input_editor.value;
-        const lines = text.split("\n");
-        const count = lines.length;
-        this.editor_lines.textContent = "";
-        for (let i = 1; i <= count; i++) {
-            const line = document.createElement(`div`);
-            line.innerHTML = i.toString();
-            this.editor_lines.appendChild(line);
-        }
     }
 
     replace_spaces_indentation(data: string) {
@@ -375,9 +365,3 @@ export class App {
         });
     }
 }
-
-//HighlightedCode.useTheme('tomorrow-night-bright');
-
-//const program_editor = new ProgramEditor();
-//program_editor.init();
-//EditorFeatures.forEditor(program_editor.input_editor);
