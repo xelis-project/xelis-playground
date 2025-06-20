@@ -36,7 +36,7 @@ const entry_call_btn = document.querySelector(`#entry-call-btn`);
 const signature_btn = document.querySelector(`#signature-btn`);
 const copy_btn = document.querySelector(`#copy-ec-btn`);
 const entry_menu = document.getElementById('entry-menu');
-
+const arg_ro_message = document.querySelector(`#pba-readonly > div.message`);
 
 load_funcs(silex);
 
@@ -113,7 +113,10 @@ function add_entry(entry, index) {
     entry_menu.appendChild(link);
 
     link.addEventListener('click', (e) => {
-       // const entry_index = e.target.getAttribute(`data-entry-index`);
+        /* defaults */
+        arg_ro_message.classList.add('hide');
+        /* end defaults */
+
         program_entry_index = index;
 
         const params = xelis_xvm_param_parser.parameter_builder_data[program_entry_index].parameters;
@@ -129,6 +132,7 @@ function add_entry(entry, index) {
         e_name_ro.textContent = `${entry_name}`;
 
         signature_container.replaceChildren();
+
         params.forEach((param, index) => {
             const p_elem = document.createElement("parameter");
             const label = document.createElement("label");
@@ -228,11 +232,6 @@ function compile_code() {
             btn_run.setAttribute('disabled', '');
         } else {
             btn_run.removeAttribute('disabled');
-        }
-
-        buildCustomSelects();
-
-        if (entries.length > 0) {
             const first_menu_link = document.querySelector(`#entry-menu a`);
             first_menu_link.click();
         }
@@ -241,18 +240,10 @@ function compile_code() {
         output.innerHTML += output_success("Compiled successfully!\n");
 
         btn_export.removeAttribute('disabled');
-        edit_params_btn.removeAttribute('disabled');
         entry_call_btn.removeAttribute('disabled');
         entry_call_btn.classList.add('selected');
         signature_btn.removeAttribute('disabled');
         copy_btn.removeAttribute('disabled');
-
-        //update_ro_argument_display();
-
-        // console.log(xelis_xvm_param_parser.parameter_builder_data);
-
-        //const xvm_signature_builder_test = new XelisXvmParser();
-        //console.log(xvm_signature_builder_test.signature_to_json("struct(StructType(Struct { id: 1, fields: [String, Array(U8)] }))"));
 
     } catch (e) {
         output.innerHTML += output_error("Error: " + e + "\n");
@@ -286,10 +277,23 @@ function get_program_params() {
     const params = [];
     const pbe_params_elems = document.querySelectorAll(`#pb_entry_container_${program_entry_index} > div.pb-arguments-container > pre`);
     pbe_params_elems.forEach(pbe => {
-        const content = pbe.textContent;
+        // remove the quotes
+        const copy_pbe = pbe.cloneNode(true);
+        ['quote'].forEach(c => {
+            const brace_children = copy_pbe.querySelectorAll(c);
+            for (const b of brace_children) {
+                b.remove();
+            }
+        });
+
+        // remove the open brackets
+
+        const content = copy_pbe.textContent;
         params.push(typeof content === 'number' ? content.toString() : content);
     });
 
+    console.log("DEBUG: Executing program with params:");
+    console.log(params);
     return params;
 }
 
@@ -467,15 +471,26 @@ btn_clear.addEventListener('click', () => {
 entry_call_btn.addEventListener('click', () => {
     signature_container.classList.add('hide');
     entry_call_container.classList.remove('hide');
+    arg_ro_message.classList.add('hide');
 });
 
 signature_btn.addEventListener('click', () => {
     signature_container.classList.remove('hide');
     entry_call_container.classList.add('hide');
+
+    if(xelis_xvm_param_parser.parameter_builder_data[program_entry_index].parameters.length === 0) {
+        arg_ro_message.classList.remove('hide');
+    } else {
+        arg_ro_message.classList.add('hide');
+    }
 });
 
 btn_compile.addEventListener('click', () => {
     compile_code();
+});
+
+copy_btn.addEventListener('click', () => {
+    copyTextToClipboard(entry_call_container.textContent);
 });
 
 /* We update the readonly display whenever the parameter builder changes */
@@ -483,5 +498,15 @@ document.addEventListener("pb-argument-did-change", () => {
     update_ro_argument_display();
 });
 
-
 EditorFeatures.forEditor(input_editor);
+
+
+/* should be in a utilities file */
+async function copyTextToClipboard(textToCopy) {
+    try {
+        await navigator.clipboard.writeText(textToCopy);
+        console.log('Text successfully copied to clipboard!');
+    } catch (err) {
+        console.error('Failed to copy text: ', err);
+    }
+}
