@@ -1,0 +1,27 @@
+{
+  "name": "xelis-playground",
+  "version": "1.0.0",
+  "description": "XVM Playground based on the Silex language.",
+  "homepage": "https://github.com/xelis-project/xelis-playground#readme",
+  "bugs": {
+    "url": "https://github.com/xelis-project/xelis-playground/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xelis-project/xelis-playground.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^6.3.5"
+  },
+  "dependencies": {
+    "format-bytes": "^1.0.1",
+    "highlight.js": "^11.11.1",
+    "split.js": "^1.6.5"
+  }
+}

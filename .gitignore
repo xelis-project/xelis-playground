@@ -2,12 +2,5 @@
 build/*
 !build/_headers
 node_modules
-package.json
-package-lock.json
 pkg/
-public/xelis_playground_bg.wasm
-public/xelis_playground.js
 target/
-
-
-

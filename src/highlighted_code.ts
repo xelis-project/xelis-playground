@@ -1,8 +1,6 @@
-'use strict';
+import hljs from 'highlight.js/lib/core';
+import silex from './silex_lang';
 
-import hljs from 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.10.0/build/es/core.min.js';
-import silex from './silex-lang.js';
-//import rust from 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.10.0/build/es/languages/rust.min.js';
 hljs.registerLanguage('silex', silex);
 
 /*! (c) Andrea Giammarchi - ISC */

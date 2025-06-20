@@ -6,9 +6,11 @@ Website: https://www.rust-lang.org
 Category: common, system
 */
 
+import { HLJSApi } from "highlight.js";
+
 /** @type LanguageFn */
 
-export default function(hljs) {
+export default function(hljs: HLJSApi) {
   const regex = hljs.regex;
   // ============================================
   // Added to support the r# keyword, which is a raw identifier in Rust.
