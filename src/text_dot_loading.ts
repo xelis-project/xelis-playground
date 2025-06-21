@@ -22,14 +22,14 @@ export class TextDotLoading {
             }
 
             this.dot_index++;
-            this.cancel_timeout = setTimeout(update, 500);
+            this.cancel_timeout = window.setTimeout(update, 500);
         }
 
         update();
     }
 
     stop() {
-        clearTimeout(this.cancel_timeout);
+        window.clearTimeout(this.cancel_timeout);
         this.element.innerText = this.text;
     }
 }
