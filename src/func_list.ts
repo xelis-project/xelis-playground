@@ -1,8 +1,7 @@
 export class FuncList {
   function_list: HTMLElement;
   function_list_items: HTMLElement;
-  btn_close_func_list: HTMLElement;
-  btn_open_func_list: HTMLElement;
+  btn_toggle_func_list: HTMLButtonElement;
   search_func_list: HTMLInputElement;
 
   funcs: any[];
@@ -11,8 +10,7 @@ export class FuncList {
   constructor() {
     this.function_list = document.getElementById('function_list') as HTMLElement;
     this.function_list_items = document.getElementById('function_list_items') as HTMLElement;
-    this.btn_close_func_list = document.getElementById('btn_close_func_list') as HTMLElement;
-    this.btn_open_func_list = document.getElementById('btn_open_func_list') as HTMLElement;
+    this.btn_toggle_func_list = document.getElementById('btn_toggle_func_list') as HTMLButtonElement;
     this.search_func_list = document.getElementById('search_func_list') as HTMLInputElement;
 
     this.funcs = [];
@@ -20,9 +18,7 @@ export class FuncList {
 
     this.search_func_list.addEventListener("input", (e) => this.handle_search_input(e));
     this.search_func_list.value = localStorage.getItem(`list-functions-search`) || ``;
-
-    this.btn_close_func_list.addEventListener("click", () => this.close_list_functions());
-    this.btn_open_func_list.addEventListener("click", () => this.open_list_functions());
+    this.btn_toggle_func_list.addEventListener("click", () => this.toggle_list_functions());
 
     const list_functions = localStorage.getItem(`list-functions`);
     if (list_functions === `true`) {
@@ -37,17 +33,21 @@ export class FuncList {
     this.load_function_list();
   }
 
+  toggle_list_functions() {
+    if(this.function_list.classList.contains("hidden")) {
+      this.open_list_functions();
+    } else {
+      this.close_list_functions();
+    }
+  }
+
   open_list_functions() {
     this.function_list.classList.remove('hidden');
-    this.btn_open_func_list.classList.add('hidden');
-    this.btn_close_func_list.classList.remove('hidden');
     localStorage.setItem(`list-functions`, 'true');
   }
 
   close_list_functions() {
     this.function_list.classList.add('hidden');
-    this.btn_close_func_list.classList.add('hidden');
-    this.btn_open_func_list.classList.remove('hidden');
     localStorage.setItem(`list-functions`, 'false');
   }
 

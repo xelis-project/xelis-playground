@@ -1,4 +1,5 @@
-html, body {
+html,
+body {
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
@@ -188,7 +189,7 @@ html, body {
   position: relative;
 }
 
-#output_container > :nth-child(2) {
+#output_container> :nth-child(2) {
   font-weight: bold;
   margin-bottom: 1rem;
   color: white;
@@ -297,7 +298,8 @@ html, body {
   user-select: none;
 }
 
-.export-program-buttons button:hover, .export-program-buttons button.selected {
+.export-program-buttons button:hover,
+.export-program-buttons button.selected {
   background-color: #02ffcf;
   color: black;
 }
@@ -321,6 +323,9 @@ html, body {
   color: white;
   border-bottom: .1rem solid #3f3f3f;
   font-family: monospace;
+  border-right: .1rem solid #3f3f3f;
+  border-bottom: none;
+  overflow: auto;
 }
 
 @media screen and (min-width: 768px) {
@@ -332,17 +337,17 @@ html, body {
   }
 }
 
-#function_list > :nth-child(1) {
+#function_list> :nth-child(1) {
   font-size: 1.5rem;
   padding: 1rem;
   color: #02ffcf;
 }
 
-#function_list > :nth-child(2) {
+#function_list> :nth-child(2) {
   padding: 0 1rem 1rem 1rem;
 }
 
-#function_list > :nth-child(2) > input {
+#function_list> :nth-child(2)>input {
   box-sizing: border-box;
   width: 100%;
   padding: .5rem;
@@ -354,28 +359,21 @@ html, body {
   font-size: 1rem;
 }
 
-#function_list > :nth-child(3) {
+#function_list> :nth-child(3) {
   display: flex;
   gap: 2rem;
   overflow: auto;
   padding: 1rem;
   padding-top: 0;
-  max-height: 100px;
+  flex-direction: column;
 }
 
-@media screen and (min-width: 768px) {
-  #function_list > :nth-child(3) {
-    max-height: inherit;
-    flex-direction: column;
-  }
-}
-
-#function_list > :nth-child(3) > div > div {
+#function_list> :nth-child(3)>div>div {
   padding-left: .5rem;
   white-space: nowrap;
 }
 
-#function_list > :nth-child(3) > div > :first-child {
+#function_list> :nth-child(3)>div> :first-child {
   margin-bottom: .5rem;
   padding-left: 0;
 }
@@ -406,7 +404,7 @@ html, body {
   opacity: 1;
 }
 
-#btn_close_func_list {
+#btn_toggle_func_list {
   background: #222222;
   border: none;
   cursor: pointer;
@@ -415,18 +413,21 @@ html, body {
   opacity: .3;
   width: 100%;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 @media screen and (min-width: 768px) {
-  #btn_close_func_list {
-    width: 20px;
+  #btn_toggle_func_list {
+    width: 3em;
   }
 
-  #btn_close_func_list > div {
-    transform: translate(0, -40px) rotate(90deg);
+  #btn_toggle_func_list>div {
+    rotate: -90deg;
   }
 }
 
-#btn_close_func_list:hover {
+#btn_toggle_func_list:hover {
   opacity: .6;
 }

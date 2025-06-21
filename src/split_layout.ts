@@ -1,13 +1,8 @@
 import Split from 'split.js';
 
-//import 'https://cdnjs.cloudflare.com/ajax/libs/split.js/1.6.5/split.min.js';
-
-// the split layout on small screen (mobile) won't drag because we need a min-height
-// and if we set this height the textarea highlighted code vertical scrollbar bugs
-
 export class SplitLayout {
-    direction: 'horizontal' | 'vertical';
-    split: Split.Instance;
+    direction!: 'horizontal' | 'vertical';
+    split!: Split.Instance;
 
     constructor() {
         this.set_split_direction();
@@ -35,7 +30,7 @@ export class SplitLayout {
 
     set_split() {
         this.split = Split(
-            ['#screen_left', '#screen_right'],
+            ['#function_list', '#screen_left', '#screen_right'],
             {
                 minSize: 100,
                 gutterSize: 6,
