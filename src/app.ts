@@ -8,10 +8,12 @@ import { SplitLayout } from "./split_layout";
 import { TextDotLoading } from './text_dot_loading';
 import { ModalExport } from "./model_export";
 import { FuncList } from './func_list';
+import { Modal } from './modal';
 
 export class App {
     silex: Silex;
 
+    modal: Modal;
     func_list: FuncList;
     modal_export: ModalExport;
     split_layout: SplitLayout;
@@ -35,6 +37,9 @@ export class App {
 
     constructor(silex: Silex) {
         this.silex = silex;
+        this.program_code = "";
+        this.program_entry_index = 0;
+
         this.output = document.getElementById('output') as HTMLElement;
         this.program_entries_select = document.getElementById('program_entries_select') as HTMLSelectElement;
         this.program_entry_params = document.getElementById('program_entry_params') as HTMLElement;
@@ -47,6 +52,7 @@ export class App {
         this.btn_export = document.getElementById('btn_export') as HTMLElement;
         this.tabsize_select = document.getElementById('tabsize_select') as HTMLSelectElement;
 
+        this.btn_export.addEventListener('click', () => this.open_modal_export());
         this.btn_compile.addEventListener('click', () => this.compile_code());
         this.program_entries_select.addEventListener('change', (e) => this.handle_program_entries_change(e));
         this.btn_run.addEventListener('click', async () => await this.run_program());
@@ -54,10 +60,12 @@ export class App {
         this.examples_select.addEventListener('change', async (e) => await this.handle_examples_change(e));
         this.tabsize_select.addEventListener('change', (e) => this.handle_tabsize_change(e));
 
+        this.modal = new Modal();
         this.split_layout = new SplitLayout();
         this.func_list = new FuncList();
         this.func_list.load_funcs(this.silex);
         this.custom_select = new CustomSelect();
+        this.modal_export = new ModalExport(this);
 
         const editor_element = document.getElementById('input_editor') as HTMLPreElement;
         this.editor = ace.edit(editor_element);
@@ -356,6 +364,14 @@ export class App {
 
     handle_input_change(e: Event) {
         this.program_changed();
+    }
+
+    open_modal_export() {
+        this.modal.open(this.modal_export.element);
+    }
+
+    get_program() {
+        return this.silex.compile(this.program_code);
     }
 
     replace_spaces_indentation(data: string) {

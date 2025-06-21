@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "ace-builds": "^1.43.0",
-    "format-bytes": "^1.0.1",
+    "bytes-formatter": "^21.6.15",
     "highlight.js": "^11.11.1",
     "split.js": "^1.6.5"
   }

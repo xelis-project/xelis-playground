@@ -1,7 +1,10 @@
-import formatBytes from 'format-bytes';
+import { formatBytes } from 'bytes-formatter';
+import { App } from './app';
 
 export class ModalExport {
-  modal_export: HTMLElement;
+  app: App;
+
+  element: HTMLElement;
   btn_export_download: HTMLElement;
   btn_export_copy: HTMLElement;
   tab_export_hex: HTMLElement;
@@ -14,8 +17,10 @@ export class ModalExport {
   program_blob: Blob | null = null;
   program_filename: string | null = null;
 
-  constructor() {
-    this.modal_export = document.getElementById('modal_export') as HTMLElement;
+  constructor(app: App) {
+    this.app = app;
+
+    this.element = document.getElementById('modal_export') as HTMLElement;
     this.btn_export_download = document.getElementById('btn_export_download') as HTMLElement;
     this.btn_export_copy = document.getElementById('btn_export_copy') as HTMLElement;
     this.tab_export_hex = document.getElementById('tab_export_hex') as HTMLElement;
@@ -81,7 +86,7 @@ export class ModalExport {
     this.tab_export_hex.classList.add('selected');
     this.tab_export_json.classList.remove('selected');
     this.tab_export_bytes.classList.remove('selected');
-    const program_value = globalThis.get_program().to_hex();
+    const program_value = this.app.get_program().to_hex();
     this.export_program_value.innerText = program_value;
     this.program_blob = new Blob([program_value], { type: "text/plain" });
     this.program_filename = "xelis_program.txt";
@@ -92,7 +97,7 @@ export class ModalExport {
     this.tab_export_hex.classList.remove('selected');
     this.tab_export_json.classList.remove('selected');
     this.tab_export_bytes.classList.add('selected');
-    const program_value = globalThis.get_program().to_bytes();
+    const program_value = this.app.get_program().to_bytes();
     this.export_program_value.innerText = program_value.join("");
     this.program_blob = new Blob([program_value], { type: "application/octet-stream" });
     this.program_filename = "xelis_program.bin";
@@ -103,7 +108,7 @@ export class ModalExport {
     this.tab_export_hex.classList.remove('selected');
     this.tab_export_bytes.classList.remove('selected');
     this.tab_export_json.classList.add('selected');
-    const program_value = globalThis.get_program().to_json();
+    const program_value = this.app.get_program().to_json();
     this.export_program_value.innerText = program_value;
     this.program_blob = new Blob([program_value], { type: "text/plain" });
     this.program_filename = "xelis_program.json";
