@@ -37,9 +37,10 @@ export class SplitLayout {
         this.split = Split(
             ['#screen_left', '#screen_right'],
             {
-                minSize: 300,
+                minSize: 100,
                 gutterSize: 6,
                 direction: this.direction,
+                snapOffset: 0,
             }
         );
     }
