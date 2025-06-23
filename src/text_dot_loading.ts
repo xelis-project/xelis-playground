@@ -20,9 +20,9 @@ export class TextDotLoading {
                 this.dot_index = 0;
             } else {
                 this.element.innerText += ".";
+                this.dot_index++;
             }
 
-            this.dot_index++;
             this.cancel_timeout = window.setTimeout(update, 500);
         }
 
