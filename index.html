@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Silex Playground - XELIS</title>
+    <link rel="stylesheet" href="./styles/app.css" />
+    <link rel="stylesheet" href="/styles/modal.css" />
+    <link rel="stylesheet" href="/styles/custom_select.css" />
+    <link rel="stylesheet" href="/styles/font_types.css" />
+    <link rel="stylesheet" href="/styles/app_2.css" />
+    <link rel="stylesheet" href="/styles/parameter_builder.css" />
+    <link
+      rel="icon"
+      type="image/png"
+      href="/favicon/favicon-48x48.png"
+      sizes="48x48"
+    />
+    <link rel="icon" type="image/svg+xml" href="./favicon/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon/favicon.ico" />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/favicon/apple-touch-icon.png"
+    />
+    <link rel="manifest" href="/favicon/site.webmanifest" />
+  </head>
+  <body>
+    <div id="app">
+      <button
+        id="btn_toggle_func_list"
+        type="button"
+        title="Toggle function list"
+      >
+        <div>Toggle functions</div>
+      </button>
+      <div id="function_list" class="hidden">
+        <div>Functions</div>
+        <div>
+          <input id="search_func_list" type="text" placeholder="Search" />
+        </div>
+        <div id="function_list_items">
+          <!-- populated by JS -->
+        </div>
+      </div>
+      <div id="screen_left">
+        <div class="controls">
+          <div class="title">
+            <svg
+              width="2rem"
+              height="2rem"
+              viewBox="0 0 778 743"
+              fill="currentColor"
+            >
+              <path
+                fill-rule="evenodd"
+                clip-rule="evenodd"
+                d="M388.909 742.872L777.817 353.964L424.056 0.202599L478.809 132.737L700.036 353.964L388.909 665.091L77.7817 353.964L299.507 129.121L353.964 0L0 353.964L388.909 742.872Z"
+              />
+              <path
+                d="M388.909 665.091L353.964 0L299.507 129.121L388.909 665.091Z"
+              />
+              <path
+                d="M424.056 0.202599L388.909 665.091L478.809 132.737L424.056 0.202599Z"
+              />
+            </svg>
+            <div>
+              XELIS
+              <div class="playground">Silex Playground</div>
+            </div>
+          </div>
+          <div class="flex-row">
+            <div class="custom-select">
+              <select id="examples_select">
+                <option>Examples</option>
+                <option
+                  value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/array.slx"
+                >
+                  Array
+                </option>
+                <option
+                  value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/condition.slx"
+                >
+                  Condition
+                </option>
+                <option
+                  value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/constants.slx"
+                >
+                  Constants
+                </option>
+                <option
+                  value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/factorial.slx"
+                >
+                  Factorial
+                </option>
+                <option
+                  value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/fizzbuzz.slx"
+                >
+                  FizzBuzz
+                </option>
+                <option
+                  value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/loop.slx"
+                >
+                  Loop
+                </option>
+                <option
+                  value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/number.slx"
+                >
+                  Number
+                </option>
+                <option
+                  value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/optional.slx"
+                >
+                  Optional
+                </option>
+                <option
+                  value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/path.slx"
+                >
+                  Path
+                </option>
+                <option
+                  value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/prime.slx"
+                >
+                  Prime
+                </option>
+                <option
+                  value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/prime_index.slx"
+                >
+                  Prime Index
+                </option>
+                <option
+                  value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/recursive.slx"
+                >
+                  Recursive
+                </option>
+                <option
+                  value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/specific_condition.slx"
+                >
+                  Specific Condition
+                </option>
+                <option
+                  value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/struct.slx"
+                >
+                  Struct
+                </option>
+              </select>
+            </div>
+            <div class="custom-select">
+              <select id="tabsize_select">
+                <option>Tab Size</option>
+                <option value="2">Tab Size: 2</option>
+                <option value="4">Tab Size: 4</option>
+              </select>
+            </div>
+            <button id="btn_compile" class="btn" title="Build the code">
+              <svg
+                width="1.2rem"
+                height="1.2rem"
+                viewBox="0 0 16 16"
+                fill="currentColor"
+              >
+                <path d="M1 12h4v4h-4v-4z"></path>
+                <path d="M6 12h4v4h-4v-4z"></path>
+                <path d="M11 12h4v4h-4v-4z"></path>
+                <path d="M1 7h4v4h-4v-4z"></path>
+                <path d="M1 2h4v4h-4v-4z"></path>
+                <path d="M6 7h4v4h-4v-4z"></path>
+                <path d="M7 1h4v4h-4v-4z"></path>
+                <path d="M11 7h4v4h-4v-4z"></path>
+                <path d="M13 0h3v3h-3v-3z"></path>
+              </svg>
+              Compile
+            </button>
+          </div>
+        </div>
+        <pre id="input_editor"></pre>
+      </div>
+      <div id="screen_right">
+        <div class="controls">
+          <div class="title">Program</div>
+        </div>
+        <div id="program-spec">
+          <div id="entry-controls">
+            <div class="dropdown">
+              <div class="entry-stat-ro stats">
+                <label>Entry</label
+                ><span id="hud-entry-name" class="entry-name">- none -</span>
+              </div>
+              <div id="entry-menu" class="dropdown-content"></div>
+            </div>
+
+            <div class="options-container">
+              <button id="pb_ui_btn" class="opt-btn blue first" disabled>
+                Configure
+              </button>
+              <button
+                id="btn_run"
+                class="opt-btn green"
+                title="Execute the code."
+                disabled
+              >
+                Run
+              </button>
+              <button id="btn_export" class="opt-btn yellow" disabled>
+                Export
+              </button>
+            </div>
+          </div>
+          <div id="parameter-display" class="">
+            <h2 class="title1">Parameters</h2>
+            <div id="pba-readonly" class="pb-arguments-container readonly">
+              <div class="message hide">This entry has no parameters.</div>
+              <div id="entry-call-container"></div>
+              <div id="signature-container" class="hide code"></div>
+              <div class="pb-arg-btns">
+                <button
+                  id="edit-entry-params-btn"
+                  class="opt-btn blue"
+                  disabled
+                >
+                  Edit</button
+                ><button id="entry-call-btn" class="opt-btn blue" disabled>
+                  Entry Call</button
+                ><button id="signature-btn" class="opt-btn blue" disabled>
+                  XVM SiG</button
+                ><button id="copy-ec-btn" class="opt-btn blue" disabled>
+                  Copy
+                </button>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h2 class="title1">Max Gas</h2>
+            <input
+              id="input_max_gas"
+              type="number"
+              placeholder="infinite"
+              class="large-input"
+            />
+          </div>
+        </div>
+        <div id="output_container">
+          <button id="btn_clear" class="opt-btn blue" title="Clear output">
+            Clear
+          </button>
+          <div id="output-heading"><h2 class="title1">Output</h2></div>
+          <div id="output">
+            <!-- populated by JS -->
+          </div>
+        </div>
+      </div>
+      <div id="modal_export" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-frame">
+          <div class="modal-title">Export program</div>
+          <div class="modal-content">
+            <div>
+              <div class="export-program-buttons">
+                <button id="tab_export_hex">Hex</button>
+                <button id="tab_export_bytes">Bytes</button>
+                <button id="tab_export_json">Json</button>
+              </div>
+              <div id="export_program_value" class="export-program-value"></div>
+              <div id="export_program_size" class="export-program-size"></div>
+            </div>
+            <div class="flex-row">
+              <button id="btn_export_copy" class="btn">
+                <svg
+                  fill="currentColor"
+                  width="1.5rem"
+                  height="1.5rem"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M21,10V20a1,1,0,0,1-1,1H10a1,1,0,0,1-1-1V10a1,1,0,0,1,1-1H20A1,1,0,0,1,21,10ZM6,14H5V5h9V6a1,1,0,0,0,2,0V4a1,1,0,0,0-1-1H4A1,1,0,0,0,3,4V15a1,1,0,0,0,1,1H6a1,1,0,0,0,0-2Z"
+                  />
+                </svg>
+                Copy
+              </button>
+              <button id="btn_export_download" class="btn">
+                <svg
+                  width="1.5rem"
+                  height="1.5rem"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                >
+                  <path
+                    d="M20 15V18C20 19.1046 19.1046 20 18 20H6C4.89543 20 4 19.1046 4 18L4 15M8 11L12 15M12 15L16 11M12 15V3"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                Download
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="modal_parameter_builder" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-frame">
+          <div class="modal-title">Parameters</div>
+          <div id="pb-modal-content" class="modal-content">
+            <div class="hud">
+              <div class="entry-stat stats">
+                <label>Entry</label><span class="entry-name">-NONE-</span>
+              </div>
+              <div class="param-stat stats">
+                <label>Params</label><span></span>
+              </div>
+              <div class="status-stat stats">
+                <label>Status</label><span>unset</span>
+              </div>
+            </div>
+            <div class="parameter-builder-container"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="./src/index.ts"></script>
+  </body>
+</html>
