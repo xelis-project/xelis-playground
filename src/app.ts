@@ -13,7 +13,7 @@ import { XVMParamParser } from './parameter_builder/xvm_param_parser';
 import { ParameterBuilder } from './parameter_builder/parameter_builder';
 
 export class App {
-    silex: Silex;
+    silex: any;
 
     modal: Modal;
     func_list: FuncList;
@@ -51,8 +51,8 @@ export class App {
     program_entry_index: number;
     xvm_param_parser: XVMParamParser;
 
-    constructor() {
-        this.silex = new Silex();
+    constructor(silex: Silex) {
+        this.silex = silex;
         this.program_code = "";
         this.program_entry_index = 0;
         this.xvm_param_parser = new XVMParamParser();
