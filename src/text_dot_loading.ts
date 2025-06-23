@@ -9,14 +9,15 @@ export class TextDotLoading {
         this.dot_index = 0;
         this.dot_count = count;
         this.element = element;
-        this.text = element.innerText;
+        this.text = "";
     }
 
     start() {
+        this.text = this.element.innerText;
         const update = () => {
             if (this.dot_index >= this.dot_count) {
                 this.element.innerHTML = this.text;
-                this.dot_count = 0;
+                this.dot_index = 0;
             } else {
                 this.element.innerText += ".";
             }
