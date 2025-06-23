@@ -445,8 +445,8 @@ export class App {
             let result = await this.silex.execute_program(program, entry.id(), max_gas, params);
             output_dot_loading.stop();
 
+            this.output.textContent = "";
             let logs = result.logs();
-            //this.output.textContent += "\n";
             if (logs.length > 0) {
                 this.output.textContent += logs.join("\n");
                 this.output.textContent += "\n";
