@@ -51,8 +51,8 @@ export class App {
     program_entry_index: number;
     xvm_param_parser: XVMParamParser;
 
-    constructor(silex: Silex) {
-        this.silex = silex;
+    constructor() {
+        this.silex = new Silex();
         this.program_code = "";
         this.program_entry_index = 0;
         this.xvm_param_parser = new XVMParamParser();
