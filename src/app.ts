@@ -412,6 +412,7 @@ export class App {
 
     async run_program() {
         let max_gas = null as bigint | null; // infinite
+        this.output.innerHTML = "";
 
         if (this.input_max_gas.value) {
             const max_gas_int = parseInt(this.input_max_gas.value);
@@ -445,7 +446,7 @@ export class App {
             output_dot_loading.stop();
 
             let logs = result.logs();
-            this.output.textContent += "\n";
+            //this.output.textContent += "\n";
             if (logs.length > 0) {
                 this.output.textContent += logs.join("\n");
                 this.output.textContent += "\n";
