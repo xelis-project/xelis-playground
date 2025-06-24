@@ -266,7 +266,7 @@ impl Silex {
         *LOGS_SENDER.lock().unwrap() = Some(sender);
         
         environment
-            .get_mut_function("println", None, vec![Type::Any])
+            .get_mut_function("println", None)
             .set_on_call(move |_, args, _| -> _ {
                 let param = &args[0];
                 cfg_if! {
