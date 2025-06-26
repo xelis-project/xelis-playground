@@ -1,5 +1,6 @@
 import xelis_init, { Silex } from '../public/xelis_playground.js';
 import { App } from "./app";
+import './styles';
 
 async function main() {
     console.log("Loading Silex WASM module...");
