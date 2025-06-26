@@ -329,8 +329,8 @@ export class App {
                 this.add_entry(entry, index);
 
                 let pb_entry_container = document.getElementById(`pb_entry_container_${index}`);
-                let pb_input_container: null;
-                let arg_container: null;
+                let pb_input_container: HTMLElement;
+                let arg_container: HTMLElement;
 
                 if (pb_entry_container !== null) {
                     pb_input_container = pb_entry_container.querySelector(`div.pb-input-container`) as HTMLElement;
@@ -492,7 +492,6 @@ export class App {
         let code = await res.text();
         code = this.replace_spaces_indentation(code);
         this.set_editor_code(code);
-        this.editor.clearSelection();
     }
 
     save_tabsize() {
