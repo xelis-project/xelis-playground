@@ -132,6 +132,7 @@ export class App {
         });
 
         this.load_save();
+        this.custom_select.build_selects();
     }
 
     load_save() {
