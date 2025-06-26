@@ -132,8 +132,6 @@ export class App {
         });
 
         this.load_save();
-        // prevent editor from selecting all text by default
-        this.editor.clearSelection();
     }
 
     load_save() {
@@ -154,7 +152,7 @@ export class App {
     }
 
     set_editor_code(code: string) {
-        this.editor.setValue(code);
+        this.editor.setValue(code, -1); // -1 places the cursor at the top -- undefined or 0 select all text
         this.program_changed();
     }
 
