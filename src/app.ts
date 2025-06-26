@@ -132,6 +132,8 @@ export class App {
         });
 
         this.load_save();
+        // prevent editor from selecting all text by default
+        this.editor.clearSelection();
     }
 
     load_save() {
