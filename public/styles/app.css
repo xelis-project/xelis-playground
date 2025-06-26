@@ -18,8 +18,8 @@ body {
 }
 
 .playground {
-  color: #5b5b5b;
-  font-size: .9rem;
+  color: #d3f5ff;
+  font-size: .8rem;
 }
 
 #app {
@@ -66,6 +66,7 @@ body {
 @media screen and (min-width: 768px) {
   #screen_left {
     width: 50%;
+    background: #0b263512;
   }
 }
 
@@ -98,7 +99,7 @@ body {
   background: black;
   color: white;
   padding: 1rem;
-  border-bottom: .1rem solid #3f3f3f;
+  border-bottom: .1rem solid #01563b20;
   flex-wrap: wrap;
 }
 
@@ -118,11 +119,13 @@ body {
 }
 
 .btn:hover {
-  background-color: white;
+  background-color: #00ffac3b;
+  color: white;
 }
 
 .btn:disabled {
-  background-color: #3f3f3f;
+  /* background-color: #3f3f3f; */
+  opacity: 0.4;
   cursor: default;
 }
 
@@ -384,7 +387,6 @@ body {
   right: 0;
   top: 50%;
   transform: translate(33%, -50%) rotate(-90deg);
-  border: none;
   background: transparent;
   color: white;
   padding: .5rem 1rem;

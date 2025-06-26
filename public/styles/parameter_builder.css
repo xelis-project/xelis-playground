@@ -21,7 +21,7 @@ pre:not(.input_editor > pre), .code {
 }
 
 #modal_parameter_builder *, #parameter-display *
-, #screen_right > .controls .title, #screen_right > #program-spec > #entry-controls *:not(pre *)
+, .controls, .btn, .opt-btn, #screen_right > .controls .title, #screen_right > #program-spec > #entry-controls *:not(pre *)
 , #screen_right > #program-spec > #entry-controls *:not(input), h2.title1 {
     font-family: "Michroma", "Nimbus-ExtLight", sans-serif;
 }
@@ -132,7 +132,6 @@ input[type="number"] {
 }
 
 
-
 ::placeholder {
     color: rgba(196, 246, 255, 0.67);
     font-family: 'Michroma', 'Nimbus-ExtLight', sans-serif;
@@ -146,6 +145,24 @@ input[type="number"] {
 }
 
 /** main buttons **/
+/* overrides */
+.controls, .btn, .select-selected {
+    text-transform: uppercase;
+    font-size: 0.6rem;
+}
+
+.select-selected, .btn {
+    border-radius: 0;
+    background: #00ffac12;
+    color: #00ffebb5 !important
+}
+
+/* end overrides */
+
+#xelis-type {
+    font-size: 1.5rem;
+}
+
 .options-container {
     display: grid;
     grid-template-columns: auto auto auto;
@@ -340,14 +357,14 @@ input[type=number]::-webkit-outer-spin-button {
     display: grid;
     /* The keys can only be primitive types. long addresses?*/
     grid-template-columns: auto auto auto;
-    gap: 0px;
+    gap: 0;
 }
 
 .kv-container:has(div:nth-child(2):is(.compound-type)) {
     display: flow;
     /* The keys can only be primitive types. long addresses?*/
     grid-template-columns: auto auto auto;
-    gap: 0px;
+    gap: 0;
 }
 
 .kv-container input[type='number'] {
@@ -418,7 +435,6 @@ div.pb-arguments-container.readonly > pre {
 }
 
 #screen_right > div.controls > div.title {
-    font-size: 1.6rem;
     /* color: #b9f8f6; */
     color: #2fdcb0;
     font-weight: bold;
@@ -479,6 +495,10 @@ div.pb-arguments-container.readonly > pre {
     vertical-align: middle;
     padding: 0;
     margin: 0;
+}
+
+#hud-entry-name {
+    text-transform: unset;
 }
 
 /** index.css overrides **/

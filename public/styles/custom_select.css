@@ -24,12 +24,12 @@
   position: relative;
   top: 4px;
   border: .5rem solid transparent;
-  border-color: black transparent transparent transparent;
+  border-color: #00ffebb5 transparent transparent transparent;
 }
 
 /* Point the arrow upwards when the select box is open (active): */
 .select-selected.select-arrow-active:after {
-  border-color: transparent transparent black transparent;
+  border-color: transparent transparent #00ffebb5 transparent;
   top: -4px;
 }
 
@@ -41,13 +41,15 @@
 }
 
 .select-items div {
-  color: rgb(173, 173, 173);
+  color: #00d1af;
+  font-size: 0.7rem;
+  text-transform: initial;
 }
 
 /* Style items (options): */
 .select-items {
   position: absolute;
-  background-color: #3f3f3f;
+  background-color: #021814;
   top: 100%;
   left: 0;
   right: 0;
@@ -62,7 +64,10 @@
   display: none;
 }
 
-.select-items div:hover, .same-as-selected {
-  background-color: rgba(0, 0, 0, 0.1);
-  color: white !important;
+.select-items div:hover {
+  background-color: black;
+}
+
+.same-as-selected {
+  background-color: #002c1e;
 }

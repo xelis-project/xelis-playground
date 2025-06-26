@@ -132,8 +132,6 @@ export class App {
         });
 
         this.load_save();
-        // prevent editor from selecting all text by default
-        this.editor.clearSelection();
     }
 
     load_save() {
@@ -146,6 +144,13 @@ export class App {
 
         const tabsize = localStorage.getItem('tabsize') || '4';
         this.set_tabsize(tabsize);
+
+        // editor defaults
+        // prevent editor from selecting all text by default
+        this.editor.clearSelection();
+        this.editor.setHighlightActiveLine(false);
+        this.editor.renderer.setPadding(8);
+        this.editor.renderer.setScrollMargin(10, 10)
     }
 
     set_tabsize(tabsize: string) {
@@ -325,8 +330,8 @@ export class App {
                 this.add_entry(entry, index);
 
                 let pb_entry_container = document.getElementById(`pb_entry_container_${index}`);
-                let pb_input_container = null;
-                let arg_container = null;
+                let pb_input_container: null;
+                let arg_container: null;
 
                 if (pb_entry_container !== null) {
                     pb_input_container = pb_entry_container.querySelector(`div.pb-input-container`) as HTMLElement;
@@ -488,6 +493,7 @@ export class App {
         let code = await res.text();
         code = this.replace_spaces_indentation(code);
         this.set_editor_code(code);
+        this.editor.clearSelection();
     }
 
     save_tabsize() {
