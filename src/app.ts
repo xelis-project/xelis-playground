@@ -131,7 +131,12 @@ export class App {
             wrapBehavioursEnabled: true // auto surround
         });
 
+        this.editor.setHighlightActiveLine(false);
+        this.editor.renderer.setPadding(8);
+        this.editor.renderer.setScrollMargin(10, 10)
+
         this.load_save();
+        this.custom_select.build_selects();
     }
 
     load_save() {
@@ -145,12 +150,6 @@ export class App {
         const tabsize = localStorage.getItem('tabsize') || '4';
         this.set_tabsize(tabsize);
 
-        // editor defaults
-        // prevent editor from selecting all text by default
-        this.editor.clearSelection();
-        this.editor.setHighlightActiveLine(false);
-        this.editor.renderer.setPadding(8);
-        this.editor.renderer.setScrollMargin(10, 10)
     }
 
     set_tabsize(tabsize: string) {
@@ -159,7 +158,7 @@ export class App {
     }
 
     set_editor_code(code: string) {
-        this.editor.setValue(code);
+        this.editor.setValue(code, -1); // -1 places the cursor at the top -- undefined or 0 select all text
         this.program_changed();
     }
 
