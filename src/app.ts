@@ -34,16 +34,16 @@ export class App {
     btn_export: HTMLElement;
     tabsize_select: HTMLSelectElement;
 
-    edit_params_btn: HTMLElement;
+    btn_edit_params: HTMLElement;
     pb_ui: HTMLElement;
     pb_main_container: HTMLElement;
     parameter_display: HTMLElement;
     pba_readonly: HTMLElement;
     entry_call_container: HTMLElement;
     signature_container: HTMLElement;
-    entry_call_btn: HTMLElement;
-    signature_btn: HTMLElement;
-    copy_btn: HTMLElement;
+    btn_entry_call: HTMLElement;
+    btn_signature: HTMLElement;
+    btn_copy: HTMLElement;
     entry_menu: HTMLElement;
     arg_ro_message: HTMLElement;
 
@@ -69,34 +69,35 @@ export class App {
         this.btn_export = document.getElementById('btn_export') as HTMLElement;
         this.tabsize_select = document.getElementById('tabsize_select') as HTMLSelectElement;
 
-        this.edit_params_btn = document.getElementById('edit-entry-params-btn') as HTMLButtonElement;
+        this.btn_edit_params = document.getElementById('edit-entry-params-btn') as HTMLButtonElement;
+        this.btn_entry_call = document.querySelector(`#entry-call-btn`) as HTMLButtonElement;
+        this.btn_signature = document.querySelector(`#signature-btn`) as HTMLButtonElement;
+        this.btn_copy = document.querySelector(`#copy-ec-btn`) as HTMLButtonElement;
+
         this.pb_ui = document.getElementById('modal_parameter_builder') as HTMLElement;
         this.pb_main_container = document.querySelector('div.parameter-builder-container') as HTMLElement;
         this.parameter_display = document.getElementById('parameter-display') as HTMLElement;
         this.pba_readonly = document.getElementById('pba-readonly') as HTMLElement;
         this.entry_call_container = document.querySelector(`#entry-call-container`) as HTMLElement;
         this.signature_container = document.querySelector(`#signature-container`) as HTMLElement;
-        this.entry_call_btn = document.querySelector(`#entry-call-btn`) as HTMLButtonElement;
-        this.signature_btn = document.querySelector(`#signature-btn`) as HTMLButtonElement;
-        this.copy_btn = document.querySelector(`#copy-ec-btn`) as HTMLButtonElement;
         this.entry_menu = document.getElementById('entry-menu') as HTMLElement;
         this.arg_ro_message = document.querySelector(`#pba-readonly > div.message`) as HTMLElement;
 
         this.btn_export.addEventListener('click', () => this.open_modal_export());
         this.btn_compile.addEventListener('click', () => this.compile_code());
-        this.copy_btn.addEventListener('click', () => this.copy_text_to_clipboard(this.entry_call_container.textContent || ""));
+        this.btn_copy.addEventListener('click', () => this.copy_text_to_clipboard(this.entry_call_container.textContent || ""));
         this.btn_run.addEventListener('click', async () => await this.run_program());
         this.btn_clear.addEventListener('click', () => this.clear_output());
         this.examples_select.addEventListener('change', async (e) => await this.handle_examples_change(e));
         this.tabsize_select.addEventListener('change', (e) => this.handle_tabsize_change(e));
 
-        this.entry_call_btn.addEventListener('click', () => {
+        this.btn_entry_call.addEventListener('click', () => {
             this.signature_container.classList.add('hide');
             this.entry_call_container.classList.remove('hide');
             this.arg_ro_message.classList.add('hide');
         });
 
-        this.signature_btn.addEventListener('click', () => {
+        this.btn_signature.addEventListener('click', () => {
             this.signature_container.classList.remove('hide');
             this.entry_call_container.classList.add('hide');
 
@@ -107,7 +108,7 @@ export class App {
             }
         });
 
-        this.edit_params_btn.addEventListener('click', () => this.handle_edit_params());
+        this.btn_edit_params.addEventListener('click', () => this.handle_edit_params());
 
         /* We update the readonly display whenever the parameter builder changes */
         document.addEventListener("pb-argument-did-change", () => {
@@ -163,11 +164,13 @@ export class App {
     }
 
     program_changed() {
+        console.log("DEBUG: Program changed");
         if (this.program_code && this.program_code !== this.editor.getValue()) {
             this.btn_run.setAttribute("disabled", "");
             this.btn_export.setAttribute("disabled", "");
             this.output.innerHTML = "";
-            this.reset_entries();
+
+            this.clear_program();
             this.program_code = "";
             this.program_entry_index = 0;
         }
@@ -177,14 +180,21 @@ export class App {
         localStorage.setItem('code', this.editor.getValue());
     }
 
-    reset_entries() {
-        this.entry_call_container.replaceChildren();
-        this.custom_select.build_selects();
-    }
-
-    clear_entries() {
+    clear_program() {
+        this.xvm_param_parser = new XVMParamParser();
         this.entry_call_container.replaceChildren();
         this.entry_menu.replaceChildren();
+
+        // UI
+        const e_name_ro = document.querySelector(`#hud-entry-name`) as HTMLElement;
+        e_name_ro.textContent = `- none -`;
+
+        this.btn_run.setAttribute('disabled', '');
+        this.btn_export.setAttribute("disabled", "");
+        this.btn_edit_params.setAttribute('disabled', '');
+        this.btn_entry_call.setAttribute('disabled', '');
+        this.btn_signature.setAttribute('disabled', '');
+        this.btn_copy.setAttribute('disabled', '');
     }
 
     add_entry(entry: any, index: number) {
@@ -205,9 +215,9 @@ export class App {
             const params = this.xvm_param_parser.parameter_builder_data[this.program_entry_index].parameters;
 
             if (params.length > 0) {
-                this.edit_params_btn.removeAttribute('disabled');
+                this.btn_edit_params.removeAttribute('disabled');
             } else {
-                this.edit_params_btn.setAttribute('disabled', '');
+                this.btn_edit_params.setAttribute('disabled', '');
             }
 
             const entry_name = this.xvm_param_parser.parameter_builder_data[this.program_entry_index].name;
@@ -308,15 +318,8 @@ export class App {
     compile_code() {
         try {
             this.save_code();
-            this.clear_entries();
+            this.clear_program();
             this.output.innerHTML = "Program saved locally.\n";
-            this.btn_run.setAttribute('disabled', '');
-            this.btn_export.setAttribute("disabled", "");
-            this.edit_params_btn.setAttribute('disabled', '');
-            this.entry_call_btn.setAttribute('disabled', '');
-            this.signature_btn.setAttribute('disabled', '');
-            this.copy_btn.setAttribute('disabled', '');
-
             const code = this.editor.getValue();
             localStorage.setItem('code', code);
 
@@ -372,10 +375,10 @@ export class App {
             this.output.innerHTML += this.output_success("Compiled successfully!\n");
 
             this.btn_export.removeAttribute('disabled');
-            this.entry_call_btn.removeAttribute('disabled');
-            this.entry_call_btn.classList.add('selected');
-            this.signature_btn.removeAttribute('disabled');
-            this.copy_btn.removeAttribute('disabled');
+            this.btn_entry_call.removeAttribute('disabled');
+            this.btn_entry_call.classList.add('selected');
+            this.btn_signature.removeAttribute('disabled');
+            this.btn_copy.removeAttribute('disabled');
         } catch (e) {
             this.output.innerHTML += this.output_error("Error: " + e + "\n");
         }
@@ -401,8 +404,6 @@ export class App {
             params.push(`${content}`);
         });
 
-        console.log("DEBUG: Executing program with params:");
-        console.log(params);
         return params;
     }
 
