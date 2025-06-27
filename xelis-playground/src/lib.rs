@@ -557,7 +557,9 @@ impl Silex {
             let mut logs = Vec::new();
             let (res, elapsed_time, used_gas) = {
                 // Create the VM, this will initialize the context also
-                let mut vm = VM::new(&program.module, &environment);
+                let mut vm = VM::new(&environment);
+                vm.append_module(&program.module)
+                    .map_err(|e| format!("Error while adding module: {}", e))?;
 
                 let context = vm.context_mut();
                 context.insert(ContractProviderWrapper(&mut storage));
