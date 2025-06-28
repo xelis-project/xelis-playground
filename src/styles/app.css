@@ -185,17 +185,22 @@ body {
 
 #output_container {
   flex: 1;
-  padding: 1rem 1rem 2rem 1rem;
+  padding: 1rem 1rem 1rem 1rem;
   background: black;
 
   scroll-behavior: smooth;
   position: relative;
 }
 
-#output_container> :nth-child(2) {
-  font-weight: bold;
-  margin-bottom: 1rem;
-  color: white;
+.output-header {
+  border: solid #7afad34a;
+  border-width: 1px 0;
+  padding: 1rem;
+  vertical-align: middle;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+;
 }
 
 #output {

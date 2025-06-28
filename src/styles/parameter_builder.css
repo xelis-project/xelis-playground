@@ -471,10 +471,6 @@ div.pb-arguments-container.readonly > pre {
     margin-bottom: 10px;
 }
 
-#btn_clear {
-    float: right;
-}
-
 #output_container {
     background: none;
     font-family: "Source Code Pro", Consolas, monospace;
@@ -490,11 +486,8 @@ div.pb-arguments-container.readonly > pre {
     font-size: 0.9rem;
 }
 
-#output-heading {
-    display: flow-root;
-    vertical-align: middle;
-    padding: 0;
-    margin: 0;
+#output-heading * {
+    display: inline;
 }
 
 #hud-entry-name {
