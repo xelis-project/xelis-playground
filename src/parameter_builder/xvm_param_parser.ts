@@ -18,7 +18,8 @@ export class XVMParamParser {
 
     constructor() {
         this.parameter_builder_data = [];
-        //window.raw_entries = [];
+        //@ts-ignore
+        window.raw_entries = [];
     }
 
     /* Deprecated. This was used to parse a non-JSON formatted signature*/
@@ -210,7 +211,8 @@ export class XVMParamParser {
 
         this.parameter_builder_data.push(pb_obj);
 
-        //window.raw_entries.push(entry);
+        // @ts-ignore
+        window.raw_entries.push(entry);
         //window.pb_entries = this.parameter_builder_data;
     }
 }

@@ -208,19 +208,10 @@
               <div id="entry-call-container"></div>
               <div id="signature-container" class="hide code"></div>
               <div class="pb-arg-btns">
-                <button
-                  id="edit-entry-params-btn"
-                  class="opt-btn blue"
-                  disabled
-                >
-                  Edit</button
-                ><button id="entry-call-btn" class="opt-btn blue" disabled>
-                  Entry Call</button
-                ><button id="signature-btn" class="opt-btn blue" disabled>
-                  XVM SiG</button
-                ><button id="copy-ec-btn" class="opt-btn blue" disabled>
-                  Copy
-                </button>
+                <button id="edit-entry-params-btn" class="opt-btn blue" disabled>Edit</button>
+                <button id="entry-call-btn" class="opt-btn blue hide" disabled>Entry Call</button>
+                <button id="signature-btn" class="opt-btn blue" disabled>XVM SiG</button>
+                <button id="copy-ec-btn" class="opt-btn blue" disabled>Copy</button>
               </div>
             </div>
           </div>
@@ -238,9 +229,17 @@
 
         <div class="output-header">
           <div id="output-heading"><h2 class="title1">Output</h2></div>
-          <button id="btn_clear" class="opt-btn blue" title="Clear output">
-            Clear
-          </button>
+          <div>
+            <button id="btn_output_clear" class="opt-btn blue" title="Clear output">
+              Clear
+            </button>
+            <button id="btn_output_copy" class="opt-btn blue" title="Copy output">
+              Copy
+            </button>
+            <button id="btn_output_expand_shrink" class="opt-btn blue" title="Resize output">
+              Expand
+            </button>
+          </div>
         </div>
         <div id="output_container">
 

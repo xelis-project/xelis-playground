@@ -219,7 +219,7 @@ input[type="number"] {
     height: fit-content;
     border: none;
     text-transform: uppercase;
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     padding: 5px 10px;
     margin: 0 2px;
 }
@@ -322,12 +322,6 @@ input[type="number"] {
 
 div.pb-arguments-container.readonly {
     font-size: larger;
-}
-
-body {
-    /* Add padding to the bottom of the body equal to the height of the fixed element
-       to prevent content in parameter-builder from being hidden underneath arguments-container. */
-    /*padding-bottom: 100px; not sure if needed anymore */
 }
 
 /** syntax **/
@@ -474,6 +468,11 @@ div.pb-arguments-container.readonly > pre {
 #output_container {
     background: none;
     font-family: "Source Code Pro", Consolas, monospace;
+    border: none;
+    border-top: 1px solid #299def24;
+    border-bottom-width: 0;
+    margin: 1rem 1rem 0 1rem;
+
 }
 
 #output {

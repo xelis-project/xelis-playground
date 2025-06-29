@@ -29,7 +29,9 @@ export class App {
     btn_compile: HTMLElement;
     input_max_gas: HTMLInputElement;
     examples_select: HTMLSelectElement;
-    btn_clear: HTMLElement;
+    btn_output_clear: HTMLElement;
+    btn_output_copy: HTMLElement;
+    btn_output_toggle_expand: HTMLElement;
     editor_lines: HTMLElement;
     btn_export: HTMLElement;
     tabsize_select: HTMLSelectElement;
@@ -64,7 +66,9 @@ export class App {
         this.btn_compile = document.getElementById('btn_compile') as HTMLElement;
         this.input_max_gas = document.getElementById('input_max_gas') as HTMLInputElement;
         this.examples_select = document.getElementById('examples_select') as HTMLSelectElement;
-        this.btn_clear = document.getElementById('btn_clear') as HTMLElement;
+        this.btn_output_clear = document.getElementById('btn_output_clear') as HTMLElement;
+        this.btn_output_copy = document.getElementById('btn_output_copy') as HTMLElement;
+        this.btn_output_toggle_expand = document.getElementById('btn_output_expand_shrink') as HTMLElement;
         this.editor_lines = document.getElementById('editor_lines') as HTMLElement;
         this.btn_export = document.getElementById('btn_export') as HTMLElement;
         this.tabsize_select = document.getElementById('tabsize_select') as HTMLSelectElement;
@@ -87,7 +91,9 @@ export class App {
         this.btn_compile.addEventListener('click', () => this.compile_code());
         this.btn_copy.addEventListener('click', () => this.copy_text_to_clipboard(this.entry_call_container.textContent || ""));
         this.btn_run.addEventListener('click', async () => await this.run_program());
-        this.btn_clear.addEventListener('click', () => this.clear_output());
+        this.btn_output_clear.addEventListener('click', () => this.clear_output());
+        this.btn_output_copy.addEventListener('click', () => this.copy_text_to_clipboard(this.output.textContent || ""));
+        this.btn_output_toggle_expand.addEventListener('click', () => this.expand_output());
         this.examples_select.addEventListener('change', async (e) => await this.handle_examples_change(e));
         this.tabsize_select.addEventListener('change', (e) => this.handle_tabsize_change(e));
 
@@ -95,6 +101,9 @@ export class App {
             this.signature_container.classList.add('hide');
             this.entry_call_container.classList.remove('hide');
             this.arg_ro_message.classList.add('hide');
+
+            this.btn_signature.classList.remove('hide');
+            this.btn_entry_call.classList.add('hide');
         });
 
         this.btn_signature.addEventListener('click', () => {
@@ -106,6 +115,9 @@ export class App {
             } else {
                 this.arg_ro_message.classList.add('hide');
             }
+
+            this.btn_signature.classList.add('hide');
+            this.btn_entry_call.classList.remove('hide');
         });
 
         this.btn_edit_params.addEventListener('click', () => this.handle_edit_params());
@@ -189,12 +201,16 @@ export class App {
         const e_name_ro = document.querySelector(`#hud-entry-name`) as HTMLElement;
         e_name_ro.textContent = `- none -`;
 
+        // entry call window
+        this.btn_entry_call.click();
+
         this.btn_run.setAttribute('disabled', '');
         this.btn_export.setAttribute("disabled", "");
         this.btn_edit_params.setAttribute('disabled', '');
         this.btn_entry_call.setAttribute('disabled', '');
         this.btn_signature.setAttribute('disabled', '');
         this.btn_copy.setAttribute('disabled', '');
+
     }
 
     add_entry(entry: any, index: number) {
@@ -357,6 +373,7 @@ export class App {
                 pb_entry_container.setAttribute('data-pbe-index', `${index}`);
 
                 const parsed_entry = this.xvm_param_parser.parameter_builder_data[index];
+                console.log(parsed_entry);
                 ParameterBuilder.build_from_schema(parsed_entry.parameters, {
                     arg_container: arg_container,
                     pb_container: pb_input_container
@@ -547,6 +564,10 @@ export class App {
                 pbe.classList.add('hide');
             }
         }
+    }
+
+    expand_output() {
+        console.log("TODO: expand output");
     }
 
     /* should be in a utilities file */
