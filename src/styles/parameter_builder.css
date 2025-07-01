@@ -324,6 +324,20 @@ div.pb-arguments-container.readonly {
     font-size: larger;
 }
 
+.pb-arguments-container pre * {
+    display: inline!important;
+}
+
+.pb-arguments-container opaque * {
+    font-style: normal;
+    color: rgb(174 216 249) !important;
+    word-wrap: break-word;
+}
+
+.pb-arguments-container opaque quote {
+    display: none !important;
+}
+
 /** syntax **/
 comma {
     color: white;
@@ -406,6 +420,9 @@ div.pb-arguments-container.readonly > pre {
 
 /** IDs **/
 
+#modal_parameter_builder .modal-frame {
+    max-width: unset;
+}
 #parameter-builder, .pb-input-container {
     overflow-y: auto; /* Add vertical scrolling if content overflows */
     margin-bottom: 100px; /* Create space for the fixed arguments-container */

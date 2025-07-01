@@ -404,9 +404,13 @@ export class App {
     get_program_params() {
         const params = [] as string[];
         const pbe_params_elems = document.querySelectorAll(`#pb_entry_container_${this.program_entry_index} > div.pb-arguments-container > pre`);
-        pbe_params_elems.forEach(pbe => {
+        pbe_params_elems.forEach((pbe, index) => {
             // remove the quotes
             const copy_pbe = pbe.cloneNode(true) as HTMLElement;
+            const type_name = copy_pbe.firstChild?.nodeName.toLowerCase();
+
+            let content: string | null | undefined;
+
             ['quote'].forEach(c => {
                 const brace_children = copy_pbe.querySelectorAll(c);
                 for (const b of brace_children) {
@@ -414,12 +418,27 @@ export class App {
                 }
             });
 
-            // remove the open brackets
+            // TODO: Verify that the opaque type format will be specialized.
+            switch (type_name) {
+                case 'opaque':
+                    // address tag, hash tag, etc.
+                    const opaque_type = copy_pbe.firstChild?.firstChild?.firstChild;
+                    console.log(opaque_type);
+                    //const ot_name = opaque_type?.nodeName.toLowerCase();
+                    //content =`{type: "${ot_name}", value: ${opaque_type?.textContent}}`
+                    content = opaque_type?.textContent
+                    break;
 
-            const content = copy_pbe.textContent;
-            //params.push(typeof content === 'number' ? content.toString() : content);
+                default:
+                    content = copy_pbe.textContent;
+                    break;
+            }
+
             params.push(`${content}`);
         });
+
+        console.log("GET_PARAMS OUTPUT");
+        console.log(params);
 
         return params;
     }

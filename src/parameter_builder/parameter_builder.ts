@@ -3,6 +3,7 @@ import { array_type } from "./types/array";
 import { simple_type } from "./types/simple";
 import { map_type } from "./types/map";
 import { struct_type } from "./types/struct";
+import { opaque_type } from "./types/opaque";
 import { enum_type } from "./types/enum";
 import { boolean_type } from "./types/boolean";
 import { DataType } from "./data_type";
@@ -24,6 +25,8 @@ export class ParameterBuilder {
                 return map_type(parameter, root_container);
             case DataType.STRUCT_TYPE.name.toLowerCase():
                 return struct_type(parameter, root_container);
+            case DataType.OPAQUE_TYPE.name.toLowerCase():
+                return opaque_type(parameter, root_container);
             case DataType.BOOL_TYPE.name.toLowerCase():
             case "bool":  // TODO: alias?
                 return boolean_type(parameter, root_container);

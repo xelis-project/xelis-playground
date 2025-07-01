@@ -11,4 +11,5 @@ export class DataType {
     static ENUM_TYPE = Object.freeze({ name: "enum", schema_keys: ["variants"] });
     static MAP_TYPE = Object.freeze({ name: "map", schema_keys: ["key", "value"] });
     static STRUCT_TYPE = Object.freeze({ name: "struct", schema_keys: ["fields"] });
+    static OPAQUE_TYPE = Object.freeze({ name: "opaque", schema_keys: ["allow_external_input", "id", "name"] });
 }
