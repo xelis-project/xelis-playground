@@ -12,7 +12,11 @@
 
 .ace_editor {
     background-color: #0b263500;
+    font: 12px / normal 'Source Code Pro', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+    line-height: 1.4rem !important;
 }
+
+
 
 /*.ace_gutter-cell {*/
 /*    background-color: black;*/

@@ -1,6 +1,5 @@
 html,
 body {
-  font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
   background: black;
@@ -205,10 +204,9 @@ body {
 }
 
 #output {
-color: #dcdcdc;
-font-family: monospace;
-font-size: 1rem;
-white-space: pre;
+  color: #02ffcf;
+  font-size: 1rem;
+  white-space: pre;
 }
 
 @media screen and (min-width: 768px) {
@@ -264,7 +262,7 @@ position: relative;
 #editor_lines {
 color: #3f3f3f;
 padding: 1rem .5rem 1rem 1rem;
-font: 1rem monospace;
+font: 1rem 'Source Code Pro', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace !important;
 }
 
 .spin {
@@ -330,9 +328,9 @@ font-size: .8rem;
 }
 
 #function_list {
-color: white;
+color: rgb(187, 225, 255);
 border-bottom: .1rem solid #3f3f3f;
-font-family: monospace;
+font-family: 'Source Code Pro', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace !important;
 border-right: .1rem solid #3f3f3f;
 border-bottom: none;
 overflow: auto;
@@ -348,9 +346,11 @@ overflow-x: hidden;
 }
 
 #function_list> :nth-child(1) {
-font-size: 1.5rem;
-padding: 1rem;
-color: #02ffcf;
+  font-size: 22px;
+  text-transform: uppercase;
+  padding: 1rem;
+  color: #02ffcf;
+  font-weight: bold;
 }
 
 #function_list> :nth-child(2) {

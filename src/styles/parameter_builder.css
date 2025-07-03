@@ -2,8 +2,8 @@
 /** background #030c134a **/
 /** background #0b26354a **/
 
-pre, pre *, .code, .pb-arguments-container > pre *, textarea, input[type='text'] {
-    font-family: 'Source Code Pro', Consolas, monospace !important;
+pre, pre *, .code, .pb-arguments-container > pre *, textarea, input[type='text'], #output_container, #signature-container > parameter signature, #export_program_value {
+    font-family: 'Source Code Pro', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace !important;
 }
 
 pre:not(.input_editor > pre), .code {
@@ -20,9 +20,9 @@ pre:not(.input_editor > pre), .code {
     color: #94dfff;
 }
 
-#modal_parameter_builder *, #parameter-display *
+body, #modal_parameter_builder *, #parameter-display *
 , .controls, .btn, .opt-btn, #screen_right > .controls .title, #screen_right > #program-spec > #entry-controls *:not(pre *)
-, #screen_right > #program-spec > #entry-controls *:not(input), h2.title1 {
+, #screen_right > #program-spec > #entry-controls *:not(input), h2.title1, .title, #function_list> :nth-child(1) {
     font-family: "Michroma", "Nimbus-ExtLight", sans-serif;
 }
 
@@ -61,7 +61,8 @@ h2 {
     display: none !important;
 }
 
-#modal_parameter_builder .modal-title, .controls > .title {
+.modal-title, .title {
+    font-family: 'Michroma', 'Nimbus-ExtLight', sans-serif;
     text-transform: uppercase;
     color: #2fdcb0;
 }
@@ -306,6 +307,7 @@ input[type="number"] {
     background-color: #041018; /* #030c13; /* Example */
     z-index: 100; /* Ensure it stays on top of other content */
     border-top: 16px solid;
+    overflow: auto;
 }
 
 
@@ -386,7 +388,7 @@ input[type=number]::-webkit-outer-spin-button {
 /** HUD **/
 .hud {
     display: grid;
-    grid-template-columns: 48% auto auto;
+    grid-template-columns: auto auto auto;
     gap: 15px;
     margin-bottom: 15px;
 }
@@ -454,6 +456,11 @@ div.pb-arguments-container.readonly > pre {
     /* border-bottom: thin solid #7afad3; */
 }
 
+#entry-call-container {
+    max-height: 150px;
+    overflow: auto;
+}
+
 #entry-controls {
     display: grid;
     grid-template-columns: auto auto;
@@ -484,7 +491,6 @@ div.pb-arguments-container.readonly > pre {
 
 #output_container {
     background: none;
-    font-family: "Source Code Pro", Consolas, monospace;
     border: none;
     border-top: 1px solid #299def24;
     border-bottom-width: 0;
@@ -492,13 +498,7 @@ div.pb-arguments-container.readonly > pre {
 
 }
 
-#output {
-    font-family: "Source Code Pro", Consolas, monospace;
-    color: #02ffcf;
-}
-
 #signature-container > parameter signature {
-    font-family: "Source Code Pro", Consolas, monospace;
     font-size: 0.9rem;
 }
 
