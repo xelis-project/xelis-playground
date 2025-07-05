@@ -2,7 +2,12 @@
 /** background #030c134a **/
 /** background #0b26354a **/
 
-pre, pre *, .code, .pb-arguments-container > pre *, textarea, input[type='text'], #output_container, #signature-container > parameter signature, #export_program_value {
+pre, pre *
+, .code
+, .pb-arguments-container > pre *
+, textarea, input, #output_container
+, #signature-container > parameter *
+, #export_program_value {
     font-family: 'Source Code Pro', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace !important;
 }
 
@@ -113,13 +118,31 @@ h2 {
     margin: 0 0 15px 0;
 }
 
-input {
-    border: 1px solid #00dbff40;
-    background-color: #00000036;
-    padding: 4px;
-    margin-bottom: 4px;
+textarea, input {
     color: rgb(187, 225, 255);
     font-size: 0.9rem;
+    border: 1px solid #00dbff40;
+    background-color: #00000036;
+}
+
+input:focus, textarea:focus {
+    border: 1px solid #00dbffb0 !important;
+    outline: none;
+}
+
+textarea {
+    width: calc(100% - 0rem);
+    height: 6em;
+    resize: none;
+    /*width: 100%;*/
+    margin: unset;
+    padding: 1rem;
+    box-sizing: border-box;
+}
+
+input {
+    padding: 4px;
+    margin-bottom: 4px;
 }
 
 input[type="number"]::-webkit-outer-spin-button,
@@ -196,6 +219,18 @@ input[type="number"] {
     color: #00dbff;
 }
 
+.opt-btn.icon-blue {
+    background-color: rgba(17, 52, 76, 0);
+    /*color: #368cef;*/
+    color: #299def;
+    border: solid 1px #11344C;
+}
+
+.opt-btn.icon-blue:hover {
+    background-color: #11344C;
+    border: solid 1px #11344C;
+}
+
 .opt-btn.blue.selected {
     background-color: #00477980;
     color: #00dbff;
@@ -269,7 +304,6 @@ input[type="number"] {
 
 .input-container.type-container.simple-type input {
     margin: 0;
-    font-family: 'Souce Code Pro', Consolas, monospace !important;
     font-size: 1rem;
 }
 
@@ -320,6 +354,7 @@ input[type="number"] {
     width: auto;
     margin: auto;
     height:  auto;
+    padding-top: 0.4rem;
 }
 
 div.pb-arguments-container.readonly {
@@ -351,11 +386,6 @@ string {
 
 u8, u16, u32, u64, u128, u256, u512 {
     color: #ffc35d;
-}
-
-input:focus {
-    border: 1px solid #00dbffb0 !important;
-    outline: none;
 }
 
 input[type=number]::-webkit-inner-spin-button,
@@ -498,8 +528,30 @@ div.pb-arguments-container.readonly > pre {
 
 }
 
+#signature-container > parameter label {
+    font-weight: bold;
+}
+
+#signature-container > parameter:first-child::after {
+    content: ', ';
+}
+
+#signature-container > parameter::after {
+    content: ', ';
+    margin-right: 0.4rem;
+}
+
+#signature-container > parameter:last-child::after {
+    content: '';
+}
+
 #signature-container > parameter signature {
-    font-size: 0.9rem;
+    font-size: 1rem;
+    color: #d4bdff;
+}
+
+#output-heading {
+    margin-top: auto;
 }
 
 #output-heading * {

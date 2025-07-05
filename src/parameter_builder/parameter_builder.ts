@@ -59,7 +59,7 @@ export class ParameterBuilder {
             param_container.classList.add('param-container');
             const header = document.createElement('p');
             header.classList.add('parameter-header');
-            header.innerHTML = `Parameter: #${++index}: <span>${p.name}</span>`;
+            header.innerHTML = `Parameter ${++index}: <span>${p.name}</span>`;
             param_container.appendChild(header);
             pb_container.appendChild(param_container);
 

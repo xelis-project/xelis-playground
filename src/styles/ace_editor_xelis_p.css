@@ -16,6 +16,10 @@
     line-height: 1.4rem !important;
 }
 
+.ace_cursor {
+    color: #00ffac;
+}
+
 
 
 /*.ace_gutter-cell {*/

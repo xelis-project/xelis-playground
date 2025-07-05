@@ -31,7 +31,7 @@ export class App {
     examples_select: HTMLSelectElement;
     btn_output_clear: HTMLElement;
     btn_output_copy: HTMLElement;
-    btn_output_toggle_expand: HTMLElement;
+    btn_output_panel_toggle: HTMLElement;
     editor_lines: HTMLElement;
     btn_export: HTMLElement;
     tabsize_select: HTMLSelectElement;
@@ -52,6 +52,7 @@ export class App {
     program_code: string;
     program_entry_index: number;
     xvm_param_parser: XVMParamParser;
+    output_panel_expanded: boolean = false;
 
     constructor(silex: Silex) {
         this.silex = silex;
@@ -68,7 +69,7 @@ export class App {
         this.examples_select = document.getElementById('examples_select') as HTMLSelectElement;
         this.btn_output_clear = document.getElementById('btn_output_clear') as HTMLElement;
         this.btn_output_copy = document.getElementById('btn_output_copy') as HTMLElement;
-        this.btn_output_toggle_expand = document.getElementById('btn_output_expand_shrink') as HTMLElement;
+        this.btn_output_panel_toggle = document.getElementById('btn_output_panel_toggle') as HTMLElement;
         this.editor_lines = document.getElementById('editor_lines') as HTMLElement;
         this.btn_export = document.getElementById('btn_export') as HTMLElement;
         this.tabsize_select = document.getElementById('tabsize_select') as HTMLSelectElement;
@@ -93,7 +94,7 @@ export class App {
         this.btn_run.addEventListener('click', async () => await this.run_program());
         this.btn_output_clear.addEventListener('click', () => this.clear_output());
         this.btn_output_copy.addEventListener('click', () => this.copy_text_to_clipboard(this.output.textContent || ""));
-        this.btn_output_toggle_expand.addEventListener('click', () => this.expand_output());
+        this.btn_output_panel_toggle.addEventListener('click', () => this.output_panel_toggle(undefined));
         this.examples_select.addEventListener('change', async (e) => await this.handle_examples_change(e));
         this.tabsize_select.addEventListener('change', (e) => this.handle_tabsize_change(e));
 
@@ -176,7 +177,6 @@ export class App {
     }
 
     program_changed() {
-        console.log("DEBUG: Program changed");
         if (this.program_code && this.program_code !== this.editor.getValue()) {
             this.btn_run.setAttribute("disabled", "");
             this.btn_export.setAttribute("disabled", "");
@@ -585,8 +585,28 @@ export class App {
         }
     }
 
-    expand_output() {
-        console.log("TODO: expand output");
+    output_panel_toggle(should_shrink: boolean | undefined) {
+
+        const btn_output_panel_expand = document.querySelector(`#btn_output_panel_expand`) as HTMLButtonElement;
+        const btn_output_panel_shrink = document.querySelector(`#btn_output_panel_shrink`) as HTMLButtonElement;
+        const gas_limit_display = document.querySelector(`#gas_limit_display`) as HTMLElement;
+
+        if(this.output_panel_expanded) {
+            console.log("Shrink output window");
+            btn_output_panel_expand.classList.remove('hide');
+            btn_output_panel_shrink.classList.add('hide');
+            this.parameter_display.classList.remove('hide');
+            gas_limit_display.classList.remove('hide');
+            this.output_panel_expanded = false;
+        } else {
+            console.log("Expand output window");
+
+            btn_output_panel_expand.classList.add('hide');
+            btn_output_panel_shrink.classList.remove('hide');
+            this.parameter_display.classList.add('hide');
+            gas_limit_display.classList.add('hide');
+            this.output_panel_expanded = true;
+        }
     }
 
     /* should be in a utilities file */
