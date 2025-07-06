@@ -6,6 +6,7 @@ use std::sync::{
 };
 
 use cfg_if::cfg_if;
+use human_bytes::human_bytes;
 use humantime::format_duration;
 use indexmap::IndexMap;
 use storage::MockStorage;
@@ -157,6 +158,7 @@ pub struct ExecutionResult {
     logs: Vec<String>,
     elapsed_time: String,
     used_gas: u64,
+    used_memory: u64,
     storage: MockStorage,
 }
 
@@ -180,6 +182,14 @@ impl ExecutionResult {
 
     pub fn used_gas_formatted(&self) -> String {
         format_xelis(self.used_gas)
+    }
+
+    pub fn used_memory(&self) -> u64 {
+        self.used_memory
+    }
+
+    pub fn used_memory_formatted(&self) -> String {
+        human_bytes(self.used_memory as f64)
     }
 
     pub fn storage(&self) -> Vec<StorageEntry> {
@@ -555,7 +565,7 @@ impl Silex {
             };
 
             let mut logs = Vec::new();
-            let (res, elapsed_time, used_gas) = {
+            let (res, elapsed_time, used_gas, used_memory) = {
                 // Create the VM, this will initialize the context also
                 let mut vm = VM::new(&environment);
                 vm.append_module(&program.module)
@@ -592,9 +602,11 @@ impl Silex {
                 let res = vm.run();
 
                 let elapsed_time = start.elapsed();
-                let used_gas = vm.context().current_gas_usage();
+                let context = vm.context();
+                let used_gas = context.current_gas_usage();
+                let used_memory = context.current_memory_usage();
 
-                (res, elapsed_time, used_gas)
+                (res, elapsed_time, used_gas, used_memory as u64)
             };
 
             // Merge chain state into mock storage
@@ -612,6 +624,7 @@ impl Silex {
                     logs,
                     elapsed_time: format_duration(elapsed_time).to_string(),
                     used_gas,
+                    used_memory,
                     storage,
                 }),
                 Err(err) => Err(format!("{:#}", err)),

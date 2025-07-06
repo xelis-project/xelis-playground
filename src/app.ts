@@ -499,6 +499,7 @@ export class App {
             this.output.textContent += `Exit code: ${result.value()}\n`;
             this.output.textContent += `Executed in: ${result.elapsed_time()}\n`;
             this.output.textContent += `Gas usage: ${result.used_gas()} (${result.used_gas_formatted()} XEL)\n`;
+            this.output.textContent += `Memory usage: ${result.used_memory()} (${result.used_memory_formatted()})\n`;
 
             const storage = result.storage();
             console.log(storage);
