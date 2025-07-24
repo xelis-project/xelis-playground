@@ -27,7 +27,8 @@ use xelis_common::{
         ChainState,
         ContractCache,
         ContractEventTracker,
-        ContractProviderWrapper
+        ContractProviderWrapper,
+        ModuleMetadata
     },
     crypto::{
         elgamal::CompressedPublicKey,
@@ -52,11 +53,11 @@ use xelis_compiler::Compiler;
 use xelis_lexer::Lexer;
 use xelis_parser::Parser;
 use xelis_types::Type;
-use xelis_vm::{Primitive, ValueCell, VM};
+use xelis_vm::{Primitive, SysCallResult, ValueCell, VM};
 
 #[wasm_bindgen]
 pub struct Silex {
-    environment: EnvironmentBuilder<'static>,
+    environment: EnvironmentBuilder<'static, ModuleMetadata>,
     logs_receiver: mpsc::Receiver<String>,
     is_running: AtomicBool,
 }
@@ -291,7 +292,7 @@ impl Silex {
                     }
                 }
 
-                Ok(None)
+                Ok(SysCallResult::None)
             });
 
         Self {
@@ -568,7 +569,7 @@ impl Silex {
             let (res, elapsed_time, used_gas, used_memory) = {
                 // Create the VM, this will initialize the context also
                 let mut vm = VM::new(&environment);
-                vm.append_module(&program.module)
+                vm.append_module(&program.module, &ModuleMetadata)
                     .map_err(|e| format!("Error while adding module: {}", e))?;
 
                 let context = vm.context_mut();
