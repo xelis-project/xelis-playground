@@ -1,4 +1,4 @@
-import xelis_init, { Silex } from '../public/xelis_playground.js';
+import xelis_init, { Silex } from '../public/xelis_playground';
 import { App } from "./app";
 import './styles';
 
