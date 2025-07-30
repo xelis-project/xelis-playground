@@ -516,7 +516,7 @@ impl Silex {
         values: Vec<ValueCell>,
     ) -> Result<ExecutionResult, String> {
         let environment = self.environment.environment().clone();
-        tokio::task::spawn(async move {
+        tokio::task::spawn_blocking(move || {
             // Fake storage
             // TODO: allow user to configure data in it before running the program
             let mut storage = MockStorage {
@@ -579,7 +579,7 @@ impl Silex {
             };
 
             let mut logs = Vec::new();
-            let (res, elapsed_time, used_gas, used_memory) = async {
+            let (res, elapsed_time, used_gas, used_memory) = {
                 let mut vm = VM::new(&environment);
                 vm.append_module(&program.module, &ModuleMetadata)
                     .map_err(|e| format!("Error while adding module: {}", e))?;
@@ -601,7 +601,7 @@ impl Silex {
                 if constructor {
                     logs.push("Executing constructor..".to_owned());
 
-                    let res = vm.run().await.map_err(|err| format!("constructor: {:#}", err))?;
+                    let res = vm.run_blocking().map_err(|err| format!("constructor: {:#}", err))?;
                     if res != ValueCell::Default(Primitive::U64(0)) {
                         return Err(format!("Constructor returned a non-zero exit code: {:#}", res));
                     }
@@ -610,15 +610,15 @@ impl Silex {
                 vm.invoke_entry_chunk_with_args(entry_id, values.into_iter().rev())
                     .map_err(|err| format!("{:#}", err))?;
 
-                let res = vm.run().await;
+                let res = vm.run_blocking();
 
                 let elapsed_time = start.elapsed();
                 let context = vm.context();
                 let used_gas = context.current_gas_usage();
                 let used_memory = context.current_memory_usage();
 
-                Ok::<_, String>((res, elapsed_time, used_gas, used_memory as u64))
-            }.await?;
+                (res, elapsed_time, used_gas, used_memory as u64)
+            };
 
             // Merge chain state into mock storage
             let cache = chain_state.cache;
