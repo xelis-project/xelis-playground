@@ -53,7 +53,7 @@ use xelis_compiler::Compiler;
 use xelis_lexer::Lexer;
 use xelis_parser::Parser;
 use xelis_types::Type;
-use xelis_vm::{Primitive, SysCallResult, ValueCell, VM};
+use xelis_vm::{Primitive, SysCallResult, FnInstance, FnParams, FnReturnType, FunctionHandler, Context, ValueCell, VM};
 
 #[wasm_bindgen]
 pub struct Silex {
@@ -66,6 +66,7 @@ pub struct Silex {
 pub struct Program {
     module: Module,
     entries: Vec<Entry>,
+    abi: String,
 }
 
 #[wasm_bindgen]
@@ -86,6 +87,10 @@ impl Program {
     pub fn to_json(&self) -> String {
         serde_json::to_string_pretty(&self.module).
             expect("Failed to serialize module to JSON")
+    }
+
+    pub fn to_abi(&self) -> String {
+        self.abi.clone()
     }
 }
 
@@ -278,22 +283,7 @@ impl Silex {
         
         environment
             .get_mut_function("println", None)
-            .set_on_call(move |_, args, _| -> _ {
-                let param = &args[0];
-                cfg_if! {
-                    if #[cfg(target_arch = "wasm32")] {
-                        let lock = LOGS_SENDER.lock().unwrap();
-                        let sender = lock.as_ref().unwrap();
-                        sender
-                            .send(format!("{}", param.as_ref()?))
-                            .unwrap();
-                    } else {
-                        println!("{}", param.as_ref()?);
-                    }
-                }
-
-                Ok(SysCallResult::None)
-            });
+            .set_on_call(FunctionHandler::Sync(Self::println_fn));
 
         Self {
             environment,
@@ -301,6 +291,24 @@ impl Silex {
             is_running: AtomicBool::new(false),
         }
     }
+
+    fn println_fn(_: FnInstance, params: FnParams, _context: &mut Context) -> FnReturnType<ModuleMetadata> {
+        let param = &params[0];
+        cfg_if! {
+            if #[cfg(target_arch = "wasm32")] {
+                let lock = LOGS_SENDER.lock().unwrap();
+                let sender = lock.as_ref().unwrap();
+                sender
+                    .send(format!("{}", param.as_ref()))
+                    .unwrap();
+            } else {
+                println!("{}", param.as_ref()?);
+            }
+        }
+
+        Ok(SysCallResult::None)
+    }
+
 
     fn compile_internal(&self, code: &str) -> anyhow::Result<Program> {
         let tokens = Lexer::new(code)
@@ -338,10 +346,15 @@ impl Silex {
         }
 
         let compiler = Compiler::new(&program, self.environment.environment());
+        let module = compiler.compile()?;
+
+        let abi = xelis_abi::abi_from_parse(&program, &mapper, &self.environment)
+          .unwrap_or_else(|err| format!("{{\"error\": \"{}\"}}", err));
 
         Ok(Program {
-            module: compiler.compile()?,
+            module,
             entries,
+            abi,
         })
     }
 
@@ -567,7 +580,6 @@ impl Silex {
 
             let mut logs = Vec::new();
             let (res, elapsed_time, used_gas, used_memory) = {
-                // Create the VM, this will initialize the context also
                 let mut vm = VM::new(&environment);
                 vm.append_module(&program.module, &ModuleMetadata)
                     .map_err(|e| format!("Error while adding module: {}", e))?;
@@ -582,16 +594,14 @@ impl Silex {
                 }
                 context.set_memory_price_per_byte(1);
 
-                // Invoke the constructor first if possible
                 let constructor = vm.invoke_hook_id(0)
                     .map_err(|err| format!("{:#}", err))?;
 
                 let start = web_time::Instant::now();
                 if constructor {
                     logs.push("Executing constructor..".to_owned());
-                    let res = vm.run()
-                        .map_err(|err| format!("constructor: {:#}", err))?;
 
+                    let res = vm.run_blocking().map_err(|err| format!("constructor: {:#}", err))?;
                     if res != ValueCell::Default(Primitive::U64(0)) {
                         return Err(format!("Constructor returned a non-zero exit code: {:#}", res));
                     }
@@ -600,7 +610,7 @@ impl Silex {
                 vm.invoke_entry_chunk_with_args(entry_id, values.into_iter().rev())
                     .map_err(|err| format!("{:#}", err))?;
 
-                let res = vm.run();
+                let res = vm.run_blocking();
 
                 let elapsed_time = start.elapsed();
                 let context = vm.context();
