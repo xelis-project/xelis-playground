@@ -91,7 +91,7 @@ export class ModalExport {
   set_export_hex() {
     this.tab_export_hex.classList.add('selected');
     this.tab_export_json.classList.remove('selected');
-    this.tab_export_bytes.classList.remove('selected');+
+    this.tab_export_bytes.classList.remove('selected');
     this.tab_export_abi.classList.remove('selected');
     const program_value = this.app.get_program().to_hex();
     this.export_program_value.innerText = program_value;
