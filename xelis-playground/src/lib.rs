@@ -696,3 +696,27 @@ impl Silex {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_hello_world() {
+        let code = r#"
+            entry hello_world() {
+                println("Hello, world!");
+                return 0;
+            }
+        "#;
+
+        let silex = Silex::new();
+        let program = silex.compile_internal(code).expect("Failed to compile the program");
+        let entries = program.entries();
+        let entry = entries.get(0).expect("No entry found");
+        let result = silex.execute_program_internal(program, entry.id() as u16, None, IndexMap::new(), vec![]).await
+            .expect("Failed to execute the program");
+
+        assert_eq!(result.value(), "0");
+    }
+}
