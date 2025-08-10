@@ -585,6 +585,8 @@ impl Silex {
             let zero_hash = Hash::zero();
             let metadata = ModuleMetadata {
                 contract: zero_hash.clone(),
+                caller: None,
+                deposits: deposits.clone(),
             };
 
             let mut chain_state = ChainState {
@@ -595,7 +597,6 @@ impl Silex {
                 block_hash: &zero_hash,
                 topoheight: 0,
                 tx_hash: &zero_hash,
-                deposits: &deposits,
                 modules: HashMap::new(),
                 outputs: Vec::new(),
                 caches: HashMap::new(),
