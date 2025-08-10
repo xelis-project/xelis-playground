@@ -538,7 +538,7 @@ impl Silex {
     ) -> Result<ExecutionResult, String> {
         log!("Executing program with entry_id: {}, max_gas: {:?}, values: {:?}", entry_id, max_gas, values);
         let environment = self.environment.environment().clone();
-        tokio::task::spawn_blocking(move || {
+        tokio::spawn(async move {
             log!("Building storage and chain state");
             // Fake storage
             // TODO: allow user to configure data in it before running the program
@@ -641,7 +641,7 @@ impl Silex {
                     .map_err(|err| format!("{:#}", err))?;
 
                 log!("Running VM");
-                let res = vm.run_blocking();
+                let res = vm.run().await;
                 log!("VM executed");
 
                 let elapsed_time = start.elapsed();
