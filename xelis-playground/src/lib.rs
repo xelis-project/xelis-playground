@@ -55,6 +55,24 @@ use xelis_types::Type;
 use xelis_vm::{Primitive, SysCallResult, FnInstance, FnParams, FnReturnType, FunctionHandler, Context, ValueCell, VM};
 
 #[wasm_bindgen]
+extern "C" {
+  #[wasm_bindgen(js_namespace = console, js_name = log)]
+  pub fn console_log(s: &str);
+}
+
+macro_rules! log {
+    ($($t:tt)*) => {{
+        cfg_if! {
+            if #[cfg(target_arch = "wasm32")] {
+                console_log(&format!($($t)*));
+            } else {
+                println!($($t)*);
+            }
+        }
+    }};
+}
+
+#[wasm_bindgen]
 pub struct Silex {
     environment: EnvironmentBuilder<'static, ModuleMetadata>,
     logs_receiver: mpsc::Receiver<String>,
@@ -274,12 +292,14 @@ static LOGS_SENDER: Mutex<Option<mpsc::Sender<String>>> = Mutex::new(None);
 impl Silex {
     #[wasm_bindgen(constructor)]
     pub fn new() -> Self {
+        log!("Initializing Silex...");
         let mut environment = build_environment::<MockStorage>();
         // Patch the environment to include a println function that sends logs to the receiver
         let (sender, receiver) = mpsc::channel();
 
         *LOGS_SENDER.lock().unwrap() = Some(sender);
-        
+
+        log!("Setting up environment functions...");
         environment
             .get_mut_function("println", None)
             .set_on_call(FunctionHandler::Sync(Self::println_fn));
@@ -308,8 +328,8 @@ impl Silex {
         Ok(SysCallResult::None)
     }
 
-
     fn compile_internal(&self, code: &str) -> anyhow::Result<Program> {
+        log!("Compiling code:\n{}", code);
         let tokens = Lexer::new(code)
             .into_iter()
             .collect::<Result<Vec<_>, _>>()?;
@@ -344,9 +364,11 @@ impl Silex {
             }
         }
 
+        log!("Found {} entry points", entries.len());
         let compiler = Compiler::new(&program, self.environment.environment());
         let module = compiler.compile()?;
 
+        log!("Compiled module");
         let abi = xelis_abi::abi_from_parse(&program, &mapper, &self.environment)
           .unwrap_or_else(|err| format!("{{\"error\": \"{}\"}}", err));
 
@@ -514,8 +536,10 @@ impl Silex {
         deposits: IndexMap<Hash, ContractDeposit>,
         values: Vec<ValueCell>,
     ) -> Result<ExecutionResult, String> {
+        log!("Executing program with entry_id: {}, max_gas: {:?}, values: {:?}", entry_id, max_gas, values);
         let environment = self.environment.environment().clone();
         tokio::task::spawn_blocking(move || {
+            log!("Building storage and chain state");
             // Fake storage
             // TODO: allow user to configure data in it before running the program
             let mut storage = MockStorage {
@@ -602,17 +626,23 @@ impl Silex {
                 let start = web_time::Instant::now();
                 if constructor {
                     logs.push("Executing constructor..".to_owned());
+                    log!("Executing constructor..");
 
-                    let res = vm.run_blocking().map_err(|err| format!("constructor: {:#}", err))?;
+                    let res = vm.run_blocking()
+                        .map_err(|err| format!("constructor: {:#}", err))?;
+
                     if res != ValueCell::Default(Primitive::U64(0)) {
                         return Err(format!("Constructor returned a non-zero exit code: {:#}", res));
                     }
                 }
 
+                log!("Executing entry point with ID: {}", entry_id);
                 vm.invoke_entry_chunk_with_args(entry_id, values.into_iter().rev())
                     .map_err(|err| format!("{:#}", err))?;
 
+                log!("Running VM");
                 let res = vm.run_blocking();
+                log!("VM executed");
 
                 let elapsed_time = start.elapsed();
                 let context = vm.context();
@@ -621,6 +651,8 @@ impl Silex {
 
                 (res, elapsed_time, used_gas, used_memory as u64)
             };
+
+            log!("Execution completed in {} ms, used gas: {}, used memory: {} bytes", elapsed_time.as_millis(), used_gas, used_memory);
 
             // Merge chain state into mock storage
             let mut caches = chain_state.caches;
