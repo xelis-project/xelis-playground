@@ -1,9 +1,9 @@
 mod storage;
 
-use std::sync::{
+use std::{collections::HashMap, sync::{
     atomic::{AtomicBool, Ordering},
     mpsc, Mutex,
-};
+}};
 
 use cfg_if::cfg_if;
 use human_bytes::human_bytes;
@@ -25,7 +25,6 @@ use xelis_common::{
     contract::{
         build_environment,
         ChainState,
-        ContractCache,
         ContractEventTracker,
         ContractProviderWrapper,
         ModuleMetadata
@@ -292,7 +291,7 @@ impl Silex {
         }
     }
 
-    fn println_fn(_: FnInstance, params: FnParams, _context: &mut Context) -> FnReturnType<ModuleMetadata> {
+    fn println_fn(_: FnInstance, params: FnParams, _: &ModuleMetadata, _: &mut Context) -> FnReturnType<ModuleMetadata> {
         let param = &params[0];
         cfg_if! {
             if #[cfg(target_arch = "wasm32")] {
@@ -302,7 +301,7 @@ impl Silex {
                     .send(format!("{}", param.as_ref()))
                     .unwrap();
             } else {
-                println!("{}", param.as_ref()?);
+                println!("{}", param.as_ref());
             }
         }
 
@@ -558,21 +557,24 @@ impl Silex {
                 CompressedPublicKey::new(Default::default()),
                 Default::default()
             );
-            let block = Block::new(Immutable::Owned(header), Vec::new());
+            let block = Block::new(header, Vec::new());
             let zero_hash = Hash::zero();
+            let metadata = ModuleMetadata {
+                contract: zero_hash.clone(),
+            };
 
             let mut chain_state = ChainState {
                 debug_mode: true,
                 mainnet: false,
-                random: None,
                 block: &block,
-                contract: &zero_hash,
+                entry_contract: &zero_hash,
                 block_hash: &zero_hash,
                 topoheight: 0,
                 tx_hash: &zero_hash,
                 deposits: &deposits,
+                modules: HashMap::new(),
                 outputs: Vec::new(),
-                cache: ContractCache::new(),
+                caches: HashMap::new(),
                 tracker: ContractEventTracker::default(),
                 assets: Default::default(),
                 global_caches: &Default::default()
@@ -581,7 +583,7 @@ impl Silex {
             let mut logs = Vec::new();
             let (res, elapsed_time, used_gas, used_memory) = {
                 let mut vm = VM::new(&environment);
-                vm.append_module(&program.module, &ModuleMetadata)
+                vm.append_module(&program.module, &metadata)
                     .map_err(|e| format!("Error while adding module: {}", e))?;
 
                 let context = vm.context_mut();
@@ -621,12 +623,14 @@ impl Silex {
             };
 
             // Merge chain state into mock storage
-            let cache = chain_state.cache;
-            for (k, (_, v)) in cache.storage.into_iter() {
-                match v {
-                    Some(v) => storage.data.insert(k, v),
-                    None => storage.data.remove(&k),
-                };
+            let mut caches = chain_state.caches;
+            if let Some(cache) = caches.remove(&zero_hash) {
+                for (k, (_, v)) in cache.storage.into_iter() {
+                    match v {
+                        Some(v) => storage.data.insert(k, v),
+                        None => storage.data.remove(&k),
+                    };
+                }
             }
 
             match res {
@@ -640,7 +644,7 @@ impl Silex {
                 }),
                 Err(err) => Err(format!("{:#}", err)),
             }
-        }).await.unwrap()
+        }).await.map_err(|v| v.to_string())?
     }
 
     // Execute the program

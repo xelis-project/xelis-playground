@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, sync::Arc};
 
 use xelis_common::{
     asset::AssetData,
@@ -7,7 +7,7 @@ use xelis_common::{
     crypto::{Hash, PublicKey},
     account::CiphertextCache,
 };
-use xelis_vm::ValueCell;
+use xelis_vm::{Module, ValueCell};
 use async_trait::async_trait;
 
 pub struct MockStorage {
@@ -63,5 +63,9 @@ impl ContractProvider for MockStorage {
 
     async fn account_exists(&self, _: &PublicKey, _: TopoHeight) -> Result<bool, anyhow::Error> {
         Ok(false)
+    }
+
+    async fn load_contract_module(&self, _: &Hash, _: TopoHeight) -> Result<Option<Arc<Module>>, anyhow::Error> {
+        Ok(None)
     }
 }
