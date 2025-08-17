@@ -66,10 +66,9 @@ h2 {
     display: none !important;
 }
 
-.modal-title, .title {
+.modal-title {
     font-family: 'Michroma', 'Nimbus-ExtLight', sans-serif;
     text-transform: uppercase;
-    color: #2fdcb0;
 }
 
 .compound-type {
@@ -157,10 +156,10 @@ input[type="number"] {
 
 
 ::placeholder {
-    color: rgba(196, 246, 255, 0.67);
+    color: rgba(136, 154, 170, 0.67);
     font-family: 'Michroma', 'Nimbus-ExtLight', sans-serif;
     text-transform: uppercase;
-    font-size: 0.7rem;
+    font-size: 0.6rem;
 }
 
 .large-input {
@@ -241,6 +240,23 @@ input[type="number"] {
     color: #00ffdb;
 }
 
+.opt-btn.icon-green {
+    background-color: rgba(17, 76, 52, 0);
+    border: solid 1px #114C34;
+    color: #00ffdb;
+}
+
+.opt-btn.icon-green:hover {
+    background-color: #00ffac12;
+    color: #00ffac !important;
+    border: solid 1px #114C34;
+}
+
+.clean, .clean:hover{
+    border: none;
+    background: none !important;
+}
+
 .opt-btn.yellow {
     background-color: #4C3411;
     color: #ffdb00;
@@ -269,6 +285,10 @@ input[type="number"] {
     margin: 15px 0;
 }
 
+
+.mini-btn {
+    font-size: 0.5rem;
+}
 /* end main buttons */
 
 .controls {
@@ -325,21 +345,17 @@ input[type="number"] {
     /* border: 2px solid #00e7ff59; */
 }
 
+
 #arguments-container, .pb-arguments-container {
     padding: 15px;
-    margin: 20px;
+    margin: 0 0 1rem 0;
     font-size: 0.8rem;
     border: 1px solid #299def;
     color: #299def;
-    position: fixed;
-    bottom: 0;
-    left: 0; /* Ensure it spans the full width */
-    right: 0; /* Ensure it spans the full width */
-    height: 100px; /* Set the fixed height */
     width: auto; /* Make it span the full viewport width */
+    min-height: 50px;
     /* You might want to add a background color or border for visibility */
     background-color: #041018; /* #030c13; /* Example */
-    z-index: 100; /* Ensure it stays on top of other content */
     border-top: 16px solid;
     overflow: auto;
 }
@@ -388,7 +404,7 @@ u8, u16, u32, u64, u128, u256, u512 {
     color: #ffc35d;
 }
 
-input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webk-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button {
     -webkit-appearance: none;
 }
@@ -439,7 +455,7 @@ input[type=number]::-webkit-outer-spin-button {
 .hud label, .parameter-sel-container label, div.pb-arguments-container.readonly > label, .stats label {
     text-transform: uppercase;
     display: block;
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     margin-bottom: 0.35em;
     color: #00ffebb5 !important;
 }
@@ -455,36 +471,50 @@ div.pb-arguments-container.readonly > pre {
 #modal_parameter_builder .modal-frame {
     max-width: unset;
 }
-#parameter-builder, .pb-input-container {
-    overflow-y: auto; /* Add vertical scrolling if content overflows */
-    margin-bottom: 100px; /* Create space for the fixed arguments-container */
-    height: auto; /* Allow height to be determined by content or parent */
-    min-height: 400px;
-    max-height: calc(100vh - 100px); /* Or set a max-height relative to viewport height minus fixed element height */
-    /* min-width: 480px; */
+
+#parameter_builder_container .pb_entry_container {
+    display: flex;
+    flex-direction: column;
+    flex-flow: column;
+    height: 100%;
 }
+
+#parameter_builder_container .pb-arguments-container {
+    max-height: 5rem;
+    flex-shrink: 0;
+}
+
+#parameter_builder_container .pb-input-scrollbox  {
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+    min-height: 0;
+    max-height: 55vh;
+}
+
+#parameter_builder_container .pb-input-container {
+    flex-grow: 1;
+    overflow-y: auto;
+    height: auto;
+    max-height: none;
+    box-sizing: border-box;
+}
+
+
+#parameter_builder_container .info-block {
+    margin: 1.25rem 0 0;
+}
+
+#parameter_builder_container .po-selection {
+  margin-top: 1rem;
+}
+
 
 /* pb_ui_button */
 #pb_ui_btn {
     /* margin-bottom: 30px ; */
 }
 
-#screen_right {
-    background-color: #0b26354a;
-}
-
-#screen_right > div.controls {
-    border-bottom: thin solid #7afad34a;
-}
-
-#screen_right > div.controls > div.title {
-    /* color: #b9f8f6; */
-    color: #2fdcb0;
-    font-weight: bold;
-    font-size: 22px;
-    /* padding: 1rem; */
-    /* border-bottom: thin solid #7afad3; */
-}
 
 #entry-call-container {
     max-height: 150px;
@@ -562,6 +592,10 @@ div.pb-arguments-container.readonly > pre {
     text-transform: unset;
 }
 
+#pb-ui-params-stat{
+    text-align: center;
+}
+
 /** index.css overrides **/
 
 /** Dropdown **/
@@ -578,6 +612,7 @@ div.pb-arguments-container.readonly > pre {
     /* min-width: 260px; */
     box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
     z-index: 1;
+    min-width: max-content;
 }
 
 .dropdown-content a {

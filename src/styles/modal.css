@@ -17,7 +17,8 @@
 }
 
 .modal-frame {
-  background: black;
+    background: #00090ef7
+    ;
   color: white;
   margin: 2rem;
   z-index: 3;
@@ -48,8 +49,8 @@
   font-weight: bold;
   font-size: 22px;
   padding: 1rem;
-  border-bottom: thin solid #7afad3;
-  color: #7afad3;
+  border-bottom: thin solid #2fdcb099;
+  color: #2fdcb0;
 }
 
 .modal-content {

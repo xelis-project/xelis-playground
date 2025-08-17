@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "XVM Playground based on the Silex language.",
   "homepage": "https://github.com/xelis-project/xelis-playground#readme",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/xelis-project/xelis-playground/issues"
   },
@@ -18,12 +19,17 @@
   },
   "devDependencies": {
     "rollup-plugin-modify": "^3.0.0",
+    "typescript": "^5.9.2",
     "vite": "^6.3.5"
   },
   "dependencies": {
     "ace-builds": "^1.43.0",
     "bytes-formatter": "^21.6.15",
+    "fflate": "^0.7.1",
     "highlight.js": "^11.11.1",
-    "split.js": "^1.6.5"
+    "jszip": "^3.10.1",
+    "pnpm": "^10.15.0",
+    "split.js": "^1.6.5",
+    "uuidv7": "^1.0.2"
   }
 }

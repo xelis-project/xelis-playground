@@ -31,60 +31,92 @@
     border: none !important;
 }
 
-/** REPLACE WITH GRID OR FLEX **/
-.ex-section{
-    display: table-cell;
-    padding: 20px;
+.data-table-container.scrollable {
+    max-height: 250px; /* Or a fixed height */
+    overflow-y: auto;
 }
 
-.exch-ctrl .button {
-    display: block;
-    background-color: #032030;
-    padding: 6px;
-    text-align: center;
-    margin: 0 0 3px 0;
-    color: rgb(25, 185, 255);
-    font-size: 10px;
+.data-table-container.scrollable .data-table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.data-table-container.scrollable thead, .data-table-container.scrollable tfoot {
+    position: sticky;
+    top: 0;
+    z-index: 5; /* Ensures it stays on top */
+}
+
+.data-table-container.scrollable tfoot {
+    bottom: 0;
+}
+
+.data-table-container.scrollable::-webkit-scrollbar {
+    display: initial;
+    height: .4rem;
+    width: .4rem;
+}
+
+.data-table-container.scrollable::-webkit-scrollbar-thumb {
+    background: #00734e;
+    border-radius: .5em;
+}
+
+.data-table-container.scrollable::-webkit-scrollbar-thumb:hover {
+    background: rgb(122 250 211);
 }
 
 .data-table {
     font-size: 0.70em;
-    font-family: "HN-LtEx", "Helvetica Neue", sans-serif;
-    text-transform: uppercase;
+    text-transform: none;
     color: rgb(25, 185, 255);
     width: 100%;
     margin: 0;
+    border-collapse: collapse;
 }
 
 .data-table th {
-    background-color: rgba(17, 54, 86, 0.65);
-    padding: 5px 6px;
-    margin-bottom: 4px;
-    font-family: "HN-LtEx", "Helvetica Neue", sans-serif;
-    /* color: #578C90; */
-    color: #dbdebc;
-    font-size: 0.65em;
+    border-right: 1px solid #2a455e;
+    padding: 0.5rem;
+    margin-bottom: 0;
+    text-transform: uppercase;
+    font-size: 0.8em;
+    letter-spacing: 0.05rem;
 }
+
+.data-table th, .data-table tfoot td {
+    background-color: rgb(0 16 23);
+    color: #7da1b4;
+}
+
 
 .data-table td {
     background-color: #032030;
-    padding: 5px 6px;
+    padding: 0.4rem 0.6rem;
     margin-bottom: 4px;
+    border-right: 1px solid #2a455e;
 }
 
-.data-table td:nth-child(2),  .data-table td:nth-child(3), .data-table td:nth-child(4), .data-table td:nth-child(5){
-    text-align: right;
+.data-table th:nth-child(1), .data-table td:nth-child(1) {
+    border-left: none;
+}
+.data-table th:last-child, .data-table td:last-child {
+    border-right: none;
 }
 
-.data-table tr:hover td {
+.data-table tbody tr:hover td{
     cursor: pointer;
     background-color: rgba(17, 54, 86, 0.75) !important;
     color: rgb(187, 225, 255);
 }
 
+.data-table tfoot td {
+    text-align: right;
+    padding-right: 1rem;
+}
+
 .ro-display div {
     font-size: 0.65em;
-    font-family: "HN-LtEx", "Helvetica Neue", sans-serif;
     display: inline-block;
     background-color: rgba(17, 54, 86, 0.65);
     padding: 5px 6px;
@@ -96,29 +128,12 @@
     display: block;
     margin-bottom: 2px;
     min-width: 50px;
-    font-family: "HN-LtEx", "Helvetica Neue", sans-serif;
     color: #578C90;
 }
 
-
-
-.exch-ctrl .button:hover, .opt-btn:hover  {
+.opt-btn:hover  {
     cursor: pointer;
     color : #b6e5ff !important;
-}
-
-.graph-pct {
-    width: 200px;
-    background-color: rgba(57, 132, 198, 0.49) !important;
-    color: white !important;
-}
-
-#parameter-detail-body {
-    display: grid;
-    grid-template-columns: 40% auto;
-    gap: 20px;
-    align-content: space-between;
-    align-items: start;
 }
 
 .parameter-sel-container {
@@ -137,11 +152,56 @@
     color: #ffd500;
 }
 
-#utilities-container {
+
+/* component specific styles */
+
+#parameter-detail-body {
     display: grid;
-    grid-template-columns: auto auto auto;
+    grid-template-columns: 40% auto;
     gap: 20px;
+    align-content: space-between;
+    align-items: start;
 }
 
+#project-details-container .data-table td:nth-child(2) {
+    text-align: center;
+}
+
+#projects-table-container .data-table td:nth-child(3),
+#projects-table-container .data-table td:nth-child(4),
+#project-details-container .data-table td:nth-child(3),
+#project-details-container .data-table td:nth-child(4),
+#project-details-container .data-table td:nth-child(5) {
+    text-align: right;
+}
+
+#btn_close_project_panel {
+    top: -0.1rem;
+    font-size: 0.65rem;
+}
+
+#editor_commands {
+    margin-bottom: 0.15rem;
+}
+
+#project-details-container {
+    border: none;
+    padding: 1.5rem 0;
+    margin-top: 0;
+    animation: panel-anim-in .1s running;
+}
+
+#projects-table-container {
+    margin-top: 1.5rem;
+}
+
+#projects-table-container .data-table tbody td {
+    padding: 0.5rem 0.6rem;
+}
+
+.data-count {
+    font-weight: bold;
+    /*color: #93d6ff;*/
+}
 
 
