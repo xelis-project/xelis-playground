@@ -82,9 +82,9 @@ dependencies = [
 
 [[package]]
 name = "anyhow"
-version = "1.0.98"
+version = "1.0.99"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e16d2d3311acee920a9eb8d33b8cbc1787ce4a264e85f964c2404b969bdcd487"
+checksum = "b0674a1ddeecb70197781e945de4b3b8ffb61fa939a5597bcf48503737663100"
 
 [[package]]
 name = "arrayref"
@@ -100,9 +100,9 @@ checksum = "7c02d123df017efcdfbd739ef81735b36c5ba83ec3c59c80a9d7ecc718f92e50"
 
 [[package]]
 name = "async-trait"
-version = "0.1.88"
+version = "0.1.89"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e539d3fca749fcee5236ab05e93a52867dd549cc157c8cb7f99595f3cedffdb5"
+checksum = "9035ad2d096bed7955a320ee7e2230574d28fd3c3a0f186cbea1ff3c7eed5dbb"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -155,7 +155,7 @@ version = "0.69.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "271383c67ccabffb7381723dea0672a673f292304fcb45c01cc648c7a8d58088"
 dependencies = [
- "bitflags",
+ "bitflags 2.9.3",
  "cexpr",
  "clang-sys",
  "itertools 0.12.1",
@@ -174,9 +174,15 @@ dependencies = [
 
 [[package]]
 name = "bitflags"
-version = "2.9.1"
+version = "1.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1b8e56985ec62d17e9c1001dc89c88ecd7dc08e47eba5ec7c29c7b5eeecde967"
+checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
+
+[[package]]
+name = "bitflags"
+version = "2.9.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "34efbcccd345379ca2868b2b2c9d3782e9cc58ba87bc7d79d5b53d9c9ae6f25d"
 
 [[package]]
 name = "bitvec"
@@ -215,7 +221,7 @@ dependencies = [
 [[package]]
 name = "bulletproofs"
 version = "5.0.2"
-source = "git+https://github.com/xelis-project/bulletproofs?tag=v5.0.0#eca1052e33d38d06d8745ef07cc1c2c8ec5a0b78"
+source = "git+https://github.com/xelis-project/bulletproofs?tag=v5.0.2#43a67f48fc9c0947e25c43252e83457db546733d"
 dependencies = [
  "byteorder",
  "curve25519-dalek",
@@ -272,9 +278,9 @@ checksum = "1fd0f2584146f6f2ef48085050886acf353beff7305ebd1ae69500e27c67f64b"
 
 [[package]]
 name = "cc"
-version = "1.2.32"
+version = "1.2.34"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2352e5597e9c544d5e6d9c95190d5d27738ade584fa8db0a16e130e5c2b5296e"
+checksum = "42bc4aea80032b7bf409b0bc7ccad88853858911b7713a8062fdc0623867bedc"
 dependencies = [
  "jobserver",
  "libc",
@@ -292,9 +298,9 @@ dependencies = [
 
 [[package]]
 name = "cfg-if"
-version = "1.0.1"
+version = "1.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9555578bc9e57714c812a1f84e4fc5b4d21fcb063490c624de019f7464c91268"
+checksum = "2fd1289c04a9ea8cb22300a459a72a385d7c73d3259e2ed7dcb2af674838cfa9"
 
 [[package]]
 name = "chacha20"
@@ -863,11 +869,11 @@ dependencies = [
 
 [[package]]
 name = "io-uring"
-version = "0.7.9"
+version = "0.7.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d93587f37623a1a17d94ef2bc9ada592f5465fe7732084ab7beefabe5c77c0c4"
+checksum = "046fa2d4d00aea763528b4950358d0ead425372445dc8ff86312b3c69ff7727b"
 dependencies = [
- "bitflags",
+ "bitflags 2.9.3",
  "cfg-if",
  "libc",
 ]
@@ -983,13 +989,13 @@ checksum = "32a282da65faaf38286cf3be983213fcf1d2e2a58700e808f83f4ea9a4804bc0"
 
 [[package]]
 name = "merlin"
-version = "3.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "58c38e2799fc0978b65dfff8023ec7843e2330bb462f19198840b34b6582397d"
+version = "3.1.0"
+source = "git+https://github.com/xelis-project/merlin?tag=v3.1.0#adf820dbb1ce8b92f1122a368c9a22e4afbaf524"
 dependencies = [
  "byteorder",
  "keccak",
  "rand_core 0.6.4",
+ "strobe-rs",
  "zeroize",
 ]
 
@@ -1136,9 +1142,9 @@ dependencies = [
 
 [[package]]
 name = "prettyplease"
-version = "0.2.36"
+version = "0.2.37"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ff24dfcda44452b9816fff4cd4227e1bb73ff5a2f1bc1105aa92fb8565ce44d2"
+checksum = "479ca8adacdd7ce8f1fb39ce9ecccbfe93a3f1344b3d0d97f20bc0196208f62b"
 dependencies = [
  "proc-macro2",
  "syn",
@@ -1167,9 +1173,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.96"
+version = "1.0.101"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "beef09f85ae72cea1ef96ba6870c51e6382ebfa4f0e85b643459331f3daa5be0"
+checksum = "89ae43fd86e4158d6db51ad8e2b80f313af9cc74f5c0e03ccb87de09998732de"
 dependencies = [
  "unicode-ident",
 ]
@@ -1296,7 +1302,7 @@ version = "0.38.44"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fdb5bc1ae2baa591800df16c9ca78619bf65c0488b41b96ccec5d11220d8c154"
 dependencies = [
- "bitflags",
+ "bitflags 2.9.3",
  "errno",
  "libc",
  "linux-raw-sys",
@@ -1354,9 +1360,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.142"
+version = "1.0.143"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "030fedb782600dcbd6f02d479bf0d817ac3bb40d644745b769d6a96bc3afc5a7"
+checksum = "d401abef1d108fbd9cbaebc3e46611f4b1021f714a0597a71f41ee463f5f4a5a"
 dependencies = [
  "itoa",
  "memchr",
@@ -1403,6 +1409,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 
 [[package]]
+name = "strobe-rs"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "98fe17535ea31344936cc58d29fec9b500b0452ddc4cc24c429c8a921a0e84e5"
+dependencies = [
+ "bitflags 1.3.2",
+ "byteorder",
+ "keccak",
+ "subtle",
+ "zeroize",
+]
+
+[[package]]
 name = "subtle"
 version = "2.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1410,9 +1429,9 @@ checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
 
 [[package]]
 name = "syn"
-version = "2.0.104"
+version = "2.0.106"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "17b6f705963418cdb9927482fa304bc562ece2fdd4f616084c50b7023b435a40"
+checksum = "ede7c438028d4436d71104916910f5bb611972c5cfd7f89b8300a8186e6fada6"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1436,11 +1455,11 @@ dependencies = [
 
 [[package]]
 name = "thiserror"
-version = "2.0.12"
+version = "2.0.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "567b8a2dae586314f7be2a752ec7474332959c6460e02bde30d702a66d488708"
+checksum = "3467d614147380f2e4e374161426ff399c91084acd2363eaf549172b3d5e60c0"
 dependencies = [
- "thiserror-impl 2.0.12",
+ "thiserror-impl 2.0.16",
 ]
 
 [[package]]
@@ -1456,9 +1475,9 @@ dependencies = [
 
 [[package]]
 name = "thiserror-impl"
-version = "2.0.12"
+version = "2.0.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7f7cf42b4507d8ea322120659672cf1b9dbb93f8f2d4ecfd6e51350ff5b17a1d"
+checksum = "6c5e1be1c48b9172ee610da68fd9cd2770e7a4056cb3fc98710ee6906f0c7960"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1944,9 +1963,9 @@ checksum = "271414315aff87387382ec3d271b52d7ae78726f5d44ac98b4f4030c91880486"
 
 [[package]]
 name = "winnow"
-version = "0.7.12"
+version = "0.7.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f3edebf492c8125044983378ecb5766203ad3b4c2f7a922bd7dd207f6d443e95"
+checksum = "21a0236b59786fed61e2a80582dd500fe61f18b5dca67a4a067d0bc9039339cf"
 dependencies = [
  "memchr",
 ]
@@ -1957,7 +1976,7 @@ version = "0.39.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6f42320e61fe2cfd34354ecb597f86f413484a798ba44a8ca1165c58d42da6c1"
 dependencies = [
- "bitflags",
+ "bitflags 2.9.3",
 ]
 
 [[package]]
@@ -1972,7 +1991,7 @@ dependencies = [
 [[package]]
 name = "xelis-abi"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#b3ea0acdd3f3e6e8dd283b1fe4333cbe91c59002"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#1f15e52c16211ed4aba123ab3e6cbc4d8b56d125"
 dependencies = [
  "anyhow",
  "serde_json",
@@ -1988,7 +2007,7 @@ dependencies = [
 [[package]]
 name = "xelis-ast"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#b3ea0acdd3f3e6e8dd283b1fe4333cbe91c59002"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#1f15e52c16211ed4aba123ab3e6cbc4d8b56d125"
 dependencies = [
  "indexmap",
  "xelis-types",
@@ -1997,12 +2016,12 @@ dependencies = [
 [[package]]
 name = "xelis-builder"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#b3ea0acdd3f3e6e8dd283b1fe4333cbe91c59002"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#1f15e52c16211ed4aba123ab3e6cbc4d8b56d125"
 dependencies = [
  "anyhow",
  "log",
  "paste",
- "thiserror 2.0.12",
+ "thiserror 2.0.16",
  "xelis-ast",
  "xelis-environment",
  "xelis-types",
@@ -2011,7 +2030,7 @@ dependencies = [
 [[package]]
 name = "xelis-bytecode"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#b3ea0acdd3f3e6e8dd283b1fe4333cbe91c59002"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#1f15e52c16211ed4aba123ab3e6cbc4d8b56d125"
 dependencies = [
  "indexmap",
  "serde",
@@ -2021,10 +2040,10 @@ dependencies = [
 [[package]]
 name = "xelis-compiler"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#b3ea0acdd3f3e6e8dd283b1fe4333cbe91c59002"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#1f15e52c16211ed4aba123ab3e6cbc4d8b56d125"
 dependencies = [
  "log",
- "thiserror 2.0.12",
+ "thiserror 2.0.16",
  "xelis-ast",
  "xelis-bytecode",
  "xelis-environment",
@@ -2034,14 +2053,14 @@ dependencies = [
 [[package]]
 name = "xelis-environment"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#b3ea0acdd3f3e6e8dd283b1fe4333cbe91c59002"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#1f15e52c16211ed4aba123ab3e6cbc4d8b56d125"
 dependencies = [
  "anyhow",
  "better_any",
  "futures",
  "hashbrown",
  "indexmap",
- "thiserror 2.0.12",
+ "thiserror 2.0.16",
  "xelis-bytecode",
  "xelis-types",
 ]
@@ -2062,10 +2081,10 @@ dependencies = [
 [[package]]
 name = "xelis-lexer"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#b3ea0acdd3f3e6e8dd283b1fe4333cbe91c59002"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#1f15e52c16211ed4aba123ab3e6cbc4d8b56d125"
 dependencies = [
  "log",
- "thiserror 2.0.12",
+ "thiserror 2.0.16",
  "xelis-ast",
  "xelis-types",
 ]
@@ -2073,12 +2092,12 @@ dependencies = [
 [[package]]
 name = "xelis-parser"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#b3ea0acdd3f3e6e8dd283b1fe4333cbe91c59002"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#1f15e52c16211ed4aba123ab3e6cbc4d8b56d125"
 dependencies = [
  "anyhow",
  "indexmap",
  "log",
- "thiserror 2.0.12",
+ "thiserror 2.0.16",
  "xelis-ast",
  "xelis-builder",
  "xelis-environment",
@@ -2117,7 +2136,7 @@ dependencies = [
 [[package]]
 name = "xelis-types"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#b3ea0acdd3f3e6e8dd283b1fe4333cbe91c59002"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#1f15e52c16211ed4aba123ab3e6cbc4d8b56d125"
 dependencies = [
  "anyhow",
  "indexmap",
@@ -2125,18 +2144,19 @@ dependencies = [
  "lazy_static",
  "serde",
  "serde_json",
- "thiserror 2.0.12",
+ "thiserror 2.0.16",
 ]
 
 [[package]]
 name = "xelis-vm"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#b3ea0acdd3f3e6e8dd283b1fe4333cbe91c59002"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#1f15e52c16211ed4aba123ab3e6cbc4d8b56d125"
 dependencies = [
+ "anyhow",
  "futures",
  "indexmap",
  "log",
- "thiserror 2.0.12",
+ "thiserror 2.0.16",
  "xelis-bytecode",
  "xelis-environment",
  "xelis-types",
@@ -2145,7 +2165,7 @@ dependencies = [
 [[package]]
 name = "xelis_common"
 version = "1.18.0"
-source = "git+https://github.com/xelis-project/xelis-blockchain?branch=dev#bd57260f44f46879c77dd2961a7f915c5318bbec"
+source = "git+https://github.com/xelis-project/xelis-blockchain?branch=dev#6a4fc96ed8aa5890dd8310aa46dac793dce3acc4"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -2174,7 +2194,7 @@ dependencies = [
  "serde_json",
  "serde_regex",
  "sha3",
- "thiserror 2.0.12",
+ "thiserror 2.0.16",
  "win32console",
  "xelis-builder",
  "xelis-hash",
