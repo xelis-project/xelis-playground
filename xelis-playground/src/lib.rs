@@ -658,10 +658,11 @@ impl Silex {
             // Merge chain state into mock storage
             let mut caches = chain_state.caches;
             if let Some(cache) = caches.remove(&zero_hash) {
-                for (k, (_, v)) in cache.storage.into_iter() {
+                for (k, v) in cache.storage.into_iter() {
                     match v {
-                        Some(v) => storage.data.insert(k, v),
-                        None => storage.data.remove(&k),
+                        Some((_, Some(v))) => storage.data.insert(k, v),
+                        Some((_, None)) => storage.data.remove(&k),
+                        None => {}, // key stored as checked but not found
                     };
                 }
             }
