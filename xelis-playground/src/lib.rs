@@ -660,8 +660,12 @@ impl Silex {
             if let Some(cache) = caches.remove(&zero_hash) {
                 for (k, v) in cache.storage.into_iter() {
                     match v {
-                        Some((_, Some(v))) => storage.data.insert(k, v),
-                        Some((_, None)) => storage.data.remove(&k),
+                        Some((_, Some(v))) => {
+                            storage.data.insert(k, v);
+                        },
+                        Some((_, None)) => {
+                            storage.data.remove(&k);
+                        },
                         None => {}, // key stored as checked but not found
                     };
                 }

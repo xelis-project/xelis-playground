@@ -21,10 +21,6 @@ impl ContractStorage for MockStorage {
         Ok(Some((topoheight, self.data.get(key).cloned())))
     }
 
-    async fn has_data(&self, _: &Hash, key: &ValueCell, _: TopoHeight) -> Result<bool, anyhow::Error> {
-        Ok(self.data.contains_key(key))
-    }
-
     async fn load_data_latest_topoheight(&self, _: &Hash, _: &ValueCell, topoheight: TopoHeight) -> Result<Option<TopoHeight>, anyhow::Error> {
         Ok(Some(topoheight))
     }
