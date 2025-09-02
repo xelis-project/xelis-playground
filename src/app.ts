@@ -9,8 +9,11 @@ import { TextDotLoading } from './text_dot_loading';
 import { ModalExport } from "./model_export";
 import { FuncList } from './func_list';
 import { Modal } from './modal';
+import {FileMetaData, Project, ProjectManager} from './project';
 import { XVMParamParser } from './parameter_builder/xvm_param_parser';
 import { ParameterBuilder } from './parameter_builder/parameter_builder';
+import {PanelOptions, UIContainers} from "./UIContainers";
+import {silex_examples, SilexExample} from "./examples";
 
 export class App {
     silex: any;
@@ -22,6 +25,7 @@ export class App {
     custom_select: CustomSelect;
 
     editor: ace.Editor;
+    editor_has_unsaved_changes: boolean = false;
     output: HTMLElement;
     //program_entries_select: HTMLSelectElement;
     //program_entry_params: HTMLElement;
@@ -37,7 +41,7 @@ export class App {
     tabsize_select: HTMLSelectElement;
 
     btn_edit_params: HTMLElement;
-    pb_ui: HTMLElement;
+    //pb_ui: HTMLElement;
     pb_main_container: HTMLElement;
     parameter_display: HTMLElement;
     pba_readonly: HTMLElement;
@@ -46,15 +50,33 @@ export class App {
     btn_entry_call: HTMLElement;
     btn_signature: HTMLElement;
     btn_copy: HTMLElement;
+
+    /* Editor Project Panel */
+    btn_project_panel: HTMLElement;
+    btn_project_panel_close: HTMLElement;
+
+    /*Editor options popup*/
+    btn_editor_options: HTMLElement;
+    btn_editor_load_file: HTMLElement;
+    btn_editor_save_code: HTMLElement;
+    /* end editor options popup*/
+
     entry_menu: HTMLElement;
     arg_ro_message: HTMLElement;
+
+
 
     program_code: string;
     program_entry_index: number;
     xvm_param_parser: XVMParamParser;
     output_panel_expanded: boolean = false;
 
+    project_manager: ProjectManager;
+    btn_close_arg_editor: HTMLElement;
+
+
     constructor(silex: Silex) {
+        const _thisApp = this;
         this.silex = silex;
         this.program_code = "";
         this.program_entry_index = 0;
@@ -64,7 +86,7 @@ export class App {
         //this.program_entries_select = document.getElementById('program_entries_select') as HTMLSelectElement;
         //this.program_entry_params = document.getElementById('program_entry_params') as HTMLElement;
         this.btn_run = document.getElementById('btn_run') as HTMLElement;
-        this.btn_compile = document.getElementById('btn_compile') as HTMLElement;
+        this.btn_compile = document.getElementById('btn_editor_compile') as HTMLElement;
         this.input_max_gas = document.getElementById('input_max_gas') as HTMLInputElement;
         this.examples_select = document.getElementById('examples_select') as HTMLSelectElement;
         this.btn_output_clear = document.getElementById('btn_output_clear') as HTMLElement;
@@ -79,22 +101,126 @@ export class App {
         this.btn_signature = document.querySelector(`#signature-btn`) as HTMLButtonElement;
         this.btn_copy = document.querySelector(`#copy-ec-btn`) as HTMLButtonElement;
 
-        this.pb_ui = document.getElementById('modal_parameter_builder') as HTMLElement;
-        this.pb_main_container = document.querySelector('div.parameter-builder-container') as HTMLElement;
+        /* Argument Editor (Parameter Builder)*/
+        this.pb_main_container = UIContainers.get_panel_selection_container('#parameter_builder_container') as HTMLElement;
         this.parameter_display = document.getElementById('parameter-display') as HTMLElement;
         this.pba_readonly = document.getElementById('pba-readonly') as HTMLElement;
         this.entry_call_container = document.querySelector(`#entry-call-container`) as HTMLElement;
         this.signature_container = document.querySelector(`#signature-container`) as HTMLElement;
         this.entry_menu = document.getElementById('entry-menu') as HTMLElement;
         this.arg_ro_message = document.querySelector(`#pba-readonly > div.message`) as HTMLElement;
+        this.btn_close_arg_editor = document.querySelector(`#btn_close_arg_editor`) as HTMLElement;
+        /* end Argument Editor (Parameter Builder)*/
+
+        /* editor Project panel */
+        this.btn_project_panel = document.querySelector(`#btn_editor_project`) as HTMLElement;
+        this.btn_project_panel_close = document.querySelector(`#btn_close_project_panel`) as HTMLElement;
+        /* end editor Project panel */
+
+        /** editor options panel **/
+        this.btn_editor_options = document.querySelector(`#btn_editor_options`) as HTMLElement;
+        this.btn_editor_load_file = document.querySelector(`#btn_editor_load_file`) as HTMLElement;
+        this.btn_editor_save_code = document.querySelector(`#btn_editor_save_code`) as HTMLElement;
+        /* end editor options panel*/
 
         this.btn_export.addEventListener('click', () => this.open_modal_export());
         this.btn_compile.addEventListener('click', () => this.compile_code());
         this.btn_copy.addEventListener('click', () => this.copy_text_to_clipboard(this.entry_call_container.textContent || ""));
         this.btn_run.addEventListener('click', async () => await this.run_program());
         this.btn_output_clear.addEventListener('click', () => this.clear_output());
+
         this.btn_output_copy.addEventListener('click', () => this.copy_text_to_clipboard(this.output.textContent || ""));
         this.btn_output_panel_toggle.addEventListener('click', () => this.output_panel_toggle(undefined));
+
+        this.btn_close_arg_editor.addEventListener("click", () => {
+            const after_close = () => {
+                this.editor.focus();
+            }
+
+            UIContainers.panel_close(UIContainers.panel_options({initiator: this.btn_close_arg_editor, after_close: after_close} as PanelOptions));
+        });
+
+        this.btn_editor_save_code.addEventListener('click', (_) => {
+
+            const after_close = () => {
+                [this.btn_project_panel, this.btn_editor_options,
+                    this.btn_compile].forEach(b => b.removeAttribute("disabled"));
+
+                this.editor.focus();
+            }
+
+            const after_open = () => {
+                [this.btn_project_panel, this.btn_editor_options,
+                    this.btn_compile].forEach(b => b.setAttribute("disabled", ""));
+                this.project_manager.ui_save_code_to_project(UIContainers.panel_options({initiator: this.btn_editor_save_code, after_close: after_close} as PanelOptions));
+            }
+
+            UIContainers.panel_toggle(UIContainers.panel_options({initiator: this.btn_editor_save_code, after_open: after_open, after_close: after_close} as PanelOptions));
+        });
+
+        this.btn_project_panel.addEventListener('click', (evt) => {
+            const project_panel_open = () => {
+                [this.btn_editor_save_code, this.btn_editor_options,
+                    this.btn_compile].forEach(b => b.setAttribute("disabled", ""));
+
+
+                document.dispatchEvent(new CustomEvent("project-container-external-open", {
+                    detail: {
+                        container: "editor-main",
+                    },
+                }));
+            }
+
+            const project_panel_close = () => {
+                console.log("sending project-container-external-close");
+                document.dispatchEvent(new CustomEvent("project-container-external-close", {
+                    detail: {
+                        container: "editor-main",
+                    },
+                }));
+
+                this.notify_screen_left_reset();
+            }
+
+            const panel_container_id = this.btn_project_panel.getAttribute("data-panel-id");
+            if(panel_container_id === null) {
+                console.error("btn_editor_project has no data-panel-id");
+                return;
+            }
+
+            const panel_body = document.querySelector(`#${panel_container_id} .panel_body`) as HTMLElement;
+
+            if (panel_body.classList.contains('hide')) {
+                project_panel_open();
+            } else {
+                project_panel_close();
+            }
+        });
+        this.btn_project_panel_close.addEventListener('click', (evt) => {
+            document.dispatchEvent(new CustomEvent("project-container-external-close", {
+                detail: {
+                    container: "editor-main",
+                },
+            }));
+
+            this.notify_screen_left_reset();
+        })
+
+        this.btn_editor_options.addEventListener('click', () => {
+            const after_open = () => {
+                [this.btn_editor_save_code, this.btn_project_panel,
+                    this.btn_compile].forEach(b => b.setAttribute("disabled", ""));
+            }
+
+            const after_close = () => {
+                [this.btn_editor_save_code, this.btn_project_panel,
+                    this.btn_compile].forEach(b => b.removeAttribute("disabled"));
+
+                this.editor.focus();
+            }
+            UIContainers.panel_toggle(UIContainers.panel_options({initiator: this.btn_editor_options, after_open: after_open, after_close: after_close} as PanelOptions));
+        });
+
         this.examples_select.addEventListener('change', async (e) => await this.handle_examples_change(e));
         this.tabsize_select.addEventListener('change', (e) => this.handle_tabsize_change(e));
 
@@ -121,12 +247,68 @@ export class App {
             this.btn_entry_call.classList.remove('hide');
         });
 
-        this.btn_edit_params.addEventListener('click', () => this.handle_edit_params());
+        this.btn_edit_params.addEventListener('click', () => this.ui_open_argument_editor());
 
         /* We update the readonly display whenever the parameter builder changes */
         document.addEventListener("pb-argument-did-change", () => {
             this.update_ro_argument_display();
         });
+
+        document.addEventListener("screen-left-reset", () => {
+            console.log("Argument editor reset - did screen-left-reset. restoring buttons");
+
+            [this.btn_project_panel,
+                this.btn_editor_save_code,
+                this.btn_editor_options,
+                this.btn_compile].forEach(b => b.removeAttribute("disabled"));
+
+            this.editor.focus();
+        });
+
+        document.addEventListener("screen-right-reset", () => {
+            console.log("Argument editor reset - did screen-right-reset.");
+            UIContainers.panel_close(UIContainers.panel_options({initiator: this.btn_close_arg_editor} as PanelOptions));
+        });
+
+        /* Project Manager */
+        this.project_manager = new ProjectManager();
+        this.project_manager.buffer_needs_saving = () => {return this.editor_has_unsaved_changes};
+
+        document.addEventListener("project-changed", (e) => {
+
+            let current_project = this.project_manager.get_current_project();
+
+            if(current_project === null) {
+                console.error("current_project cannot be null.");
+                return;
+            }
+
+            if(current_project?.last_used_file_metadata === null
+                || current_project.last_used_file_metadata === undefined) {
+                localStorage.setItem('last_file_used_data', "");
+            }
+
+            // Wait a for a second, then read the value?
+            setTimeout(() => {
+                _thisApp.project_manager.worker_last_file_used_poll.postMessage({command: "poll_with_current_project", cmd_opts: {project: current_project}});
+            }, 250);
+
+            this.update_info_display();
+        });
+
+        document.addEventListener("project-did-load-file", () => {
+            console.log("Argument editor reset - did project-did-load-file.");
+            this.notify_screen_left_reset();
+        });
+
+        document.addEventListener("file_loaded", (e) => {
+            const ce = e as CustomEvent;
+            const detail = ce.detail;
+            console.log(`Loading ${detail.project.name}/${detail.filename}`);
+            this.set_editor_code(detail.file_data);
+        });
+
+        /* end Project Manager */
 
         this.modal = new Modal();
 
@@ -147,10 +329,111 @@ export class App {
 
         this.editor.setHighlightActiveLine(false);
         this.editor.renderer.setPadding(8);
-        this.editor.renderer.setScrollMargin(10, 10)
+        this.editor.renderer.setScrollMargin(10, 10);
+
+        const editor_session = this.editor.getSession();
+        editor_session.on('change', (delta: ace.Ace.Delta) => {
+
+            localStorage.setItem("code", editor_session.getValue());
+
+            this.update_info_display();
+        });
+
+        document.addEventListener("project-last-file-refresh", (e) => {
+            this.update_info_display();
+        });
+
+        window.addEventListener('storage', (event) => {
+            switch (event.key) {
+                case 'code':
+                break;
+                case 'current_project':
+                    const project = JSON.parse(event.newValue as string);
+                    // reload all the projects
+                    _thisApp.project_manager.load_projects_record();
+                    _thisApp.project_manager.last_used_file_refresh();
+                    // update the editor
+                    _thisApp.set_editor_code(localStorage.getItem('code') ?? "");
+                    break;
+                default:
+                    break;
+            }
+        });
+
+        document.addEventListener("projects-metadata-loaded", (e) => {
+            this.load_example_projects();
+            this.custom_select.build_selects();
+        });
 
         this.load_save();
-        this.custom_select.build_selects();
+
+    }
+
+    load_example_projects() {
+        const _thisApp = this;
+
+        const did_load_examples = localStorage.getItem('did_load_examples');
+        if(did_load_examples === null) {
+
+            console.log("Loading examples");
+            const example_project = _thisApp.project_manager.create_new_project("Examples", "Some simple Silex examples.");
+
+            // leave some time for the project metadata and directory to be created
+            setTimeout(() => {
+                silex_examples.forEach((example: SilexExample) => {
+                    // get the file data from the url
+                    fetch(example.url)
+                        .then(response => response.text())
+                        .then(data => {
+                            _thisApp.project_manager.save_code_to_project(example_project, example.name, data, false);
+                        });
+                });
+            }, 1000);
+
+            localStorage.setItem('did_load_examples', JSON.stringify(true));
+        }
+
+
+        // TODO remove
+        // Render the menu options for examples_select
+        const examples_select = document.getElementById("examples_select") as HTMLSelectElement;
+        silex_examples.forEach((example: SilexExample) => {
+            const option = document.createElement("option");
+            option.value = example.url;
+            option.textContent = example.name;
+            examples_select.appendChild(option);
+        });
+    }
+
+
+    update_info_display() {
+        const _thisApp = this;
+
+        const current_project_name = document.getElementById("current-project") as HTMLElement;
+        current_project_name.textContent = _thisApp.project_manager.get_current_project()?.name as string;
+
+        const last_file_used_name = _thisApp.project_manager.get_current_project()?.last_used_file_metadata?.name ?? "-";
+
+        const editor_buffer_info = document.getElementById("editor-buffer-info") as HTMLElement;
+        const last_file_used_data = localStorage.getItem('last_file_used_data') ?? "";
+        if(_thisApp.editor.getValue() === last_file_used_data) {
+            _thisApp.editor_has_unsaved_changes = false;
+            editor_buffer_info.classList.remove('unsaved');
+            editor_buffer_info.textContent = last_file_used_name;
+        } else {
+            _thisApp.editor_has_unsaved_changes = true;
+            editor_buffer_info.classList.add('unsaved');
+            editor_buffer_info.textContent = "- unsaved -";
+        }
+
+        const current_file_info = document.getElementById("current-file") as HTMLElement;
+
+        if(this.project_manager.get_current_project()?.last_used_file_metadata !== null) {
+            current_file_info.textContent = last_file_used_name;
+        } else {
+            current_file_info.textContent = "-";
+        }
+
     }
 
     load_save() {
@@ -163,7 +446,6 @@ export class App {
 
         const tabsize = localStorage.getItem('tabsize') || '4';
         this.set_tabsize(tabsize);
-
     }
 
     set_tabsize(tabsize: string) {
@@ -188,7 +470,7 @@ export class App {
         }
     }
 
-    save_code() {
+    compile_save_code() {
         localStorage.setItem('code', this.editor.getValue());
     }
 
@@ -225,7 +507,6 @@ export class App {
             /* defaults */
             this.arg_ro_message.classList.add('hide');
             /* end defaults */
-
             this.program_entry_index = index;
 
             const params = this.xvm_param_parser.parameter_builder_data[this.program_entry_index].parameters;
@@ -333,8 +614,10 @@ export class App {
 
     compile_code() {
         try {
-            this.save_code();
+            this.compile_save_code();
             this.clear_program();
+            // if we were using the argument editor, reset to contract/program panel.
+            this.notify_screen_right_reset();
             this.output.innerHTML = "Program saved locally.\n";
             const code = this.editor.getValue();
             localStorage.setItem('code', code);
@@ -347,7 +630,9 @@ export class App {
                 this.xvm_param_parser.make_schema_from_entry(entry);
                 this.add_entry(entry, index);
 
-                let pb_entry_container = document.getElementById(`pb_entry_container_${index}`);
+                let pb_entry_container = document.getElementById(`pb_entry_container_${index}`);;
+                let pb_input_scrollbox: HTMLElement;
+                let pb_footer_container: HTMLElement;
                 let pb_input_container: HTMLElement;
                 let arg_container: HTMLElement;
 
@@ -359,21 +644,31 @@ export class App {
                     pb_entry_container.id = `pb_entry_container_${index}`;
                     pb_entry_container.classList.add(`pb_entry_container`);
 
+                    pb_input_scrollbox = document.createElement(`div`);
+                    pb_input_scrollbox.classList.add(`pb-input-scrollbox`);
+
                     pb_input_container = document.createElement(`div`);
                     pb_input_container.classList.add(`pb-input-container`);
 
                     arg_container = document.createElement(`div`);
                     arg_container.classList.add(`pb-arguments-container`);
 
-                    pb_entry_container.appendChild(pb_input_container);
+                    pb_footer_container = document.createElement(`div`);
+                    pb_footer_container.classList.add(`pb-footer-container`);
+                    pb_footer_container.innerHTML = `<div class="pb-footer-buttons"></div>`
+
+
                     pb_entry_container.appendChild(arg_container);
+                    pb_input_scrollbox.appendChild(pb_input_container);
+                    pb_entry_container.appendChild(pb_input_scrollbox);
+                    pb_entry_container.appendChild(pb_footer_container);
+
                     this.pb_main_container.appendChild(pb_entry_container);
                 }
 
                 pb_entry_container.setAttribute('data-pbe-index', `${index}`);
 
                 const parsed_entry = this.xvm_param_parser.parameter_builder_data[index];
-                console.log(parsed_entry);
                 ParameterBuilder.build_from_schema(parsed_entry.parameters, {
                     arg_container: arg_container,
                     pb_container: pb_input_container
@@ -564,17 +859,21 @@ export class App {
     /** Opens the parameter builder modal.
      * TODO: Best to move this into the program window, and get rid of the modal.
      * */
-    handle_edit_params() {
-        this.pb_ui.classList.remove('hidden');
+    ui_open_argument_editor() {
+        const arg_editor = UIContainers.panel_open(UIContainers.panel_options({initiator: this.btn_edit_params} as PanelOptions))
+
+        if(arg_editor === null) {
+            console.log("Error opening argument editor");
+        }
 
         for (const pbe of this.pb_main_container.children) {
             if (parseInt(pbe.getAttribute("data-pbe-index") || "") === this.program_entry_index) {
-                const entry_stat = document.querySelector(`.entry-stat > span`);
+                const entry_stat = document.querySelector(`#pb-ui-entry-stat`);
                 if (entry_stat !== null) {
                     entry_stat.textContent = `${this.xvm_param_parser.parameter_builder_data[this.program_entry_index].name}`;
                 }
 
-                const param_stat = document.querySelector(`.param-stat > span`);
+                const param_stat = document.querySelector(`#pb-ui-params-stat`);
                 if (param_stat !== null) {
                     param_stat.textContent = `${this.xvm_param_parser.parameter_builder_data[this.program_entry_index].parameters.length}`;
                 }
@@ -618,5 +917,21 @@ export class App {
         } catch (err) {
             console.error('Failed to copy text: ', err);
         }
+    }
+
+    notify_screen_left_reset() {
+        const screen_left_reset = new CustomEvent("screen-left-reset", {
+            detail: {},
+        });
+
+        document.dispatchEvent(screen_left_reset);
+    }
+
+    notify_screen_right_reset() {
+        const screen_right_reset = new CustomEvent("screen-right-reset", {
+            detail: {},
+        });
+
+        document.dispatchEvent(screen_right_reset);
     }
 }

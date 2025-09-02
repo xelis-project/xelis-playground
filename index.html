@@ -42,10 +42,9 @@
         <div class="controls">
           <div class="title">
             <svg
-              width="2rem"
-              height="2rem"
               viewBox="0 0 778 743"
               fill="currentColor"
+              style="width: 2rem; height: 2rem;"
             >
               <path
                 fill-rule="evenodd"
@@ -61,223 +60,222 @@
             </svg>
             <div>
               <span id="xelis-type">XELIS</span>
-              <div class="playground">Silex Playground</div>
+              <div class="playground">Silex Studio - beta</div>
             </div>
           </div>
           <div class="flex-row">
-            <div class="custom-select">
-              <select id="examples_select">
-                <option>Examples</option>
-                <option
-                  value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/array.slx"
-                >
-                  Array
-                </option>
-                <option
-                  value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/condition.slx"
-                >
-                  Condition
-                </option>
-                <option
-                  value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/constants.slx"
-                >
-                  Constants
-                </option>
-                <option
-                  value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/factorial.slx"
-                >
-                  Factorial
-                </option>
-                <option
-                  value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/fizzbuzz.slx"
-                >
-                  FizzBuzz
-                </option>
-                <option
-                  value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/loop.slx"
-                >
-                  Loop
-                </option>
-                <option
-                  value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/number.slx"
-                >
-                  Number
-                </option>
-                <option
-                  value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/optional.slx"
-                >
-                  Optional
-                </option>
-                <option
-                  value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/path.slx"
-                >
-                  Path
-                </option>
-                <option
-                  value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/prime.slx"
-                >
-                  Prime
-                </option>
-                <option
-                  value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/prime_index.slx"
-                >
-                  Prime Index
-                </option>
-                <option
-                  value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/recursive.slx"
-                >
-                  Recursive
-                </option>
-                <option
-                  value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/specific_condition.slx"
-                >
-                  Specific Condition
-                </option>
-                <option
-                  value="https://raw.githubusercontent.com/xelis-project/xelis-vm/refs/heads/master/examples/struct.slx"
-                >
-                  Struct
-                </option>
-              </select>
-            </div>
-            <div class="custom-select">
-              <select id="tabsize_select">
-                <option>Tab Size</option>
-                <option value="2">Tab Size: 2</option>
-                <option value="4">Tab Size: 4</option>
-              </select>
-            </div>
-            <button id="btn_compile" class="btn" title="Build the code">
-              <svg
-                width="1.2rem"
-                height="1.2rem"
-                viewBox="0 0 16 16"
-                fill="currentColor"
-              >
-                <path d="M1 12h4v4h-4v-4z"></path>
-                <path d="M6 12h4v4h-4v-4z"></path>
-                <path d="M11 12h4v4h-4v-4z"></path>
-                <path d="M1 7h4v4h-4v-4z"></path>
-                <path d="M1 2h4v4h-4v-4z"></path>
-                <path d="M6 7h4v4h-4v-4z"></path>
-                <path d="M7 1h4v4h-4v-4z"></path>
-                <path d="M11 7h4v4h-4v-4z"></path>
-                <path d="M13 0h3v3h-3v-3z"></path>
-              </svg>
-              Compile
+            <button id="btn_environment" class="opt-btn icon-green mini-btn" title="">
+              <table>
+                <tr>
+                  <td class="key-label">Environment:</td>
+                  <td>Developer</td>
+                </tr>
+              </table>
             </button>
           </div>
         </div>
-        <pre id="input_editor"></pre>
-      </div>
-      <div id="screen_right">
-        <div class="controls">
-          <div class="title">Program</div>
-        </div>
-        <div id="program-spec">
-          <div id="entry-controls">
-            <div class="dropdown">
-              <div class="entry-stat-ro stats">
-                <label>Entry</label
-                ><span id="hud-entry-name" class="entry-name">- none -</span>
-              </div>
-              <div id="entry-menu" class="dropdown-content"></div>
-            </div>
-
-            <div class="options-container">
-              <button id="pb_ui_btn" class="opt-btn blue first" disabled>
-                Configure
-              </button>
-              <button
-                id="btn_run"
-                class="opt-btn green"
-                title="Execute the code."
-                disabled
-              >
-                Run
-              </button>
-              <button id="btn_export" class="opt-btn yellow" disabled>
-                Export
-              </button>
+        <div id="editor_container">
+          <div id="editor_header" class="panel_header">
+            <div class="panel-title title">Editor</div>
+            <div id="editor_commands">
+              <button id="btn_editor_save_code" class="opt-btn icon-green" data-panel-id="editor_save_code_container">Save</button>
+              <button id="btn_editor_load_file" class="opt-btn icon-green" style="display: none">Load</button>
+              <button id="btn_editor_project" class="opt-btn icon-green" data-panel-id="editor_project_container">Projects</button>
+              <button id="btn_editor_options" class="opt-btn icon-green" data-panel-id="editor_options_container">Options</button>
+              <button id="btn_editor_compile" class="opt-btn icon-green">Compile</button>
             </div>
           </div>
-          <div id="parameter-display" class="">
-            <h2 class="title1">Parameters</h2>
-            <div id="pba-readonly" class="pb-arguments-container readonly">
-              <div class="message hide">This entry has no parameters.</div>
-              <div id="entry-call-container"></div>
-              <div id="signature-container" class="hide code"></div>
-              <div class="pb-arg-btns">
-                <button id="edit-entry-params-btn" class="opt-btn blue" disabled>Arguments</button>
-                <button id="entry-call-btn" class="opt-btn blue hide" disabled>Entry Call</button>
-                <button id="signature-btn" class="opt-btn blue" disabled>XVM SiG</button>
-                <button id="copy-ec-btn" class="opt-btn blue" disabled>Copy</button>
-              </div>
+          <div class="info-block-container">
+            <div id="editor-info" class="info-block">
+              <div><key>Current Project</key><div id="current-project"></div></div>
+              <div><key>Buffer</key><div id="editor-buffer-info"></div></div>
+              <div><key>Last Loaded</key><div id="current-file"></div></div>
             </div>
           </div>
-          <div id="gas_limit_display">
-            <h2 class="title1">Max Gas</h2>
-            <input
-              id="input_max_gas"
-              type="number"
-              placeholder="infinite"
-              class="large-input"
-            />
-          </div>
-        </div>
+            <div id="editor_save_code_container" class="panel_container">
+                <div class="panel_backdrop hide"></div>
+                <div class="panel_body hide">
+                    <!--              <h5 style="margin-top: 0;">Save Code</h5>-->
+                    <div class="panel-options-container">
+                        <div class="po-btns">
 
 
-        <div class="output-header">
-          <div id="output-heading"><h2 class="title1">Output</h2></div>
-          <div>
-            <button id="btn_output_clear" class="opt-btn icon-blue" title="Clear output">
-              <svg
-                      width="1.5rem"
-                      height="1.5rem"
-                      viewBox="0 0 16 16"
-                      fill="currentColor">
-                <path d="M10 12.6l.7.7 1.6-1.6 1.6 1.6.8-.7L13 11l1.7-1.6-.8-.8-1.6 1.7-1.6-1.7-.7.8 1.6 1.6-1.6 1.6zM1 4h14V3H1v1zm0 3h14V6H1v1zm8 2.5V9H1v1h8v-.5zM9 13v-1H1v1h8z"/></svg>
-            </button>
-
-            <button id="btn_output_copy" class="opt-btn icon-blue" title="Copy output">
-              <svg width="1.5rem" height="1.5rem" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" stroke-width="3" stroke="currentColor" fill="none"><rect x="11.13" y="17.72" width="33.92" height="36.85" rx="2.5"/><path d="M19.35,14.23V13.09a3.51,3.51,0,0,1,3.33-3.66H49.54a3.51,3.51,0,0,1,3.33,3.66V42.62a3.51,3.51,0,0,1-3.33,3.66H48.39"/></svg>
-            </button>
-
-            <button id="btn_output_panel_toggle" class="opt-btn icon-blue">
-              <svg
-                      id="btn_output_panel_expand"
-                      width="1.5rem"
-                      height="1.5rem"
-                      viewBox="0 0 30 30"
-                      fill="currentColor"
-                      class="out-expand"
-              >
-                <title>Expand output window</title>
-                <path d="M25.99 6.042l-0.004 9.735-3.732-3.733-4.454 4.455-2.665-2.665 4.454-4.454-3.384-3.383 9.785 0.045zM11.494 22.805l3.238 3.182-9.722 0.017 0.004-9.68 3.815 3.815 4.925-4.924 2.665 2.665-4.925 4.925z"></path>
-              </svg>
-
-              <svg
-                      id="btn_output_panel_shrink"
-                      width="1.5rem"
-                      height="1.5rem"
-                      viewBox="0 0 32 32"
-                      fill="currentColor"
-                      class="out-shrink hide"
-              >
-                <title>Shrink output window</title>
-                <path d="M27.407 7.882l-2.665-2.665-4.925 4.925-3.815-3.815-0.004 9.68 9.723-0.017-3.238-3.183 4.924-4.925zM8.577 20.383l-4.453 4.453 2.665 2.666 4.453-4.455 3.732 3.732 0.004-9.734-9.784-0.045 3.383 3.383z"></path>
-              </svg>
-
-            </button>
-          </div>
-        </div>
-        <div id="output_container">
-
-          <div id="output">
-            <!-- populated by JS -->
-          </div>
+                        </div>
+                        <div class="po-selection"></div>
+                    </div>
+                </div>
+            </div>
+            <div id="editor_project_container" class="panel_container">
+                <div class="panel_backdrop hide"></div>
+                <div class="panel_body hide">
+                    <button id="btn_close_project_panel" class="dialog-btn opt-btn icon-green close-btn top-right">close</button>
+                    <h5 style="margin-top: 0;">Projects</h5>
+                    <div class="panel-options-container">
+                        <div class="po-btns">
+                            <input type="file" id="editor_load_file_input" class="hide">
+                            <button id="btn_editor_new_project" class="btn">New Project</button>
+                        </div>
+                        <div class="po-selection"></div>
+                    </div>
+                </div>
+            </div>
+            <div id="editor_options_container" class="panel_container">
+                <div class="panel_backdrop hide"></div>
+                <div class="panel_body hide">
+                    <h5 style="margin-top: 0;">Editor Options</h5>
+                    <div class="panel-options-container">
+                        <div class="po-btns">
+                            <div class="custom-select">
+                                <select id="examples_select">
+                                    <option>Examples</option>
+                                </select>
+                            </div>
+                            <div class="custom-select">
+                                <select id="tabsize_select">
+                                    <option>Tab Size</option>
+                                    <option value="2">Tab Size: 2</option>
+                                    <option value="4">Tab Size: 4</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="po-selection"></div>
+                    </div>
+                </div>
+            </div>
+            <div id="alert_container_left" class="panel_container alert_container left hide">
+                <div class="panel_backdrop "></div>
+                <div class="panel_body">
+                    <div class="panel-options-container">
+                        <div class="po-btns"></div>
+                        <div class="po-selection"></div>
+                    </div>
+                </div>
+            </div>
+          <pre id="input_editor"></pre>
         </div>
       </div>
+        <div id="screen_right">
+            <div id="screen_right_content">
+                <div class="controls">
+                    <div class="title">CONTRACT</div>
+                </div>
+                <div id="parameter_builder_container" class="panel_container">
+                    <div class="panel_backdrop bkdrp-strong hide"></div>
+                    <div class="panel_body hide">
+                        <div class="panel-title title">Argument Editor</div>
+                        <div class="info-block">
+                            <div><key>Entry</key><div id="pb-ui-entry-stat"></div></div>
+                            <div><key>Parameters</key><div id="pb-ui-params-stat"></div></div>
+                            <div class="info-block-button-container"><button id="btn_close_arg_editor" data-panel-id="parameter_builder_container" class="opt-btn icon-green right">DONE</button></div>
+                        </div>
+                        <div class="panel-options-container">
+                            <div class="po-btns" style="display: none;"></div>
+                            <div id="pb-modal-content" class="modal-content" style="display: none;"></div>
+                            <div class="po-selection"></div>
+                        </div>
+                    </div>
+                </div>
+                <div id="program-spec">
+                    <div id="entry-controls">
+                        <div class="dropdown">
+                            <div class="entry-stat-ro stats">
+                                <label>Entry</label
+                                ><span id="hud-entry-name" class="entry-name">- none -</span>
+                            </div>
+                            <div id="entry-menu" class="dropdown-content"></div>
+                        </div>
+
+                        <div class="options-container">
+                            <button id="pb_ui_btn" class="opt-btn blue first" disabled>
+                                Storage
+                            </button>
+                            <button
+                                    id="btn_run"
+                                    class="opt-btn green"
+                                    title="Execute the code."
+                                    disabled
+                            >
+                                Run
+                            </button>
+                            <button id="btn_export" class="opt-btn yellow" disabled>
+                                Export
+                            </button>
+                        </div>
+                    </div>
+                    <div id="parameter-display" class="">
+                        <h2 class="title1">Parameters</h2>
+                        <div id="pba-readonly" class="pb-arguments-container readonly">
+                            <div class="message hide">This entry has no parameters.</div>
+                            <div id="entry-call-container"></div>
+                            <div id="signature-container" class="hide code"></div>
+                            <div class="pb-arg-btns">
+                                <button id="edit-entry-params-btn" data-panel-id="parameter_builder_container" class="opt-btn blue" disabled>Arguments</button>
+                                <button id="entry-call-btn" class="opt-btn blue hide" disabled>Entry Call</button>
+                                <button id="signature-btn" class="opt-btn blue" disabled>XVM SiG</button>
+                                <button id="copy-ec-btn" class="opt-btn blue" disabled>Copy</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="gas_limit_display">
+                        <h2 class="title1">Max Gas</h2>
+                        <input
+                                id="input_max_gas"
+                                type="number"
+                                placeholder="infinite"
+                                class="large-input"
+                        />
+                    </div>
+                </div>
+
+                <div class="output-header">
+                    <div id="output-heading"><h2 class="title1">Output</h2></div>
+                    <div>
+                        <button id="btn_output_clear" class="opt-btn icon-blue" title="Clear output">
+                            <svg
+                                    style="width: 1.5rem; height: 1.5rem;"
+                                    viewBox="0 0 16 16"
+                                    fill="currentColor">
+                                <path d="M10 12.6l.7.7 1.6-1.6 1.6 1.6.8-.7L13 11l1.7-1.6-.8-.8-1.6 1.7-1.6-1.7-.7.8 1.6 1.6-1.6 1.6zM1 4h14V3H1v1zm0 3h14V6H1v1zm8 2.5V9H1v1h8v-.5zM9 13v-1H1v1h8z"/></svg>
+                        </button>
+
+                        <button id="btn_output_copy" class="opt-btn icon-blue" title="Copy output">
+                            <svg style="width: 1.5rem; height: 1.5rem;" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" stroke-width="3" stroke="currentColor" fill="none"><rect x="11.13" y="17.72" width="33.92" height="36.85" rx="2.5"/><path d="M19.35,14.23V13.09a3.51,3.51,0,0,1,3.33-3.66H49.54a3.51,3.51,0,0,1,3.33,3.66V42.62a3.51,3.51,0,0,1-3.33,3.66H48.39"/></svg>
+                        </button>
+
+                        <button id="btn_output_panel_toggle" class="opt-btn icon-blue">
+                            <svg
+                                    id="btn_output_panel_expand"
+                                    viewBox="0 0 30 30"
+                                    fill="currentColor"
+                                    class="out-expand"
+                                    style="width: 1.5rem; height: 1.5rem;"
+                            >
+                                <title>Expand output window</title>
+                                <path d="M25.99 6.042l-0.004 9.735-3.732-3.733-4.454 4.455-2.665-2.665 4.454-4.454-3.384-3.383 9.785 0.045zM11.494 22.805l3.238 3.182-9.722 0.017 0.004-9.68 3.815 3.815 4.925-4.924 2.665 2.665-4.925 4.925z"></path>
+                            </svg>
+
+                            <svg
+                                    id="btn_output_panel_shrink"
+                                    viewBox="0 0 32 32"
+                                    fill="currentColor"
+                                    class="out-shrink hide"
+                                    style="width: 1.5rem; height: 1.5rem;"
+                            >
+                                <title>Shrink output window</title>
+                                <path d="M27.407 7.882l-2.665-2.665-4.925 4.925-3.815-3.815-0.004 9.68 9.723-0.017-3.238-3.183 4.924-4.925zM8.577 20.383l-4.453 4.453 2.665 2.666 4.453-4.455 3.732 3.732 0.004-9.734-9.784-0.045 3.383 3.383z"></path>
+                            </svg>
+
+                        </button>
+                    </div>
+                </div>
+                <div id="output_container">
+
+                    <div id="output">
+                        <!-- populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
       <div id="modal_export" class="modal hidden">
         <div class="modal-backdrop"></div>
         <div class="modal-frame">
@@ -297,9 +295,8 @@
               <button id="btn_export_copy" class="btn">
                 <svg
                   fill="currentColor"
-                  width="1.5rem"
-                  height="1.5rem"
                   viewBox="0 0 24 24"
+                  style="width: 1.5rem; height: 1.5rem;"
                 >
                   <path
                     d="M21,10V20a1,1,0,0,1-1,1H10a1,1,0,0,1-1-1V10a1,1,0,0,1,1-1H20A1,1,0,0,1,21,10ZM6,14H5V5h9V6a1,1,0,0,0,2,0V4a1,1,0,0,0-1-1H4A1,1,0,0,0,3,4V15a1,1,0,0,0,1,1H6a1,1,0,0,0,0-2Z"
@@ -309,11 +306,10 @@
               </button>
               <button id="btn_export_download" class="btn">
                 <svg
-                  width="1.5rem"
-                  height="1.5rem"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
+                  style="width: 1.5rem; height: 1.5rem;"
                 >
                   <path
                     d="M20 15V18C20 19.1046 19.1046 20 18 20H6C4.89543 20 4 19.1046 4 18L4 15M8 11L12 15M12 15L16 11M12 15V3"
@@ -325,26 +321,6 @@
                 Download
               </button>
             </div>
-          </div>
-        </div>
-      </div>
-      <div id="modal_parameter_builder" class="modal hidden">
-        <div class="modal-backdrop"></div>
-        <div class="modal-frame">
-          <div class="modal-title">Parameters</div>
-          <div id="pb-modal-content" class="modal-content">
-            <div class="hud">
-              <div class="entry-stat stats">
-                <label>Entry</label><span class="entry-name">-NONE-</span>
-              </div>
-              <div class="param-stat stats">
-                <label>Params</label><span></span>
-              </div>
-              <div class="status-stat stats">
-                <label>Status</label><span>unset</span>
-              </div>
-            </div>
-            <div class="parameter-builder-container"></div>
           </div>
         </div>
       </div>
