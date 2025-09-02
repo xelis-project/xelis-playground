@@ -565,7 +565,7 @@ export class ProjectManager {
     }
 
     project_panel_open_handler (pm: ProjectManager, e: Event)  {
-        console.log("project container opened.");
+        // console.log("project container opened.");
         // remove this event listener. It will be added again when the project container is closed.
         // @ts-ignore
         document.removeEventListener("project-subcontainer-will-open", pm.project_panel_open_handler);
@@ -580,6 +580,8 @@ export class ProjectManager {
             console.error("Container for rendering project info into not found.");
             return;
         }
+
+        ui_lapb_container.replaceChildren();
 
         _thisPM.worker_opfs.postMessage({command: "list_all_project_directories", cmd_opts: {}});
 
