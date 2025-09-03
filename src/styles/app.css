@@ -314,8 +314,9 @@ background: rgb(122 250 211);
 }
 
 .hidden {
-position: absolute;
-top: -9999px !important;
+    position: absolute;
+    top: -9999px !important;
+    display: none;
 }
 
 .flex-row {
