@@ -92,8 +92,8 @@ onmessage = async (e) => {
                 const file_data = await opfs_load_file_from_project(project, last_file_metadata.name);
                 postMessage({notice: "last_file_refreshed", data: {project: project, last_file_data: file_data}});
             } catch (error) {
-                console.log("Error reading file");
-                console.log(error);
+                console.log(`Error reading file ${last_file_metadata.name} in project ${project.name}`);
+                console.error(error);
             }
 
             break;

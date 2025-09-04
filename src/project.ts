@@ -45,7 +45,7 @@ export class PMConfig {
     static PROJECTS_ROOT_DIR = "projects";
     static DB_OBJECT_PROJECTS = "projects";
     static DB_VERSION: number = 37;
-    static DEFAULT_PROJECT = "Default Project";
+    static DEFAULT_PROJECT = "Examples";
     static DB_NAME = "silex_studio";
     static MANAGER_APP_NAME = "Silex Studio";
 }
@@ -82,7 +82,7 @@ export class ProjectManager {
     btn_new_project: HTMLElement;
     worker_opfs: Worker;
     worker_last_file_used_poll: Worker;
-    show_phantoms = true;
+    show_phantoms = false;
     show_orphans = false;
     
     buffer_needs_saving = ()=> {return false;};
@@ -288,6 +288,18 @@ export class ProjectManager {
             console.log("Message received from OPFS_worker:");
             const message = e.data;
             switch(message.notice) {
+                case "verify_default_project_dir_file":
+                    //console.log("verify_default_project_dir_file");
+                    //console.log(message.data.verify);
+                    _thisPM.emit_notification("default-project-post-check", message.data.verify);
+                    break;
+
+                case "verify_user_project_dir_file":
+                    //console.log("verify_default_project_dir_file");
+                    //console.log(message.data.verify);
+                    _thisPM.emit_notification("user-post-check", message.data.verify);
+                    break;
+
                 case "file_loaded":
                     console.log("file_loaded");
                     const notification = {
@@ -420,17 +432,144 @@ export class ProjectManager {
             this.ui_new_project();
         });
 
-        document.addEventListener("projects-metadata-loaded", () => {
-            this.init_user_project();
-        });
 
         // The only way to open the main project container panel
         // @ts-ignore
         document.addEventListener("project-container-external-open", this.project_panel_open_handler.bind(null, _thisPM), {once: true});
 
+        // Load process: Stage 0
         this.load_projects_record();
 
-        _thisPM.worker_last_file_used_poll.postMessage({command: "start_polling", cmd_opts: {seconds: 60}});
+        document.addEventListener("projects-metadata-loaded", () => {
+            // Load process: Stage 1
+            // TODO: Temp fix until Examples become the Default Project.
+            // make sure the default project is not a phantom.
+            let found_default = false;
+            Object.entries(this.projects).forEach(([uuid, project]) => {
+                if(project.name === PMConfig.DEFAULT_PROJECT) {
+                    found_default = true;
+                    // TODO: When the default becomes Example, just load the Example project.
+                    // Make sure the default project is not a phantom.;
+                    _thisPM.worker_opfs.postMessage({command: "verify_project_directory_and_file", cmd_opts: {project: project, file_metadata: project.last_used_file_metadata, notice: "verify_default_project_dir_file"}});
+                }
+            });
+
+            if(!found_default) {
+                console.log("Creating default project.");
+                //TODO Examples - make it readonly
+                _thisPM.create_new_project(PMConfig.DEFAULT_PROJECT, "");
+                this.init_user_project();
+                _thisPM.worker_last_file_used_poll.postMessage({command: "start_polling", cmd_opts: {seconds: 60}});
+            }
+        });
+
+        document.addEventListener("default-project-post-check", (event) => {
+            // Load process: Stage 2
+            const e = event as CustomEvent;
+            console.log(e.detail);
+            const project_verify = e.detail.project;
+            const project = project_verify.project as Project;
+
+            // get current project from localstorage
+            const ls_project_json = localStorage.getItem('current_project');
+            let ls_project: Project | null = null;
+            if(ls_project_json !== null) {
+                ls_project = JSON.parse(ls_project_json) as Project;
+            }
+
+            if(!project_verify.is_valid) {
+                // create default project in opfs
+                // TODO - Call create Examples project
+                this.worker_opfs.postMessage({command: "new_project", cmd_opts: {project_name: PMConfig.DEFAULT_PROJECT }});
+
+                if(ls_project !== null && ls_project.name === PMConfig.DEFAULT_PROJECT) {
+                    localStorage.removeItem('current_project');
+                }
+            }
+
+            if(!e.detail.file.is_valid) {
+                if(ls_project !== null && ls_project.name === PMConfig.DEFAULT_PROJECT) {
+
+                    Object.entries(project.files).forEach(([filename, fmd]) => {
+                        if(filename === e.detail.file.filename) {
+                            if(project.last_used_file_metadata !== null && project.last_used_file_metadata.uuid === fmd.uuid) {
+                                project.last_used_file_metadata = null;
+                            }
+                            delete project.files[filename];
+                        }
+                    });
+
+                    ls_project.last_used_file_metadata = null;
+                    project_verify.project.last_used_file_metadata = null;
+                    ProjectManager.save_project_metadata(project);
+                    localStorage.setItem('current_project', JSON.stringify(project));
+                }
+            }
+
+            // if(project.state === PhantomState) {
+            //     console.log(`Project ${project.name} is a phantom. Changing state to normal.`);
+            //     project.state = NormalState;
+            //
+            //     project.files = {};
+            //     project.last_used_file_metadata = null;
+            //
+            //     ProjectManager.save_project_metadata(project);
+            //     localStorage.setItem('current_project', JSON.stringify(project));
+            //
+            //     console.log(project);
+            //     // create project folder in OPFS
+            //     this.worker_opfs.postMessage({command: "new_project", cmd_opts: {project_name: PMConfig.DEFAULT_PROJECT }});
+            // }
+
+            // This doesn't get called until we verify that the default project is ok in OPFS.
+            this.init_user_project();
+            //_thisPM.worker_last_file_used_poll.postMessage({command: "start_polling", cmd_opts: {seconds: 60}});
+        });
+
+        document.addEventListener("user-post-check", (event) => {
+            // Load process: Stage 3
+            const e = event as CustomEvent;
+            const project_verify = e.detail.project;
+            const project = project_verify.project as Project;
+
+            console.log(e.detail);
+            console.log(project);
+
+            if(!project_verify.is_valid) {
+                console.warn("User Project is not valid. Deleting it.");
+                localStorage.removeItem('current_project');
+                Object.entries(this.projects).forEach(([uuid, project]) => {
+                    if(project.name === PMConfig.DEFAULT_PROJECT) {
+                        localStorage.setItem('current_project', JSON.stringify(project));
+                        this.set_current_project(project);
+                    }
+                });
+            }
+
+            if(!e.detail.file.is_valid) {
+                console.warn(`The last used file ${e.detail.file.filename} is not valid. Removing it from the project metadata.`);
+                Object.entries(project.files).forEach(([filename, fmd]) => {
+                    console.warn(`checking ${filename} - ${e.detail.file.name}`);
+
+                    if(filename === e.detail.file.name) {
+                        if(project.last_used_file_metadata !== null && project.last_used_file_metadata.uuid === fmd.uuid) {
+                            project.last_used_file_metadata = null;
+                        }
+                        console.warn(`deleting file meta for ${e.detail.file.name}`);
+                        delete project.files[filename];
+                        ProjectManager.save_project_metadata(project);
+                        localStorage.setItem('current_project', JSON.stringify(project));
+                    }
+                });
+                project.last_used_file_metadata = null;
+            }
+
+
+
+
+
+            this.set_current_project(project);
+        });
     }
 
     last_used_file_refresh (delay: number = 100){
@@ -447,6 +586,7 @@ export class ProjectManager {
     }
 
     init_user_project() {
+        const _thisPM = this;
         // Chec}k if a user project exists (localstorage or IndexDB)
         // If so, attempt to load it.
         // It may have been deleted from IndexDB.
@@ -461,7 +601,7 @@ export class ProjectManager {
         }
 
         if(ls_project !== null) {
-            console.log("User Project found. loading...");
+            console.log("User Project found in local storage. loading...");
 
             if(Object.entries(this.projects).length === 0) {
                 // this really shouldn't occur, because load_projects_record() would generate the default project
@@ -469,15 +609,21 @@ export class ProjectManager {
                 // the metadata was deleted. rather than get into the habit of deleting user data, lets restore the metadata
                 // first, create default project
                 // TODO: check OPFS
-                if(ls_project.name.toLowerCase() !== PMConfig.DEFAULT_PROJECT.toLowerCase()) {
-                    this.create_new_project(PMConfig.DEFAULT_PROJECT, "");
-                }
+                // if(ls_project.name !== PMConfig.DEFAULT_PROJECT) {
+                //     this.create_new_project(PMConfig.DEFAULT_PROJECT, "");
+                // } else {
+                //     console.log("Default project already exists.");
+                // }
 
-                ProjectManager.save_project_metadata(ls_project);
+                localStorage.removeItem('current_project')
+                console.warn("User Project found in local storage, but no projects exist in IndexDB. Creating the default project.");
+                //ProjectManager.save_project_metadata(ls_project);
 
             } else {
                 // locate the project. if it does not exist, put it back
                 const user_project = this.projects[ls_project.uuid];
+
+                console.log(user_project);
 
                 if(user_project === null || user_project === undefined) {
                     ProjectManager.save_project_metadata(ls_project);
@@ -485,7 +631,7 @@ export class ProjectManager {
             }
 
             // todo check OPFS - what if the user deleted the files in OPFS??
-            this.set_current_project(ls_project);
+            _thisPM.worker_opfs.postMessage({command: "verify_project_directory_and_file", cmd_opts: {project: ls_project, file_metadata: ls_project.last_used_file_metadata, notice: "verify_user_project_dir_file"}});
         } else {
             console.log("User Project not found. creating");
             // Ok to ignore any related folders/files in OPFS for now
@@ -1196,6 +1342,11 @@ export class ProjectManager {
         if(Object.entries(project.files).length === 0) {
             // dont export empty projects
             btn_export.setAttribute("disabled", "disabled");
+        }
+
+        if(project.name === PMConfig.DEFAULT_PROJECT) {
+            // dont delete default project
+            btn_delete.setAttribute("disabled", "disabled");
         }
 
         btn_activate.addEventListener("click", _ => {

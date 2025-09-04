@@ -15,7 +15,6 @@ async function opfs_load_file_from_project(project, filename) {
         return file_data;
     }
 
-
     const opfsRoot = await navigator.storage.getDirectory();
     const projects_directory_handle = await opfsRoot.getDirectoryHandle(PROJECTS_ROOT_DIR);
     const project_handle = await projects_directory_handle.getDirectoryHandle(project.name);
@@ -63,6 +62,51 @@ async function opfs_load_file_from_project(project, filename) {
 
 }
 
+async function verify_project_directory_and_file(project, filename) {
+
+    let verify = {project: {project: project, is_valid: false}, file: {name: filename, is_valid: false}};
+
+    let file_data = "";
+
+    if (project.name === null || project.name === undefined) {
+        verify.project.is_valid = false;
+        console.error(`Project/File Verify: Cannot load file. No project provided`);
+        return file_data;
+    }
+
+    if (filename === null || filename === undefined) {
+        verify.file.is_valid = false;
+        console.error(`Project/File Verify: Cannot load file. No file name provided`);
+        return file_data;
+    }
+
+    try {
+        const opfsRoot = await navigator.storage.getDirectory();
+        const projects_directory_handle = await opfsRoot.getDirectoryHandle(PROJECTS_ROOT_DIR);
+        const project_handle = await projects_directory_handle.getDirectoryHandle(project.name);
+        verify.project.is_valid = true;
+
+        if(filename === "") {
+            verify.file.is_valid = true;
+            return verify;
+        }
+        try {
+            await project_handle.getFileHandle(filename);
+            verify.file.is_valid = true;
+        } catch (error) {
+            verify.file.is_valid = false;
+            console.error(`Project/File Verify: File not found`);
+        }
+
+    } catch (error) {
+        verify.project.is_valid = false;
+        console.error(`Project/File Verify: Project directory not found`);
+    }
+
+    return verify;
+
+}
+
 onmessage = async (e) => {
 
     if(e.data.command === null || e.data.command === undefined) {
@@ -80,6 +124,12 @@ onmessage = async (e) => {
             opfs_save_file(cmd_opts.project.name, cmd_opts.filename, cmd_opts.content).then(() => {
                 postMessage({notice: "file_saved_result", data: {status: "ok", project: cmd_opts.project, filename: cmd_opts.filename, should_notify: cmd_opts.should_notify}});
                 });
+            break;
+
+        case "verify_project_directory_and_file":
+            const filename = cmd_opts.file_metadata !== null ? cmd_opts.file_metadata.name : "";
+            const verify = await verify_project_directory_and_file(cmd_opts.project, filename);
+            postMessage({notice: cmd_opts.notice, data: {verify: verify}});
             break;
 
         case "list_all_project_directories":
