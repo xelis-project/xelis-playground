@@ -765,6 +765,34 @@ justify-content: center;
     color: #dccb1f;
 }
 
+.icon {
+    width: 28px;
+    height: 28px;
+}
+
+.icon.delete-icon {
+    width: 29px;
+    height: 29px;
+}
+
+.icon.export-icon {
+    width: 26px;
+    height: 26px;
+}
+
+.graphic-button {
+    display: block;
+}
+
+.graphic-button-group {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    justify-content: space-evenly;
+    width: auto;
+}
+
+
 @keyframes panel-anim {
   0% {
     opacity: 0;
