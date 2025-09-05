@@ -453,32 +453,14 @@ export class ProjectManager {
         document.addEventListener("projects-metadata-loaded", () => {
             // Load process: Stage 1
             console.log("projects-metadata-loaded: checking example project:");
-            this.load_example_projects(true)
+            this.load_example_projects(true);
 
             setTimeout(() => {
                _thisPM.emit_notification("default-project-post-check");
             }, 700);
         });
 
-        // document.addEventListener("default-project-metadata-ready", (event) => {
-        //     // Stage 2.
-        //     console.log("DEBUG C");
-        //
-        //     const default_project = Object.values(this.projects).find(project => project.name === PMConfig.DEFAULT_PROJECT) as Project;
-        //     console.log(default_project);
-        //
-        //     if(default_project !== null) {
-        //         _thisPM.worker_opfs.postMessage({command: "verify_project_directory", cmd_opts: {project: default_project, notice: "verify_default_project"}});
-        //     } else {
-        //         console.error("Default project not found. Cannot check OPFS.");
-        //     }
-        //
-        //     console.log("DEBUG D");
-        // });
-
         document.addEventListener("default-project-post-check", (event) => {
-            console.log("DEBUG A");
-            
             // Load process: Stage 3
             const default_project = Object.values(this.projects).find(project => project.name === PMConfig.DEFAULT_PROJECT) as Project;
 
@@ -493,10 +475,6 @@ export class ProjectManager {
                 localStorage.removeItem('current_project');
                 localStorage.removeItem("last_used_file_metadata");
             }
-
-
-            console.log("DEBUG B");
-
 
             // TODO: use for normal projects
             // if(e.detail.missing_files.length > 0) {
@@ -521,9 +499,7 @@ export class ProjectManager {
             });
 
             // This doesn't get called until we verify that the default project is ok in OPFS.
-            console.log("DEBUG 1");
             this.init_user_project();
-            console.log("DEBUG 2");
         });
 
         document.addEventListener("user-post-check", (event) => {
