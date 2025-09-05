@@ -62,22 +62,67 @@ async function opfs_load_file_from_project(project, filename) {
 
 }
 
-async function verify_project_directory_and_file(project, filename) {
+async function verify_project_directory(project) {
 
-    let verify = {project: {project: project, is_valid: false}, file: {name: filename, is_valid: false}};
-
-    let file_data = "";
+    let verify = {project: project, is_valid: true, project_dir_missing: false, missing_files: []};
 
     if (project.name === null || project.name === undefined) {
         verify.project.is_valid = false;
         console.error(`Project/File Verify: Cannot load file. No project provided`);
-        return file_data;
+        return verify;
+    }
+
+    try {
+        const opfsRoot = await navigator.storage.getDirectory();
+        const projects_directory_handle = await opfsRoot.getDirectoryHandle(PROJECTS_ROOT_DIR);
+        const project_handle = await projects_directory_handle.getDirectoryHandle(project.name);
+
+        verify.is_valid = true;
+
+        let missing_files = [];
+
+        for (const filename of Object.keys(project.files)) {
+            try {
+                await project_handle.getFileHandle(filename);
+            } catch (error) {
+                missing_files.push(filename);
+                if(project.files[filename] === project.last_used_file_metadata) {
+                    project.last_used_file_metadata = null;
+                }
+                delete project.files[filename];
+                console.error(`Project/File Verify: File ${project.name}/${filename} not found`);
+            }
+        }
+
+        if(missing_files.length > 0) {
+            verify.is_valid = false;
+            verify.missing_files = missing_files;
+        }
+
+    } catch (error) {
+        verify.is_valid = false;
+        verify.project_dir_missing = true;
+        console.error(`Project/File Verify: Project directory not found`);
+    }
+
+    return verify;
+
+}
+
+async function verify_path(project, filename) {
+
+    let verify = {project: {project: project, is_valid: false}, file: {name: filename, is_valid: false}};
+
+    if (project.name === null || project.name === undefined) {
+        verify.project.is_valid = false;
+        console.error(`Project/File Verify: Cannot load file. No project provided`);
+        return verify;
     }
 
     if (filename === null || filename === undefined) {
         verify.file.is_valid = false;
         console.error(`Project/File Verify: Cannot load file. No file name provided`);
-        return file_data;
+        return verify;
     }
 
     try {
@@ -125,10 +170,15 @@ onmessage = async (e) => {
                 postMessage({notice: "file_saved_result", data: {status: "ok", project: cmd_opts.project, filename: cmd_opts.filename, should_notify: cmd_opts.should_notify}});
                 });
             break;
-
-        case "verify_project_directory_and_file":
+            //TODO: make recursive check.
+        case "verify_project_directory":
+            const pd_verify = await verify_project_directory(cmd_opts.project);
+            console.log("DEBUG Z");
+            postMessage({notice: cmd_opts.notice, data: {verify: pd_verify}});
+            break;
+        case "verify_path":
             const filename = cmd_opts.file_metadata !== null ? cmd_opts.file_metadata.name : "";
-            const verify = await verify_project_directory_and_file(cmd_opts.project, filename);
+             const verify = await verify_path(cmd_opts.project, filename);
             postMessage({notice: cmd_opts.notice, data: {verify: verify}});
             break;
 

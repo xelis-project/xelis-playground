@@ -13,7 +13,6 @@ import {FileMetaData, Project, ProjectManager} from './project';
 import { XVMParamParser } from './parameter_builder/xvm_param_parser';
 import { ParameterBuilder } from './parameter_builder/parameter_builder';
 import {PanelOptions, UIContainers} from "./UIContainers";
-import {silex_examples, SilexExample} from "./examples";
 
 export class App {
     silex: any;
@@ -32,7 +31,6 @@ export class App {
     btn_run: HTMLElement;
     btn_compile: HTMLElement;
     input_max_gas: HTMLInputElement;
-    examples_select: HTMLSelectElement;
     btn_output_clear: HTMLElement;
     btn_output_copy: HTMLElement;
     btn_output_panel_toggle: HTMLElement;
@@ -88,7 +86,7 @@ export class App {
         this.btn_run = document.getElementById('btn_run') as HTMLElement;
         this.btn_compile = document.getElementById('btn_editor_compile') as HTMLElement;
         this.input_max_gas = document.getElementById('input_max_gas') as HTMLInputElement;
-        this.examples_select = document.getElementById('examples_select') as HTMLSelectElement;
+
         this.btn_output_clear = document.getElementById('btn_output_clear') as HTMLElement;
         this.btn_output_copy = document.getElementById('btn_output_copy') as HTMLElement;
         this.btn_output_panel_toggle = document.getElementById('btn_output_panel_toggle') as HTMLElement;
@@ -221,7 +219,6 @@ export class App {
             UIContainers.panel_toggle(UIContainers.panel_options({initiator: this.btn_editor_options, after_open: after_open, after_close: after_close} as PanelOptions));
         });
 
-        this.examples_select.addEventListener('change', async (e) => await this.handle_examples_change(e));
         this.tabsize_select.addEventListener('change', (e) => this.handle_tabsize_change(e));
 
         this.btn_entry_call.addEventListener('click', () => {
@@ -360,49 +357,12 @@ export class App {
             }
         });
 
-        document.addEventListener("projects-metadata-loaded", (e) => {
-            this.load_example_projects();
+        document.addEventListener("project-manager-loaded", (e) => {
             this.custom_select.build_selects();
         });
 
         this.load_save();
 
-    }
-
-    load_example_projects() {
-        const _thisApp = this;
-
-        const did_load_examples = localStorage.getItem('did_load_examples');
-        if(did_load_examples === null) {
-
-            console.log("Loading examples");
-            const example_project = _thisApp.project_manager.create_new_project("Examples", "Some simple Silex examples.");
-
-            // leave some time for the project metadata and directory to be created
-            setTimeout(() => {
-                silex_examples.forEach((example: SilexExample) => {
-                    // get the file data from the url
-                    fetch(example.url)
-                        .then(response => response.text())
-                        .then(data => {
-                            _thisApp.project_manager.save_code_to_project(example_project, example.name, data, false);
-                        });
-                });
-            }, 1000);
-
-            localStorage.setItem('did_load_examples', JSON.stringify(true));
-        }
-
-
-        // TODO remove
-        // Render the menu options for examples_select
-        const examples_select = document.getElementById("examples_select") as HTMLSelectElement;
-        silex_examples.forEach((example: SilexExample) => {
-            const option = document.createElement("option");
-            option.value = example.url;
-            option.textContent = example.name;
-            examples_select.appendChild(option);
-        });
     }
 
 
