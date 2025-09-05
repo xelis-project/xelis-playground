@@ -360,49 +360,23 @@ export class App {
             }
         });
 
-        document.addEventListener("projects-metadata-loaded", (e) => {
-            this.load_example_projects();
+        document.addEventListener("project-manager-loaded", (e) => {
+            // TODO remove
+            // Render the menu options for examples_select
+            const examples_select = document.getElementById("examples_select") as HTMLSelectElement;
+            silex_examples.forEach((example: SilexExample) => {
+                const option = document.createElement("option");
+                option.value = example.url;
+                option.textContent = example.name;
+                examples_select.appendChild(option);
+            });
+
             this.custom_select.build_selects();
+
         });
 
         this.load_save();
 
-    }
-
-    load_example_projects() {
-        const _thisApp = this;
-
-        const did_load_examples = localStorage.getItem('did_load_examples');
-        if(did_load_examples === null) {
-
-            console.log("Loading examples");
-            const example_project = _thisApp.project_manager.create_new_project("Examples", "Some simple Silex examples.");
-
-            // leave some time for the project metadata and directory to be created
-            setTimeout(() => {
-                silex_examples.forEach((example: SilexExample) => {
-                    // get the file data from the url
-                    fetch(example.url)
-                        .then(response => response.text())
-                        .then(data => {
-                            _thisApp.project_manager.save_code_to_project(example_project, example.name, data, false);
-                        });
-                });
-            }, 1000);
-
-            localStorage.setItem('did_load_examples', JSON.stringify(true));
-        }
-
-
-        // TODO remove
-        // Render the menu options for examples_select
-        const examples_select = document.getElementById("examples_select") as HTMLSelectElement;
-        silex_examples.forEach((example: SilexExample) => {
-            const option = document.createElement("option");
-            option.value = example.url;
-            option.textContent = example.name;
-            examples_select.appendChild(option);
-        });
     }
 
 
