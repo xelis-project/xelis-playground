@@ -5,7 +5,7 @@
 // }
 
 declare module '*.svg' {
-    const content: string;
+    const content: SVGSVGElement;
     export default content;
 }
 

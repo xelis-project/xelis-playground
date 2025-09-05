@@ -766,19 +766,19 @@ justify-content: center;
 }
 
 .icon {
-    width: 28px;
-    height: 28px;
+    width: 2.5em;
+    height: 2.5em;
 }
 
-.icon.delete-icon {
-    width: 29px;
-    height: 29px;
-}
+/*.icon.delete-icon {*/
+/*    width: 29px;*/
+/*    height: 29px;*/
+/*}*/
 
-.icon.export-icon {
-    width: 26px;
-    height: 26px;
-}
+/*.icon.export-icon {*/
+/*    width: 26px;*/
+/*    height: 26px;*/
+/*}*/
 
 .graphic-button {
     display: block;

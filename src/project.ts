@@ -1,13 +1,10 @@
 import {uuidv7} from 'uuidv7';
 import {strToU8, zipSync} from 'fflate';
 import {PanelOptions, UIContainers} from "./UIContainers";
-import {silex_examples, SilexExample} from "./examples";
-import EditIcon from "./resources/icons/edit-icon.svg?sprite=inline";
-import DeleteIcon from "./resources/icons/trash-icon.svg?sprite=inline";
-import ExportIcon from "./resources/icons/export-icon-2.svg?sprite=inline";
-
-
-
+import {silex_examples} from "./examples";
+import EditIcon from "./resources/icons/edit-icon.svg";
+import DeleteIcon from "./resources/icons/trash-icon.svg";
+import ExportIcon from "./resources/icons/export-icon-2.svg";
 
 type ProjectUUID = string;
 type ProjectName = string;
