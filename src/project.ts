@@ -1,5 +1,5 @@
 import {uuidv7} from 'uuidv7';
-import {zipSync, strToU8, zip} from 'fflate';
+import {strToU8, zipSync} from 'fflate';
 import {PanelOptions, UIContainers} from "./UIContainers";
 import {silex_examples, SilexExample} from "./examples";
 
@@ -453,16 +453,16 @@ export class ProjectManager {
         document.addEventListener("projects-metadata-loaded", () => {
             // Load process: Stage 1
             console.log("projects-metadata-loaded: checking example project:");
-            this.load_example_projects(true);
+            this.init_example_projects();
 
             setTimeout(() => {
                _thisPM.emit_notification("default-project-post-check");
-            }, 700);
+            }, 100);
         });
 
         document.addEventListener("default-project-post-check", (event) => {
             // Load process: Stage 3
-            const default_project = Object.values(this.projects).find(project => project.name === PMConfig.DEFAULT_PROJECT) as Project;
+            const default_project = _thisPM.get_default_project() as Project;
 
             // get current project from localstorage
             const ls_project_json = localStorage.getItem('current_project');
@@ -471,32 +471,12 @@ export class ProjectManager {
                 ls_project = JSON.parse(ls_project_json) as Project;
             }
 
-            if(ls_project !== null && ls_project.name === PMConfig.DEFAULT_PROJECT) {
-                localStorage.removeItem('current_project');
-                localStorage.removeItem("last_used_file_metadata");
+            if(ls_project !== null && ls_project?.name === default_project.name) {
+                 if(ls_project?.last_used_file_metadata !== null) {
+                     const lufm = ls_project?.last_used_file_metadata;
+                     _thisPM.load_example_file(lufm?.name);
+                 }
             }
-
-            // TODO: use for normal projects
-            // if(e.detail.missing_files.length > 0) {
-            //     if(ls_project !== null && ls_project.name === chk_project.name) {
-            //         if(ls_project.uuid === chk_project.uuid) {
-            //             localStorage.setItem('current_project', JSON.stringify(chk_project));
-            //             ProjectManager.save_project_metadata(chk_project);
-            //         }
-            //     }
-            // }
-
-            Object.entries(_thisPM.projects).forEach(([uuid, project]) => {
-                if(project.name === default_project.name) {
-                    if(project.uuid === default_project.uuid) {
-                        _thisPM.projects[uuid] = default_project;
-                    } else {
-                        console.warn(`Project ${project.name} has a different uuid. This should not occur. Updating.`);
-                        delete _thisPM.projects[uuid];
-                        _thisPM.projects[default_project.uuid] = default_project;
-                    }
-                }
-            });
 
             // This doesn't get called until we verify that the default project is ok in OPFS.
             this.init_user_project();
@@ -563,68 +543,85 @@ export class ProjectManager {
     }
 
     get_default_project() {
-        let default_project: Project | null = null;
-        Object.entries(this.projects).forEach(([uuid, project]) => {
-            if(project.name === PMConfig.DEFAULT_PROJECT) {
-                default_project = project;
-            }
-        });
-
-        return default_project;
+        return Object.values(this.projects).find(project => PMConfig.DEFAULT_PROJECT === project.name);
     }
 
-    load_example_projects(force: boolean = false) {
+    init_example_projects(force: boolean = false) {
         const _thisPM = this;
 
-        // make sure default metadata is ok
-        let is_metadata_ok = false;
-        Object.entries(this.projects).forEach(([_, project]) => {
-            if(is_metadata_ok) return;
-            if(project.name === PMConfig.DEFAULT_PROJECT) {
-                is_metadata_ok = true;
-            }
-        });
+        // BEFORE EVERYTHING ELSE, CHECK OPFS
+        _thisPM.worker_opfs.postMessage({command: "new_project", cmd_opts: {project_name: PMConfig.DEFAULT_PROJECT }});
 
-        const did_load_examples = localStorage.getItem('did_load_examples');
-        const pm_version = localStorage.getItem('pm_version');
-        const pm_version_number = parseInt(pm_version ?? "0");
+        let missing_files: string[] = [];
 
-        if(did_load_examples === null || pm_version_number < PMConfig.VERSION || !is_metadata_ok || force) {
+        let default_project = this.get_default_project() as Project;
 
-            console.log("Loading examples");
-
-            if(force) {
-                Object.entries(this.projects).forEach(([uuid, project]) => {
-                    if(project.name === PMConfig.DEFAULT_PROJECT) {
-                        // delete default project (localstorage and IndexDB)
-                        _thisPM.delete_project(project);
-                    }
-                });
-            }
-
-            // leave some time for the project metadata and directory to be deleted.
-            setTimeout(() => {
-                const example_project = _thisPM.create_new_project(PMConfig.DEFAULT_PROJECT, PMConfig.DEFAULT_PROJECT_DESCRIPTION);
-                example_project.description = PMConfig.DEFAULT_PROJECT_DESCRIPTION;
-
-                // leave some time for the project metadata and directory to be created
-                setTimeout(() => {
-                    silex_examples.forEach((example: SilexExample) => {
-                        // get the file data from the url
-                        fetch(example.url)
-                            .then(response => response.text())
-                            .then(data => {
-                                _thisPM.save_code_to_project(example_project, example.name, data, false);
-                            });
-                    });
-                }, 200);
-            }, 500);
-
-            localStorage.setItem('did_load_examples', JSON.stringify(true));
-            localStorage.setItem('pm_version', JSON.stringify(PMConfig.VERSION));
+        if(default_project === null || default_project === undefined) {
+            default_project = _thisPM.create_new_project(PMConfig.DEFAULT_PROJECT, PMConfig.DEFAULT_PROJECT_DESCRIPTION);
         }
 
-        //_thisPM.emit_notification("default-project-metadata-ready", {});
+        if(default_project !== null && default_project !== undefined) {
+            for(const [filename, url] of Object.entries(silex_examples)) {
+                if(!Object.keys(default_project.files).includes(filename)) {
+                    missing_files.push(filename);
+                    default_project.files[filename] = new FileMetaData(filename);
+                }
+            }
+
+            if(missing_files.length > 0) {
+                ProjectManager.save_project_metadata(default_project);
+            }
+        }
+
+        ProjectManager.save_project_metadata(default_project);
+
+        // make sure the current project is up to date with the default project
+        const ls_project_json = localStorage.getItem('current_project');
+        let ls_project: Project | null = null;
+        if(ls_project_json !== null) {
+            ls_project = JSON.parse(ls_project_json) as Project;
+        }
+
+        if(ls_project !== null && ls_project.name === PMConfig.DEFAULT_PROJECT && ls_project.uuid !== default_project?.uuid) {
+            console.warn("Default project is the current project. Changing it.");
+
+            let last_used_file_metadata = ls_project.last_used_file_metadata;
+            if(last_used_file_metadata !== null && default_project !== null && default_project !== undefined) {
+                if(Object.keys(default_project?.files).includes(last_used_file_metadata.name)) {
+                    default_project.last_used_file_metadata = default_project.files[last_used_file_metadata.name];
+                } else {
+                    last_used_file_metadata = null;
+                }
+            }
+
+            localStorage.removeItem('current_project');
+            localStorage.removeItem('last_used_file_metadata');
+            localStorage.setItem('current_project', JSON.stringify(default_project as Project));
+            localStorage.setItem('last_used_file_metadata', JSON.stringify(default_project?.last_used_file_metadata));
+        }
+    }
+    load_example_file(example: string) {
+        const _thisPM = this;
+
+        const default_project = this.get_default_project();
+
+        if(default_project === null || default_project === undefined) {
+            _thisPM.create_new_project(PMConfig.DEFAULT_PROJECT, PMConfig.DEFAULT_PROJECT_DESCRIPTION);
+        }
+
+        if(default_project !== null && default_project !== undefined) {
+            for(const filename of Object.keys(silex_examples)) {
+                if(!Object.keys(default_project.files).includes(filename)) {
+                    default_project.files[filename] = new FileMetaData(filename);
+                }
+            }
+        }
+
+        fetch(silex_examples[example])
+            .then(response => response.text())
+            .then(data => {
+                _thisPM.save_code_to_project(default_project as Project, example, data, false);
+            });
     }
 
     init_user_project() {
@@ -644,7 +641,6 @@ export class ProjectManager {
 
         if(ls_project !== null) {
             console.log("User Project found in local storage. loading...");
-
 
             if(Object.entries(this.projects).length === 0) {
                 // this really shouldn't occur, because load_projects_record() would generate the default project
@@ -1285,13 +1281,25 @@ export class ProjectManager {
                         // @ts-ignore
                         btn_load_file_alert.removeEventListener("click", load_file_alert_handler);
 
-                        _thisPM.worker_opfs.postMessage({command: "load_file_from_project", cmd_opts: {project: opts.project, filename: opts.filename}});
-                        opts.project.last_used_file_metadata = opts.file_metadata;
-                        _thisPM.set_current_project(opts.project);
+                        function load_file() {
+                            _thisPM.worker_opfs.postMessage({command: "load_file_from_project", cmd_opts: {project: opts.project, filename: opts.filename}});
+                            opts.project.last_used_file_metadata = opts.file_metadata;
+                            _thisPM.set_current_project(opts.project);
 
-                        _thisPM.emit_notification("project-did-load-file");
-                        _thisPM.emit_notification("project-subcontainer-will-close");
-                        _thisPM.emit_notification("project-container-should-close");
+                            _thisPM.emit_notification("project-did-load-file");
+                            _thisPM.emit_notification("project-subcontainer-will-close");
+                            _thisPM.emit_notification("project-container-should-close");
+                        }
+
+                        if(project.name === PMConfig.DEFAULT_PROJECT) {
+                            _thisPM.load_example_file(opts.filename);
+                            // some time to load from url.
+                            setTimeout(() => {
+                                load_file();
+                            }, 400);
+                        } else {
+                            load_file();
+                        }
                     }
 
                     btn_load_file_alert.addEventListener("click", load_file_alert_handler.bind(null), {once: true});
@@ -1307,12 +1315,24 @@ export class ProjectManager {
 
             } else {
                 console.log("editor buffer does not need saving.");
-                _thisPM.worker_opfs.postMessage({command: "load_file_from_project", cmd_opts: {project: opts.project, filename: opts.filename}});
-                project.last_used_file_metadata = opts.file_metadata;
-                _thisPM.set_current_project(project);
+                function load() {
+                    _thisPM.worker_opfs.postMessage({command: "load_file_from_project", cmd_opts: {project: opts.project, filename: opts.filename}});
+                    project.last_used_file_metadata = opts.file_metadata;
+                    _thisPM.set_current_project(project);
 
-                _thisPM.emit_notification("project-did-load-file");
-                _thisPM.emit_notification("project-subcontainer-will-close");
+                    _thisPM.emit_notification("project-did-load-file");
+                    _thisPM.emit_notification("project-subcontainer-will-close");
+                }
+
+                if(project.name === PMConfig.DEFAULT_PROJECT) {
+                    _thisPM.load_example_file(opts.filename);
+                    // some time to load from url.
+                    setTimeout(() => {
+                        load();
+                    }, 400);
+                } else {
+                    load();
+                }
             }
         }
 
