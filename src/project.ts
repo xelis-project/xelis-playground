@@ -1393,26 +1393,29 @@ export class ProjectManager {
                 e.stopPropagation();
             });
 
-
             if(project.state === NormalState) {
 
                 const btn_group = document.createElement("div");
                 btn_group.classList.add("graphic-button-group", "horizontal");
 
-                const btn_edit_file = document.createElement("div");
-                const btn_delete_file = document.createElement("div");
-                const btn_export_file = document.createElement("div");
+                const btn_edit_file = document.createElement("button");
+                const btn_delete_file = document.createElement("button");
+                const btn_export_file = document.createElement("button");
 
                 [[btn_edit_file, edit_icon_html]
                     , [btn_delete_file, delete_icon_html]
                     , [btn_export_file, export_icon_html]
                 ].forEach(([btn, svg]) => {
-                    const btn_div = btn as HTMLElement;
+                    const button = btn as HTMLButtonElement;
                     const svg_html = svg as string;
-                    btn_div.classList.add("graphic-button");
-                    btn_div.innerHTML = svg_html;
-                    btn_group.appendChild(btn_div);
+                    button.classList.add("icon-button");
+                    button.innerHTML = svg_html;
+                    btn_group.appendChild(button);
                 });
+
+                //disabled for now
+                btn_delete_file.setAttribute("disabled", "");
+                btn_export_file.setAttribute("disabled", "");
 
                 action_cell.appendChild(btn_group);
 

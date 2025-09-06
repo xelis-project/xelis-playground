@@ -196,7 +196,7 @@ body {
     color: #ffdb00 !important;
 }
 
-.btn:disabled {
+.btn:disabled, .icon-button:disabled {
   /* background-color: #3f3f3f; */
   opacity: 0.4;
   cursor: default;
@@ -794,18 +794,28 @@ justify-content: center;
 /*    height: 26px;*/
 /*}*/
 
-.graphic-button {
+.icon-button {
     display: block;
+    background: none;
+    color: rgb(25, 185, 255);;
+    border: none;
+    cursor: pointer;
+    font-size: 0.75rem;
+    border-radius: .25rem;
+    padding: 0;
+}
+
+.icon-button:hover {
+    color: rgb(187, 225, 255);
 }
 
 .graphic-button-group {
     display: flex;
     flex-direction: row;
-    gap: 0.5rem;
+    gap: 0.25rem;
     justify-content: space-evenly;
     width: auto;
 }
-
 
 @keyframes panel-anim {
   0% {
