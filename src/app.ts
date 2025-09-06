@@ -333,6 +333,7 @@ export class App {
 
             localStorage.setItem("code", editor_session.getValue());
 
+            this.program_changed();
             this.update_info_display();
         });
 
