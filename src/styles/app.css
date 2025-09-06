@@ -196,7 +196,7 @@ body {
     color: #ffdb00 !important;
 }
 
-.btn:disabled {
+.btn:disabled, .icon-button:disabled {
   /* background-color: #3f3f3f; */
   opacity: 0.4;
   cursor: default;
@@ -581,6 +581,20 @@ justify-content: center;
     min-height: unset;
 }
 
+.message.dialog-btn-container {
+    justify-content: space-between;
+    align-items: center;
+}
+
+#editor_save_code_container .message.dialog-btn-container p {
+    margin: 0;
+    color: #a0c3e3;
+}
+
+.message.dialog-btn-container .button-group {
+    padding-top: 0;
+}
+
 .right {
   justify-content: flex-end;
 }
@@ -763,6 +777,44 @@ justify-content: center;
 
 .unsaved {
     color: #dccb1f;
+}
+
+.icon {
+    width: 2.0em;
+    height: 2.0em;
+}
+
+/*.icon.delete-icon {*/
+/*    width: 29px;*/
+/*    height: 29px;*/
+/*}*/
+
+/*.icon.export-icon {*/
+/*    width: 26px;*/
+/*    height: 26px;*/
+/*}*/
+
+.icon-button {
+    display: block;
+    background: none;
+    color: rgb(25, 185, 255);;
+    border: none;
+    cursor: pointer;
+    font-size: 0.75rem;
+    border-radius: .25rem;
+    padding: 0;
+}
+
+.icon-button:hover {
+    color: rgb(187, 225, 255);
+}
+
+.graphic-button-group {
+    display: flex;
+    flex-direction: row;
+    gap: 0.25rem;
+    justify-content: space-evenly;
+    width: auto;
 }
 
 @keyframes panel-anim {

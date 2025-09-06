@@ -1,7 +1,10 @@
 import {uuidv7} from 'uuidv7';
 import {strToU8, zipSync} from 'fflate';
 import {PanelOptions, UIContainers} from "./UIContainers";
-import {silex_examples, SilexExample} from "./examples";
+import {silex_examples} from "./examples";
+import EditIcon from "./resources/icons/edit-icon.svg";
+import DeleteIcon from "./resources/icons/trash-icon.svg";
+import ExportIcon from "./resources/icons/export-icon.svg";
 
 type ProjectUUID = string;
 type ProjectName = string;
@@ -40,6 +43,11 @@ interface BasicObject {
 
 interface NotificationObject {
     [key: string]: any; // Allows any string key to have a value of any type
+}
+
+function convertSvgElementToHtml(svgElement: SVGSVGElement): string {
+    const serializer = new XMLSerializer();
+    return serializer.serializeToString(svgElement);
 }
 
 export class PMConfig {
@@ -926,6 +934,8 @@ export class ProjectManager {
 
         ui_scb_container.replaceChildren();
 
+        const project = <Project>this.get_current_project();
+
         const dialog_container = document.createElement('div');
         dialog_container.classList.add("dialog-container", "layout-tight");
 
@@ -945,17 +955,21 @@ export class ProjectManager {
         filename_input.container.classList.add( "vertical");
         filename_input.input.required = true;
         filename_input.input.value = this.get_current_project()?.last_used_file_metadata?.name ?? "";
+        if(project.name === PMConfig.DEFAULT_PROJECT) {
+            filename_input.input.disabled = true;
+        }
 
         dialog_container.appendChild(project_name_input.container);
         dialog_container.appendChild(filename_input.container);
 
-        const ok_cancel_container = document.createElement('div');
-        ok_cancel_container.classList.add("dialog-btn-container", "right");
+        const message_ok_cancel_container = document.createElement('div');
+        message_ok_cancel_container.classList.add("message", "dialog-btn-container");
 
         const btn_save = document.createElement('button');
         btn_save.classList.add("dialog-btn", "btn");
         btn_save.textContent = "Save";
-        if(filename_input.input.value.length === 0) {
+
+        if(filename_input.input.value.length === 0 || project.name === PMConfig.DEFAULT_PROJECT) {
             btn_save.setAttribute("disabled", "");
         }
 
@@ -975,16 +989,27 @@ export class ProjectManager {
             ui_scb_container.replaceChildren();
         }, {once: true});
 
-        ok_cancel_container.appendChild(btn_cancel);
-        ok_cancel_container.appendChild(btn_save);
+        const message_container = document.createElement('div');
+        message_container.classList.add("dialog-message", "warning");
+        message_ok_cancel_container.appendChild(message_container);
+        if(project.name === PMConfig.DEFAULT_PROJECT) {
+            message_container.innerHTML = `Files cannot be saved to the ${project.name} project. <p>(You can always activate another project and save it there)</p>`;
+        }
 
-        dialog_container.appendChild(ok_cancel_container);
+        const btn_container = document.createElement('div');
+        btn_container.classList.add("button-group", "dialog-btn-container", "right");
+        btn_container.appendChild(btn_cancel);
+        btn_container.appendChild(btn_save);
+        message_ok_cancel_container.appendChild(btn_container);
+
+        dialog_container.appendChild(message_ok_cancel_container);
 
         // TODO: Replace project name input with dropdown menu
         project_name_input.input.value = <string>this.get_current_project()?.name;
 
         filename_input.input.addEventListener("input", e => {
-            if(filename_input.input.value.length > 0 && project_name_input.input.value.length > 0) {
+            const project = <Project>this.get_current_project();
+            if(filename_input.input.value.length > 0 && project_name_input.input.value.length > 0 && project.name !== PMConfig.DEFAULT_PROJECT) {
                 btn_save.removeAttribute("disabled");
             } else {
                 btn_save.setAttribute("disabled", "");
@@ -1201,7 +1226,7 @@ export class ProjectManager {
 
         let row_clicked = false;   // want to know if a row click should cause this panel to close.
 
-        const project_entry_row_handler = (opts: {project: Project, filename: string, file_metadata: FileMetaData}, file_load_click_event: Event)=> {
+        const project_entry_row_edit_handler = (opts: {project: Project, filename: string, file_metadata: FileMetaData}, file_load_click_event: Event)=> {
             row_clicked = true;
 
             if(_thisPM.buffer_needs_saving()) {
@@ -1249,7 +1274,7 @@ export class ProjectManager {
                         btn_load_file_alert.removeEventListener("click", load_file_alert_handler);
 
                         // @ts-ignore
-                        file_load_click_event.target.addEventListener("click", project_entry_row_handler.bind(null, {project, filename, file_metadata}), {once: true});
+                        file_load_click_event.target.addEventListener("click", project_entry_row_edit_handler.bind(null, {project, filename, file_metadata}), {once: true});
 
                     }
 
@@ -1336,7 +1361,16 @@ export class ProjectManager {
             }
         }
 
-        const entry_row_elems: HTMLElement[] = [];
+        // set styles on icons
+        EditIcon.classList.add("icon", "edit-icon");
+        const edit_icon_html = convertSvgElementToHtml(EditIcon);
+        DeleteIcon.classList.add("icon", "delete-icon");
+        const delete_icon_html = convertSvgElementToHtml(DeleteIcon);
+        ExportIcon.classList.add("icon", "export-icon");
+        const export_icon_html = convertSvgElementToHtml(ExportIcon);
+        //const copyicon_html = convertSvgElementToHtml(CopyIcon);
+
+
         Object.entries(project.files).forEach(([filename, file_metadata]) => {
             const dt_tr = document.createElement("tr");
             dt_tr.setAttribute("data-uuid", file_metadata.uuid);
@@ -1353,21 +1387,50 @@ export class ProjectManager {
                 dt_tr.appendChild(td);
             });
 
-            const load_link_td = document.createElement("td");
-            load_link_td.textContent = "-";
+            const action_cell = document.createElement("td");
+            // stop the action cell from responding to tr events
+            action_cell.addEventListener("click", e => {
+                e.stopPropagation();
+            });
 
             if(project.state === NormalState) {
-                load_link_td.textContent = "";
-                const btn_load_file = document.createElement("button");
-                btn_load_file.classList.add("opt-btn", "icon-green");
-                btn_load_file.textContent = "open";
-                entry_row_elems.push(btn_load_file);
-                load_link_td.appendChild(btn_load_file);
 
-                btn_load_file.addEventListener("click", project_entry_row_handler.bind(null, {project, filename, file_metadata}), {once: true});
+                const btn_group = document.createElement("div");
+                btn_group.classList.add("graphic-button-group", "horizontal");
+
+                const btn_edit_file = document.createElement("button");
+                const btn_delete_file = document.createElement("button");
+                const btn_export_file = document.createElement("button");
+
+                [[btn_edit_file, edit_icon_html]
+                    , [btn_delete_file, delete_icon_html]
+                    , [btn_export_file, export_icon_html]
+                ].forEach(([btn, svg]) => {
+                    const button = btn as HTMLButtonElement;
+                    const svg_html = svg as string;
+                    button.classList.add("icon-button");
+                    button.innerHTML = svg_html;
+                    btn_group.appendChild(button);
+                });
+
+                //disabled for now
+                btn_delete_file.setAttribute("disabled", "");
+                btn_export_file.setAttribute("disabled", "");
+
+                action_cell.appendChild(btn_group);
+
+                btn_edit_file.addEventListener("click", project_entry_row_edit_handler.bind(null, {project, filename, file_metadata}), {once: true});
+
+                dt_tr.addEventListener("click", project_entry_row_edit_handler.bind(null, {project, filename, file_metadata}), {once: true});
+                btn_delete_file.addEventListener("click", () => {
+                    alert("Delete file");
+                });
+                btn_export_file.addEventListener("click", () => {
+                    alert("Export file");
+                });
             }
 
-            dt_tr.appendChild(load_link_td);
+            dt_tr.appendChild(action_cell);
 
             if(project.state === NormalState || (project.state === PhantomState && this.show_phantoms)) {
                 dt_body.appendChild(dt_tr);
@@ -1548,12 +1611,6 @@ export class ProjectManager {
 
         const project_internal_close_handler = (e: Event) => {
             console.log("closing project details.");
-
-            // clean up file entry row events
-            entry_row_elems.forEach(e => {
-                // @ts-ignore
-                e.removeEventListener("click", project_entry_row_handler);
-            });
 
             ui_pb_container.replaceChildren();
 
