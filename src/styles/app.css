@@ -581,6 +581,20 @@ justify-content: center;
     min-height: unset;
 }
 
+.message.dialog-btn-container {
+    justify-content: space-between;
+    align-items: center;
+}
+
+#editor_save_code_container .message.dialog-btn-container p {
+    margin: 0;
+    color: #a0c3e3;
+}
+
+.message.dialog-btn-container .button-group {
+    padding-top: 0;
+}
+
 .right {
   justify-content: flex-end;
 }
@@ -766,8 +780,8 @@ justify-content: center;
 }
 
 .icon {
-    width: 2.5em;
-    height: 2.5em;
+    width: 2.0em;
+    height: 2.0em;
 }
 
 /*.icon.delete-icon {*/

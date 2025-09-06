@@ -4,7 +4,7 @@ import {PanelOptions, UIContainers} from "./UIContainers";
 import {silex_examples} from "./examples";
 import EditIcon from "./resources/icons/edit-icon.svg";
 import DeleteIcon from "./resources/icons/trash-icon.svg";
-import ExportIcon from "./resources/icons/export-icon-2.svg";
+import ExportIcon from "./resources/icons/export-icon.svg";
 
 type ProjectUUID = string;
 type ProjectName = string;
@@ -934,6 +934,8 @@ export class ProjectManager {
 
         ui_scb_container.replaceChildren();
 
+        const project = <Project>this.get_current_project();
+
         const dialog_container = document.createElement('div');
         dialog_container.classList.add("dialog-container", "layout-tight");
 
@@ -953,17 +955,21 @@ export class ProjectManager {
         filename_input.container.classList.add( "vertical");
         filename_input.input.required = true;
         filename_input.input.value = this.get_current_project()?.last_used_file_metadata?.name ?? "";
+        if(project.name === PMConfig.DEFAULT_PROJECT) {
+            filename_input.input.disabled = true;
+        }
 
         dialog_container.appendChild(project_name_input.container);
         dialog_container.appendChild(filename_input.container);
 
-        const ok_cancel_container = document.createElement('div');
-        ok_cancel_container.classList.add("dialog-btn-container", "right");
+        const message_ok_cancel_container = document.createElement('div');
+        message_ok_cancel_container.classList.add("message", "dialog-btn-container");
 
         const btn_save = document.createElement('button');
         btn_save.classList.add("dialog-btn", "btn");
         btn_save.textContent = "Save";
-        if(filename_input.input.value.length === 0) {
+
+        if(filename_input.input.value.length === 0 || project.name === PMConfig.DEFAULT_PROJECT) {
             btn_save.setAttribute("disabled", "");
         }
 
@@ -983,16 +989,27 @@ export class ProjectManager {
             ui_scb_container.replaceChildren();
         }, {once: true});
 
-        ok_cancel_container.appendChild(btn_cancel);
-        ok_cancel_container.appendChild(btn_save);
+        const message_container = document.createElement('div');
+        message_container.classList.add("dialog-message", "warning");
+        message_ok_cancel_container.appendChild(message_container);
+        if(project.name === PMConfig.DEFAULT_PROJECT) {
+            message_container.innerHTML = `Files cannot be saved to the ${project.name} project. <p>(You can always activate another project and save it there)</p>`;
+        }
 
-        dialog_container.appendChild(ok_cancel_container);
+        const btn_container = document.createElement('div');
+        btn_container.classList.add("button-group", "dialog-btn-container", "right");
+        btn_container.appendChild(btn_cancel);
+        btn_container.appendChild(btn_save);
+        message_ok_cancel_container.appendChild(btn_container);
+
+        dialog_container.appendChild(message_ok_cancel_container);
 
         // TODO: Replace project name input with dropdown menu
         project_name_input.input.value = <string>this.get_current_project()?.name;
 
         filename_input.input.addEventListener("input", e => {
-            if(filename_input.input.value.length > 0 && project_name_input.input.value.length > 0) {
+            const project = <Project>this.get_current_project();
+            if(filename_input.input.value.length > 0 && project_name_input.input.value.length > 0 && project.name !== PMConfig.DEFAULT_PROJECT) {
                 btn_save.removeAttribute("disabled");
             } else {
                 btn_save.setAttribute("disabled", "");
@@ -1370,11 +1387,14 @@ export class ProjectManager {
                 dt_tr.appendChild(td);
             });
 
-            const load_link_td = document.createElement("td");
-            load_link_td.textContent = "-";
+            const action_cell = document.createElement("td");
+            // stop the action cell from responding to tr events
+            action_cell.addEventListener("click", e => {
+                e.stopPropagation();
+            });
+
 
             if(project.state === NormalState) {
-                load_link_td.textContent = "";
 
                 const btn_group = document.createElement("div");
                 btn_group.classList.add("graphic-button-group", "horizontal");
@@ -1394,9 +1414,10 @@ export class ProjectManager {
                     btn_group.appendChild(btn_div);
                 });
 
-                load_link_td.appendChild(btn_group);
+                action_cell.appendChild(btn_group);
 
                 btn_edit_file.addEventListener("click", project_entry_row_edit_handler.bind(null, {project, filename, file_metadata}), {once: true});
+
                 dt_tr.addEventListener("click", project_entry_row_edit_handler.bind(null, {project, filename, file_metadata}), {once: true});
                 btn_delete_file.addEventListener("click", () => {
                     alert("Delete file");
@@ -1406,7 +1427,7 @@ export class ProjectManager {
                 });
             }
 
-            dt_tr.appendChild(load_link_td);
+            dt_tr.appendChild(action_cell);
 
             if(project.state === NormalState || (project.state === PhantomState && this.show_phantoms)) {
                 dt_body.appendChild(dt_tr);
