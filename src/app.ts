@@ -55,7 +55,7 @@ export class App {
     btn_entry_call: HTMLElement;
     btn_signature: HTMLElement;
     btn_call_history: HTMLElement;
-    btn_reuse_last_call: HTMLElement;
+    btn_reuse_entry_calls: HTMLElement;
     btn_copy: HTMLElement;
 
     /* Editor Project Panel */
@@ -81,10 +81,11 @@ export class App {
 
     call_history: Record<string, string>[] = [];
     prefs_CALL_HISTORY_MAX = 3;
-    prefs_REUSE_ENTRY_CALL_HISTORY = true;
+    prefs_REUSE_ENTRY_CALLS = true;
 
     constructor(silex: Silex) {
         const _thisApp = this;
+
         this.silex = silex;
         this.program_code = "";
         this.program_entry_index = 0;
@@ -108,14 +109,6 @@ export class App {
         this.btn_entry_call = document.querySelector(`#entry-call-btn`) as HTMLButtonElement;
         this.btn_signature = document.querySelector(`#signature-btn`) as HTMLButtonElement;
         this.btn_copy = document.querySelector(`#copy-ec-btn`) as HTMLButtonElement;
-        this.btn_call_history = document.querySelector(`#btn-call-history`) as HTMLButtonElement;
-        HistoryIcon.classList.add("icon", "history-icon");
-        this.btn_call_history.innerHTML =  Utils.convertSvgElementToHtml(HistoryIcon) as string;
-
-        this.btn_reuse_last_call = document.querySelector(`#btn-reuse-last-call`) as HTMLButtonElement;
-        ReuseIcon.classList.add("icon", "reuse-icon");
-        this.btn_reuse_last_call.innerHTML =  Utils.convertSvgElementToHtml(ReuseIcon) as string;
-
 
         /* Argument Editor (Parameter Builder)*/
         this.pb_main_container = UIContainers.get_panel_selection_container('#parameter_builder_container') as HTMLElement;
@@ -139,22 +132,6 @@ export class App {
         this.btn_editor_save_code = document.querySelector(`#btn_editor_save_code`) as HTMLElement;
         /* end editor options panel*/
 
-        // get saved call history
-        const saved_call_history = localStorage.getItem('call_history');
-        if(saved_call_history !== null) {
-            _thisApp.call_history = JSON.parse(saved_call_history);
-        }
-
-        if(_thisApp.prefs_CALL_HISTORY_MAX <= 0) {
-            _thisApp.call_history = [];
-        }
-
-        if(_thisApp.prefs_CALL_HISTORY_MAX >= 0 && _thisApp.call_history.length > _thisApp.prefs_CALL_HISTORY_MAX) {
-            _thisApp.call_history.splice(0, _thisApp.call_history.length - _thisApp.prefs_CALL_HISTORY_MAX);
-        }
-
-        localStorage.setItem('call_history', JSON.stringify(_thisApp.call_history));
-
         this.btn_export.addEventListener('click', () => this.open_modal_export());
         this.btn_compile.addEventListener('click', () => this.compile_code());
         this.btn_copy.addEventListener('click', () => this.copy_text_to_clipboard(this.entry_call_container.textContent || ""));
@@ -163,6 +140,30 @@ export class App {
 
         this.btn_output_copy.addEventListener('click', () => this.copy_text_to_clipboard(this.output.textContent || ""));
         this.btn_output_panel_toggle.addEventListener('click', () => this.output_panel_toggle(undefined));
+
+        this.btn_call_history = document.querySelector(`#btn-call-history`) as HTMLButtonElement;
+        HistoryIcon.classList.add("icon", "history-icon");
+        _thisApp.btn_call_history.innerHTML =  Utils.convertSvgElementToHtml(HistoryIcon) as string;
+
+        this.btn_reuse_entry_calls = document.querySelector(`#btn-reuse-last-call`) as HTMLButtonElement;
+        ReuseIcon.classList.add("icon", "reuse-icon");
+        _thisApp.btn_reuse_entry_calls.innerHTML =  Utils.convertSvgElementToHtml(ReuseIcon) as string;
+        _thisApp.btn_reuse_entry_calls.addEventListener("click", e => {
+            const data_toggle = _thisApp.btn_reuse_entry_calls.getAttribute("data-toggle");
+            if(data_toggle !== undefined && data_toggle !== null) {
+                if(data_toggle === "on") {
+                    _thisApp.prefs_REUSE_ENTRY_CALLS = false;
+                    _thisApp.btn_reuse_entry_calls.setAttribute("data-tooltip", "Enable call reuse");
+                    _thisApp.btn_reuse_entry_calls.setAttribute("data-toggle", "off");
+                } else {
+                    _thisApp.prefs_REUSE_ENTRY_CALLS = true;
+                    _thisApp.btn_reuse_entry_calls.setAttribute("data-tooltip", "Disable call reuse");
+                    _thisApp.btn_reuse_entry_calls.setAttribute("data-toggle", "on");
+                }
+            }
+
+            localStorage.setItem('reuse_entry_calls', JSON.stringify(_thisApp.prefs_REUSE_ENTRY_CALLS));
+        });
 
         this.btn_close_arg_editor.addEventListener("click", () => {
             const after_close = () => {
@@ -396,8 +397,50 @@ export class App {
             this.custom_select.build_selects();
         });
 
+        _thisApp.call_history_init();
+        _thisApp.reuse_entry_calls_init();
         this.load_save();
 
+    }
+
+    call_history_init() {
+        const _thisApp = this;
+        // get saved call history
+        const saved_call_history = localStorage.getItem('call_history');
+        if(saved_call_history !== null) {
+            _thisApp.call_history = JSON.parse(saved_call_history);
+        }
+
+        if(_thisApp.prefs_CALL_HISTORY_MAX <= 0) {
+            _thisApp.call_history = [];
+        }
+
+        if(_thisApp.prefs_CALL_HISTORY_MAX >= 0 && _thisApp.call_history.length > _thisApp.prefs_CALL_HISTORY_MAX) {
+            _thisApp.call_history.splice(0, _thisApp.call_history.length - _thisApp.prefs_CALL_HISTORY_MAX);
+        }
+
+        localStorage.setItem('call_history', JSON.stringify(_thisApp.call_history));
+    }
+
+    reuse_entry_calls_init() {
+        const _thisApp = this;
+        // get saved call history
+        const reuse_last_call = localStorage.getItem('reuse_entry_calls');
+        if(reuse_last_call !== null) {
+            _thisApp.prefs_REUSE_ENTRY_CALLS = JSON.parse(reuse_last_call);
+        }
+
+        if(_thisApp.prefs_REUSE_ENTRY_CALLS) {
+            _thisApp.prefs_REUSE_ENTRY_CALLS = true;
+            _thisApp.btn_reuse_entry_calls.setAttribute("data-tooltip", "Disable call reuse");
+            _thisApp.btn_reuse_entry_calls.setAttribute("data-toggle", "on");
+        } else {
+            _thisApp.prefs_REUSE_ENTRY_CALLS = false;
+            _thisApp.btn_reuse_entry_calls.setAttribute("data-tooltip", "Enable call reuse");
+            _thisApp.btn_reuse_entry_calls.setAttribute("data-toggle", "off");
+        }
+
+        localStorage.setItem('reuse_entry_calls', JSON.stringify(_thisApp.prefs_REUSE_ENTRY_CALLS));
     }
 
 
@@ -428,7 +471,6 @@ export class App {
         } else {
             current_file_info.textContent = "-";
         }
-
     }
 
     load_save() {
@@ -483,6 +525,7 @@ export class App {
 
         this.btn_run.setAttribute('disabled', '');
         this.btn_export.setAttribute("disabled", "");
+        this.btn_reuse_entry_calls.setAttribute('disabled', '');
         this.btn_call_history.setAttribute('disabled', '');
         this.btn_edit_params.setAttribute('disabled', '');
         this.btn_entry_call.setAttribute('disabled', '');
@@ -542,7 +585,7 @@ export class App {
             }, 500);
 
             // reuse call history
-            if(_thisApp.prefs_REUSE_ENTRY_CALL_HISTORY && _thisApp.call_history.length > 0) {
+            if(_thisApp.prefs_REUSE_ENTRY_CALLS && _thisApp.call_history.length > 0) {
                 let last_entry_call_history_params: Record<string, string> = _thisApp.call_history[_thisApp.call_history.length - 1];
 
                 console.log("LINK - INVOKE - last_entry_call_history_params");
@@ -702,6 +745,7 @@ export class App {
             this.program_code = code;
             this.output.innerHTML += this.output_success("Compiled successfully!\n");
 
+            this.btn_reuse_entry_calls.removeAttribute('disabled');
             this.btn_call_history.removeAttribute('disabled');
             this.btn_export.removeAttribute('disabled');
             this.btn_entry_call.removeAttribute('disabled');

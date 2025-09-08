@@ -312,6 +312,45 @@ input[type="number"] {
     align-items: center;
 }
 
+.pb-arg-btns > .left-icons {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 0.3em;
+}
+
+.left-icons button {
+    position: relative;
+}
+
+.left-icons button .icon {
+    position: relative;
+    top: 3px;
+}
+
+.left-icons .recycle-icon {
+    top: 4px;
+}
+
+button[data-toggle='on'] {
+    
+}
+
+button[data-toggle='off'] {
+    opacity: 0.4;
+}
+
+button[data-toggle='off']:hover {
+    opacity: 0.4;
+}
+
+button[data-toggle='off']:hover:disabled {
+    opacity: 0.4;
+}
+
+button[data-toggle='off']:hover:not(:disabled) {
+    opacity: 1;
+}
+
 .pb-arg-btns .opt-btn {
     font-size: 0.65rem;
 }

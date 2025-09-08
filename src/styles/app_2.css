@@ -212,13 +212,13 @@
 .with-tooltip::after {
     content: attr(data-tooltip); /* Get tooltip text from the data attribute */
     position: absolute;
-    bottom: 25%;
-    left: 50%;
-    transform: translateX(10%) translateY(50%);
+    bottom: 115%;
+    left: 0%;
+    transform: translateX(  0%) translateY(0%);
     font-size: 0.6rem;
     width: auto;
     min-width: 120px;
-    background-color: rgb(0, 31, 38);
+    background-color: rgb(0, 25, 38);
     color: rgb(147, 214, 255);
     text-align: center;
     padding: 5px 10px;
@@ -227,11 +227,17 @@
     opacity: 0;
     transition: opacity 0.3s, visibility 0.3s;
     white-space: nowrap;
+    z-index: 100;
 }
 
 .with-tooltip:hover::after {
     visibility: visible;
     opacity: 1;
+}
+
+.with-tooltip:disabled::after {
+    visibility: hidden;
+    opacity: 0;
 }
 
 
