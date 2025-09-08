@@ -200,14 +200,22 @@
                     <div id="parameter-display" class="">
                         <h2 class="title1">Parameters</h2>
                         <div id="pba-readonly" class="pb-arguments-container readonly">
-                            <div class="message hide">This entry has no parameters.</div>
-                            <div id="entry-call-container"></div>
-                            <div id="signature-container" class="hide code"></div>
+                            <div>
+                                <div class="message hide">This entry has no parameters.</div>
+                                <div id="entry-call-container"></div>
+                                <div id="signature-container" class="hide code"></div>
+                            </div>
                             <div class="pb-arg-btns">
-                                <button id="edit-entry-params-btn" data-panel-id="parameter_builder_container" class="opt-btn blue" disabled>Arguments</button>
-                                <button id="entry-call-btn" class="opt-btn blue hide" disabled>Entry Call</button>
-                                <button id="signature-btn" class="opt-btn blue" disabled>XVM SiG</button>
-                                <button id="copy-ec-btn" class="opt-btn blue" disabled>Copy</button>
+                                <div>
+                                    <button id="btn-reuse-last-call" class="icon-button with-tooltip" data-tooltip="Reuse last call"></button>
+                                    <button id="btn-call-history" class="icon-button with-tooltip" data-tooltip="Contract call history" disabled></button>
+                                </div>
+                                <div>
+                                    <button id="edit-entry-params-btn" data-panel-id="parameter_builder_container" class="opt-btn blue" disabled>Arguments</button>
+                                    <button id="entry-call-btn" class="opt-btn blue hide" disabled>Entry Call</button>
+                                    <button id="signature-btn" class="opt-btn blue" disabled>XVM SiG</button>
+                                    <button id="copy-ec-btn" class="opt-btn blue" disabled>Copy</button>
+                                </div>
                             </div>
                         </div>
                     </div>

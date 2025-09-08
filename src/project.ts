@@ -2,6 +2,8 @@ import {uuidv7} from 'uuidv7';
 import {strToU8, zipSync} from 'fflate';
 import {PanelOptions, UIContainers} from "./UIContainers";
 import {silex_examples} from "./examples";
+import {Utils} from "./Utils";
+
 import EditIcon from "./resources/icons/edit-icon.svg";
 import DeleteIcon from "./resources/icons/trash-icon.svg";
 import ExportIcon from "./resources/icons/export-icon.svg";
@@ -43,11 +45,6 @@ interface BasicObject {
 
 interface NotificationObject {
     [key: string]: any; // Allows any string key to have a value of any type
-}
-
-function convertSvgElementToHtml(svgElement: SVGSVGElement): string {
-    const serializer = new XMLSerializer();
-    return serializer.serializeToString(svgElement);
 }
 
 export class PMConfig {
@@ -1363,11 +1360,11 @@ export class ProjectManager {
 
         // set styles on icons
         EditIcon.classList.add("icon", "edit-icon");
-        const edit_icon_html = convertSvgElementToHtml(EditIcon);
+        const edit_icon_html = Utils.convertSvgElementToHtml(EditIcon);
         DeleteIcon.classList.add("icon", "delete-icon");
-        const delete_icon_html = convertSvgElementToHtml(DeleteIcon);
+        const delete_icon_html = Utils.convertSvgElementToHtml(DeleteIcon);
         ExportIcon.classList.add("icon", "export-icon");
-        const export_icon_html = convertSvgElementToHtml(ExportIcon);
+        const export_icon_html = Utils.convertSvgElementToHtml(ExportIcon);
         //const copyicon_html = convertSvgElementToHtml(CopyIcon);
 
 

@@ -14,6 +14,13 @@ import { XVMParamParser } from './parameter_builder/xvm_param_parser';
 import { ParameterBuilder } from './parameter_builder/parameter_builder';
 import {PanelOptions, UIContainers} from "./UIContainers";
 
+import HistoryIcon from "./resources/icons/history-icon.svg";
+import ReuseIcon from "./resources/icons/recycle-icon.svg";
+
+import {Utils} from "./Utils";
+
+type EntryCallParam = [string: string];
+
 export class App {
     silex: any;
 
@@ -47,6 +54,8 @@ export class App {
     signature_container: HTMLElement;
     btn_entry_call: HTMLElement;
     btn_signature: HTMLElement;
+    btn_call_history: HTMLElement;
+    btn_reuse_last_call: HTMLElement;
     btn_copy: HTMLElement;
 
     /* Editor Project Panel */
@@ -62,8 +71,6 @@ export class App {
     entry_menu: HTMLElement;
     arg_ro_message: HTMLElement;
 
-
-
     program_code: string;
     program_entry_index: number;
     xvm_param_parser: XVMParamParser;
@@ -72,6 +79,9 @@ export class App {
     project_manager: ProjectManager;
     btn_close_arg_editor: HTMLElement;
 
+    call_history: Record<string, string>[] = [];
+    prefs_CALL_HISTORY_MAX = 3;
+    prefs_REUSE_ENTRY_CALL_HISTORY = true;
 
     constructor(silex: Silex) {
         const _thisApp = this;
@@ -98,6 +108,14 @@ export class App {
         this.btn_entry_call = document.querySelector(`#entry-call-btn`) as HTMLButtonElement;
         this.btn_signature = document.querySelector(`#signature-btn`) as HTMLButtonElement;
         this.btn_copy = document.querySelector(`#copy-ec-btn`) as HTMLButtonElement;
+        this.btn_call_history = document.querySelector(`#btn-call-history`) as HTMLButtonElement;
+        HistoryIcon.classList.add("icon", "history-icon");
+        this.btn_call_history.innerHTML =  Utils.convertSvgElementToHtml(HistoryIcon) as string;
+
+        this.btn_reuse_last_call = document.querySelector(`#btn-reuse-last-call`) as HTMLButtonElement;
+        ReuseIcon.classList.add("icon", "reuse-icon");
+        this.btn_reuse_last_call.innerHTML =  Utils.convertSvgElementToHtml(ReuseIcon) as string;
+
 
         /* Argument Editor (Parameter Builder)*/
         this.pb_main_container = UIContainers.get_panel_selection_container('#parameter_builder_container') as HTMLElement;
@@ -106,7 +124,7 @@ export class App {
         this.entry_call_container = document.querySelector(`#entry-call-container`) as HTMLElement;
         this.signature_container = document.querySelector(`#signature-container`) as HTMLElement;
         this.entry_menu = document.getElementById('entry-menu') as HTMLElement;
-        this.arg_ro_message = document.querySelector(`#pba-readonly > div.message`) as HTMLElement;
+        this.arg_ro_message = document.querySelector(`#pba-readonly .message`) as HTMLElement;
         this.btn_close_arg_editor = document.querySelector(`#btn_close_arg_editor`) as HTMLElement;
         /* end Argument Editor (Parameter Builder)*/
 
@@ -120,6 +138,22 @@ export class App {
         this.btn_editor_load_file = document.querySelector(`#btn_editor_load_file`) as HTMLElement;
         this.btn_editor_save_code = document.querySelector(`#btn_editor_save_code`) as HTMLElement;
         /* end editor options panel*/
+
+        // get saved call history
+        const saved_call_history = localStorage.getItem('call_history');
+        if(saved_call_history !== null) {
+            _thisApp.call_history = JSON.parse(saved_call_history);
+        }
+
+        if(_thisApp.prefs_CALL_HISTORY_MAX <= 0) {
+            _thisApp.call_history = [];
+        }
+
+        if(_thisApp.prefs_CALL_HISTORY_MAX >= 0 && _thisApp.call_history.length > _thisApp.prefs_CALL_HISTORY_MAX) {
+            _thisApp.call_history.splice(0, _thisApp.call_history.length - _thisApp.prefs_CALL_HISTORY_MAX);
+        }
+
+        localStorage.setItem('call_history', JSON.stringify(_thisApp.call_history));
 
         this.btn_export.addEventListener('click', () => this.open_modal_export());
         this.btn_compile.addEventListener('click', () => this.compile_code());
@@ -449,6 +483,7 @@ export class App {
 
         this.btn_run.setAttribute('disabled', '');
         this.btn_export.setAttribute("disabled", "");
+        this.btn_call_history.setAttribute('disabled', '');
         this.btn_edit_params.setAttribute('disabled', '');
         this.btn_entry_call.setAttribute('disabled', '');
         this.btn_signature.setAttribute('disabled', '');
@@ -457,6 +492,8 @@ export class App {
     }
 
     add_entry(entry: any, index: number) {
+        const _thisApp = this;
+
         const link = document.createElement(`a`);
         link.classList.add(`entry-link`);
         link.setAttribute(`data-entry-index`, `${index}`);
@@ -504,6 +541,60 @@ export class App {
                 this.entry_menu.classList.add('dropdown-content');
             }, 500);
 
+            // reuse call history
+            if(_thisApp.prefs_REUSE_ENTRY_CALL_HISTORY && _thisApp.call_history.length > 0) {
+                let last_entry_call_history_params: Record<string, string> = _thisApp.call_history[_thisApp.call_history.length - 1];
+
+                console.log("LINK - INVOKE - last_entry_call_history_params");
+                console.log(last_entry_call_history_params);
+                console.log(params);
+
+                const param_containers = document.querySelectorAll(`#pb_entry_container_${this.program_entry_index} > .pb-input-scrollbox > .pb-input-container > .param-container`) as NodeListOf<HTMLElement>;
+
+                const lechp_keys = Object.keys(last_entry_call_history_params);
+
+                if(Object.keys(lechp_keys).length === params.length
+                    && param_containers.length === params.length) {
+
+                    for(let i = 0; i < params.length; i++) {
+                        if(lechp_keys[i] === params[i].type) {
+                            const param_container = param_containers[i];
+                            const param_ctr = param_container.querySelector(`.input-container[data-type="${lechp_keys[i]}"]`) as HTMLInputElement;
+                            console.log(param_ctr);
+                            switch(lechp_keys[i]) {
+                                case "u8":
+                                case "u16":
+                                case "u32":
+                                case "u64":
+                                case "u128":
+                                case "u256":
+                                case "u512":
+                                {
+                                    const p_input = param_ctr.querySelector(`input[type="number"]`) as HTMLInputElement;
+                                    p_input.value = last_entry_call_history_params[lechp_keys[i]];
+                                    p_input.dispatchEvent(new Event('change'));
+                                    break;
+                                }
+
+                                case "string": {
+                                    const p_input = param_ctr.querySelector(`input`) as HTMLInputElement;
+                                    p_input.value = last_entry_call_history_params[lechp_keys[i]];
+                                    p_input.dispatchEvent(new Event('change'));
+                                    break;
+                                }
+
+                                default:
+                                    console.error(`Complex type ${lechp_keys[i]}. TODO.`);
+                                    break;
+
+                            }
+                            // param_input.value = value;
+                        }
+                    }
+                }
+            }
+
+
             this.update_ro_argument_display();
         });
     }
@@ -528,42 +619,6 @@ export class App {
             this.entry_call_container.appendChild(close_func_name);
         }
     }
-
-    /*
-    add_entry_params(entry: any, index: number) {
-        const container = document.createElement(`div`);
-        container.id = `entry_params_${index}`;
-        container.classList.add(`spec-column`, `hidden`);
-        const params = entry.parameters();
-
-        params.forEach((param: any, param_index: number) => {
-            const item = document.createElement(`div`);
-            item.classList.add(`spec-param`);
-
-            const title = document.createElement(`div`);
-            title.textContent = `${param.name()} (${param.type_name()})`;
-
-            const input = document.createElement(`input`);
-            input.type = "text";
-            input.autocomplete = `off`;
-            input.autocapitalize = `off`;
-            input.placeholder = `required`;
-            input.setAttribute(`data-type`, param.type_name());
-            input.classList.add('input');
-            input.name = `entry_params_${index}_input`;
-
-            item.appendChild(title);
-            item.appendChild(input);
-            container.appendChild(item);
-        });
-
-        if (params.length === 0) {
-            container.innerHTML = `None`;
-        }
-
-        this.program_entry_params.appendChild(container);
-    }
-        */
 
     output_error(text: string, append: boolean = false) {
         return `<span class="out-err">${text}</span>`;
@@ -647,6 +702,7 @@ export class App {
             this.program_code = code;
             this.output.innerHTML += this.output_success("Compiled successfully!\n");
 
+            this.btn_call_history.removeAttribute('disabled');
             this.btn_export.removeAttribute('disabled');
             this.btn_entry_call.removeAttribute('disabled');
             this.btn_entry_call.classList.add('selected');
@@ -659,13 +715,18 @@ export class App {
 
     get_program_params() {
         const params = [] as string[];
+        const call_hist_params: Record<string, string> = {};
+
+
         const pbe_params_elems = document.querySelectorAll(`#pb_entry_container_${this.program_entry_index} > div.pb-arguments-container > pre`);
         pbe_params_elems.forEach((pbe, index) => {
             // remove the quotes
             const copy_pbe = pbe.cloneNode(true) as HTMLElement;
-            const type_name = copy_pbe.firstChild?.nodeName.toLowerCase();
+            const type_name = copy_pbe.firstChild?.nodeName.toLowerCase() ?? "unknown_type";
+            let ch_type_name = type_name;
 
             let content: string | null | undefined;
+            const call_hist_params_content = {} as Record<string, string>;
 
             ['quote'].forEach(c => {
                 const brace_children = copy_pbe.querySelectorAll(c);
@@ -682,7 +743,11 @@ export class App {
                     console.log(opaque_type);
                     //const ot_name = opaque_type?.nodeName.toLowerCase();
                     //content =`{type: "${ot_name}", value: ${opaque_type?.textContent}}`
-                    content = opaque_type?.textContent
+                    content = opaque_type?.textContent;
+
+                    if(opaque_type !== null && opaque_type !== undefined) {
+                        ch_type_name = opaque_type?.nodeName.toLowerCase();
+                    }
                     break;
 
                 default:
@@ -691,10 +756,13 @@ export class App {
             }
 
             params.push(`${content}`);
+            call_hist_params[ch_type_name] = `${content}`;
         });
 
         console.log("GET_PARAMS OUTPUT");
         console.log(params);
+
+        this.call_history_add(call_hist_params);
 
         return params;
     }
@@ -894,5 +962,43 @@ export class App {
         });
 
         document.dispatchEvent(screen_right_reset);
+    }
+
+    private call_history_add(params: Record<string, string>) {
+        const _thisApp = this;
+
+        let should_add = _thisApp.call_history.length == 0;
+        if(!should_add) {
+            let last_call_hist_entry: Record<string, string> = _thisApp.call_history[_thisApp.call_history.length - 1];
+            if(Object.keys(last_call_hist_entry).length !== Object.keys(params).length) {
+                should_add = true;
+            } else {
+                const le_keys = Object.keys(last_call_hist_entry);
+                const pe_keys = Object.keys(params);
+
+                for(let i = 0; i < le_keys.length; i++) {
+                    if(le_keys[i] !== pe_keys[i]) {
+                        should_add = true
+                        break;
+                    }
+
+                    if(last_call_hist_entry[le_keys[i]] !== params[le_keys[i]]) {
+                        should_add = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (should_add) {
+            if(_thisApp.call_history.length >= _thisApp.prefs_CALL_HISTORY_MAX) {
+                _thisApp.call_history.shift();
+            }
+            _thisApp.call_history.push(params);
+
+            localStorage.setItem('call_history', JSON.stringify(_thisApp.call_history));
+        }
+
+        //console.log(_thisApp.call_history);
     }
 }

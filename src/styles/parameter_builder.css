@@ -296,8 +296,20 @@ input[type="number"] {
 }
 
 .pb-arg-btns {
-    text-align: right;
-    margin-top: 15px;
+    /* text-align: right; */
+    margin-top: 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.25em;
+}
+
+.pb-arg-btns > div {
+    display: flex;
+    gap: 0.25em;
+    flex-wrap: wrap;
+    align-items: center;
 }
 
 .pb-arg-btns .opt-btn {
@@ -366,12 +378,17 @@ input[type="number"] {
 }
 
 #parameter-display > div.pb-arguments-container.readonly {
-    position:unset;
+    position: unset;
     width: auto;
     margin: auto;
-    height:  auto;
+    height: auto;
+    min-height: 100px;
     padding-top: 0.4rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
+
 
 div.pb-arguments-container.readonly {
     font-size: larger;
