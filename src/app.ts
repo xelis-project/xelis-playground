@@ -68,6 +68,7 @@ export class App {
     btn_editor_save_code: HTMLElement;
     /* end editor options popup*/
 
+    hud_entry_name: HTMLElement;
     entry_menu: HTMLElement;
     arg_ro_message: HTMLElement;
 
@@ -110,6 +111,9 @@ export class App {
         this.btn_entry_call = document.querySelector(`#entry-call-btn`) as HTMLButtonElement;
         this.btn_signature = document.querySelector(`#signature-btn`) as HTMLButtonElement;
         this.btn_copy = document.querySelector(`#copy-ec-btn`) as HTMLButtonElement;
+
+        this.hud_entry_name = document.querySelector(`#hud-entry-name`) as HTMLElement;
+        this.hud_entry_name.style.visibility = "hidden";
 
         /* Argument Editor (Parameter Builder)*/
         this.pb_main_container = UIContainers.get_panel_selection_container('#parameter_builder_container') as HTMLElement;
@@ -523,8 +527,9 @@ export class App {
         this.entry_menu.replaceChildren();
 
         // UI
-        const e_name_ro = document.querySelector(`#hud-entry-name`) as HTMLElement;
-        e_name_ro.innerHTML = `&nbsp;`;
+
+        this.hud_entry_name.innerHTML = `&nbsp;`;
+        this.hud_entry_name.style.visibility = 'hidden';
 
         // entry call window
         this.btn_entry_call.click();
@@ -565,8 +570,9 @@ export class App {
             }
 
             const entry_name = this.xvm_param_parser.parameter_builder_data[this.program_entry_index].name;
-            const e_name_ro = document.querySelector(`#hud-entry-name`) as HTMLElement;
-            e_name_ro.textContent = `${entry_name}`;
+
+            this.hud_entry_name.textContent = `${entry_name}`;
+            this.hud_entry_name.style.visibility = 'visible';
 
             this.signature_container.replaceChildren();
 
@@ -659,32 +665,7 @@ export class App {
                         break;
                     }
                 }
-
-
-                // for(let i = _thisApp.call_history.length - 1; i >= 0; --i) {
-                //     let current_call_history_params: Record<string, string> = _thisApp.call_history[_thisApp.call_history.length - 1];
-                //     const param_containers = document.querySelectorAll(`#pb_entry_container_${this.program_entry_index} > .pb-input-scrollbox > .pb-input-container > .param-container`) as NodeListOf<HTMLElement>;
-                //     const lechp_keys = Object.keys(current_call_history_params);
-                //
-                //     // check if the corresponding param keys match the current entry call history params.
-                //     for(let j = 0; j < params.length; j++) {
-                //
-                //     }
-                //
-                //     if(Object.keys(lechp_keys).length === params.length
-                //         && param_containers.length === params.length) {
-                //
-                //     }
-                // }
-
-                // console.log("LINK - INVOKE - last_entry_call_history_params");
-                // console.log(last_entry_call_history_params);
-                // console.log(params);
-
-
             }
-
-
             this.update_ro_argument_display();
         });
     }
