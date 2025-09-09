@@ -82,6 +82,7 @@ export class App {
     call_history: Record<string, string>[] = [];
     prefs_CALL_HISTORY_MAX = 10;
     prefs_REUSE_ENTRY_CALLS = true;
+    did_run_program = false;
 
     constructor(silex: Silex) {
         const _thisApp = this;
@@ -161,7 +162,10 @@ export class App {
                     _thisApp.btn_reuse_entry_calls.setAttribute("data-toggle", "on");
                 }
 
-                _thisApp.compile_code()
+                if(!this.did_run_program) {
+                    _thisApp.compile_code();
+                }
+
             }
 
             localStorage.setItem('reuse_entry_calls', JSON.stringify(_thisApp.prefs_REUSE_ENTRY_CALLS));
@@ -718,6 +722,7 @@ export class App {
         try {
             this.compile_save_code();
             this.clear_program();
+            this.did_run_program = false;
             // if we were using the argument editor, reset to contract/program panel.
             this.notify_screen_right_reset();
             this.output.innerHTML = "Program saved locally.\n";
@@ -928,6 +933,8 @@ export class App {
         this.btn_run_set_run();
         this.btn_export.removeAttribute("disabled");
         this.btn_compile.removeAttribute("disabled");
+
+        this.did_run_program = true;
     }
 
     clear_output() {
