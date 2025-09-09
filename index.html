@@ -171,30 +171,21 @@
                     </div>
                 </div>
                 <div id="program-spec">
-                    <div id="entry-controls">
-                        <div class="dropdown">
-                            <div class="entry-stat-ro stats">
-                                <label>Entry</label
-                                ><span id="hud-entry-name" class="entry-name">&nbsp;</span>
+                    <div class="info-block-container entry-controls">
+                        <div class="info-block">
+                            <div><key>Entry</key>
+                                <div class="dropdown">
+                                    <div class="entry-stat-ro">
+                                        <span id="hud-entry-name" class="entry-name" style="visibility: hidden;">&nbsp;</span>
+                                    </div>
+                                    <div id="entry-menu" class="dropdown-content"></div>
+                                </div>
                             </div>
-                            <div id="entry-menu" class="dropdown-content"></div>
-                        </div>
-
-                        <div class="options-container">
-                            <button id="pb_ui_btn" class="opt-btn blue first" disabled>
-                                Storage
-                            </button>
-                            <button
-                                    id="btn_run"
-                                    class="opt-btn green"
-                                    title="Execute the code."
-                                    disabled
-                            >
-                                Run
-                            </button>
-                            <button id="btn_export" class="opt-btn yellow" disabled>
-                                Export
-                            </button>
+                            <div class="info-block-button-container">
+                                <button class="opt-btn icon-green right" disabled id="btn_storage">STORAGE</button>
+                                <button class="opt-btn icon-green right" disabled id="btn_run" >RUN</button>
+                                <button class="opt-btn icon-green right" disabled id="btn_export">EXPORT</button>
+                            </div>
                         </div>
                     </div>
                     <div id="parameter-display" class="">

@@ -124,7 +124,7 @@ body {
 
 #screen_right_content  div.controls > div.title {
     font-weight: bold;
-    font-size: 22px;
+    font-size: 1.2rem;
 }
 
 @media screen and (min-width: 768px) {
@@ -635,7 +635,7 @@ justify-content: center;
 .info-block {
   display: flex;
   gap: 1rem 3rem;
-  align-items: flex-start;
+  align-items: center;
   flex-wrap: wrap;
   /*border: solid 1px #034853;*/
   margin: 0 1rem 0.5rem 1rem;
@@ -650,9 +650,10 @@ justify-content: center;
 }
 
 .info-block-button-container {
-  display: flex;
-  flex-grow: 1;
-  justify-content: right;
+    display: flex;
+    flex-grow: 1;
+    justify-content: right;
+    flex-wrap: wrap;
 }
 
 #project-details-container .info-block {
@@ -815,6 +816,10 @@ justify-content: center;
     gap: 0.25rem;
     justify-content: space-evenly;
     width: auto;
+}
+
+.entry-controls .info-block {
+    margin: 0;
 }
 
 @keyframes panel-anim {

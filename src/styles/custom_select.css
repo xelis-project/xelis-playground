@@ -71,3 +71,17 @@
 .same-as-selected {
   background-color: #002c1e;
 }
+
+.entry-name:after {
+    content: "";
+    position: relative;
+    margin-left: 0.75rem;
+    top: 0.8rem;
+    border: .45rem solid transparent;
+    border-color: #00eaff transparent transparent transparent;
+}
+
+.dropdown:hover .entry-name:after {
+    border-color: transparent transparent #00eaff transparent;
+    top: -0.75rem;
+}
