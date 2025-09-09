@@ -151,7 +151,7 @@ export class App {
         _thisApp.btn_reuse_entry_calls.addEventListener("click", e => {
             const data_toggle = _thisApp.btn_reuse_entry_calls.getAttribute("data-toggle");
             if(data_toggle !== undefined && data_toggle !== null) {
-                if(data_toggle === "on") {8
+                if(data_toggle === "on") {
                     _thisApp.prefs_REUSE_ENTRY_CALLS = false;
                     _thisApp.btn_reuse_entry_calls.setAttribute("data-tooltip", "Enable call reuse");
                     _thisApp.btn_reuse_entry_calls.setAttribute("data-toggle", "off");
@@ -160,6 +160,8 @@ export class App {
                     _thisApp.btn_reuse_entry_calls.setAttribute("data-tooltip", "Disable call reuse");
                     _thisApp.btn_reuse_entry_calls.setAttribute("data-toggle", "on");
                 }
+
+                _thisApp.compile_code()
             }
 
             localStorage.setItem('reuse_entry_calls', JSON.stringify(_thisApp.prefs_REUSE_ENTRY_CALLS));
@@ -1052,26 +1054,57 @@ export class App {
     private call_history_add(params: Record<string, string>) {
         const _thisApp = this;
 
-        let should_add = _thisApp.call_history.length == 0;
-        if(!should_add) {
-            let last_call_hist_entry: Record<string, string> = _thisApp.call_history[_thisApp.call_history.length - 1];
-            if(Object.keys(last_call_hist_entry).length !== Object.keys(params).length) {
-                should_add = true;
-            } else {
-                const le_keys = Object.keys(last_call_hist_entry);
-                const pe_keys = Object.keys(params);
+        // if there are no history entries, we should add the first entry.
+        // If there are entries, we should check if the call history has an exact copy
+        // of the current entry and remove it.
+        let should_add = this.call_history.length === 0;
 
-                for(let i = 0; i < le_keys.length; i++) {
-                    if(le_keys[i] !== pe_keys[i]) {
-                        should_add = true
-                        break;
+        if(!should_add) {  // confirm it shouldn't be added or remove a copy'
+
+            let found_match = false;
+
+            for(let i = _thisApp.call_history.length - 1; i >= 0; --i) {
+                let call_hist_entry: Record<string, string> = _thisApp.call_history[i];
+
+                if(Object.keys(call_hist_entry).length === Object.keys(params).length) {
+                    const le_keys = Object.keys(call_hist_entry);
+                    const pe_keys = Object.keys(params);
+
+                    let local_match = true;
+
+                    for(let j = 0; j < le_keys.length; j++) {
+                        if(le_keys[j] !== pe_keys[j]) {
+                            local_match = false
+                            break;
+                        }
+
+                        if(call_hist_entry[le_keys[j]] !== params[le_keys[j]]) {
+                            local_match = false
+                            break;
+                        }
                     }
 
-                    if(last_call_hist_entry[le_keys[i]] !== params[le_keys[i]]) {
-                        should_add = true;
-                        break;
+                    if(local_match) {
+                        found_match = true;
+                        if(i === _thisApp.call_history.length - 1) {
+                            console.log("DEBUG --- latest entry in the call history is a copy of the current entry.");
+                            break;
+                        } else {
+                            // splice out the entry
+                            _thisApp.call_history.splice(i, 1);
+                            should_add = true;   // bubble to the top of the list.
+                            break;
+                        }
                     }
                 }
+
+                if(found_match) {
+                    break;
+                }
+            }
+
+            if(!found_match) {
+                should_add = true;
             }
         }
 
