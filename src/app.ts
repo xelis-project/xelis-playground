@@ -80,7 +80,7 @@ export class App {
     btn_close_arg_editor: HTMLElement;
 
     call_history: Record<string, string>[] = [];
-    prefs_CALL_HISTORY_MAX = 3;
+    prefs_CALL_HISTORY_MAX = 10;
     prefs_REUSE_ENTRY_CALLS = true;
 
     constructor(silex: Silex) {
@@ -146,12 +146,12 @@ export class App {
         _thisApp.btn_call_history.innerHTML =  Utils.convertSvgElementToHtml(HistoryIcon) as string;
 
         this.btn_reuse_entry_calls = document.querySelector(`#btn-reuse-last-call`) as HTMLButtonElement;
-        ReuseIcon.classList.add("icon", "reuse-icon");
+        ReuseIcon.classList.add("icon", "recycle-icon");
         _thisApp.btn_reuse_entry_calls.innerHTML =  Utils.convertSvgElementToHtml(ReuseIcon) as string;
         _thisApp.btn_reuse_entry_calls.addEventListener("click", e => {
             const data_toggle = _thisApp.btn_reuse_entry_calls.getAttribute("data-toggle");
             if(data_toggle !== undefined && data_toggle !== null) {
-                if(data_toggle === "on") {
+                if(data_toggle === "on") {8
                     _thisApp.prefs_REUSE_ENTRY_CALLS = false;
                     _thisApp.btn_reuse_entry_calls.setAttribute("data-tooltip", "Enable call reuse");
                     _thisApp.btn_reuse_entry_calls.setAttribute("data-toggle", "off");
@@ -518,7 +518,7 @@ export class App {
 
         // UI
         const e_name_ro = document.querySelector(`#hud-entry-name`) as HTMLElement;
-        e_name_ro.textContent = `- none -`;
+        e_name_ro.innerHTML = `&nbsp;`;
 
         // entry call window
         this.btn_entry_call.click();
@@ -586,55 +586,96 @@ export class App {
 
             // reuse call history
             if(_thisApp.prefs_REUSE_ENTRY_CALLS && _thisApp.call_history.length > 0) {
-                let last_entry_call_history_params: Record<string, string> = _thisApp.call_history[_thisApp.call_history.length - 1];
 
-                console.log("LINK - INVOKE - last_entry_call_history_params");
-                console.log(last_entry_call_history_params);
-                console.log(params);
+                let ch_match = false;
 
-                const param_containers = document.querySelectorAll(`#pb_entry_container_${this.program_entry_index} > .pb-input-scrollbox > .pb-input-container > .param-container`) as NodeListOf<HTMLElement>;
+                for(let i = _thisApp.call_history.length - 1; i >= 0; --i) {
+                    let current_call_history_params: Record<string, string> = _thisApp.call_history[i];
+                    const param_containers = document.querySelectorAll(`#pb_entry_container_${this.program_entry_index} > .pb-input-scrollbox > .pb-input-container > .param-container`) as NodeListOf<HTMLElement>;
+                    const lechp_keys = Object.keys(current_call_history_params);
 
-                const lechp_keys = Object.keys(last_entry_call_history_params);
+                    if(Object.keys(lechp_keys).length === params.length
+                        && param_containers.length === params.length) {
 
-                if(Object.keys(lechp_keys).length === params.length
-                    && param_containers.length === params.length) {
-
-                    for(let i = 0; i < params.length; i++) {
-                        if(lechp_keys[i] === params[i].type) {
-                            const param_container = param_containers[i];
-                            const param_ctr = param_container.querySelector(`.input-container[data-type="${lechp_keys[i]}"]`) as HTMLInputElement;
-                            console.log(param_ctr);
-                            switch(lechp_keys[i]) {
-                                case "u8":
-                                case "u16":
-                                case "u32":
-                                case "u64":
-                                case "u128":
-                                case "u256":
-                                case "u512":
-                                {
-                                    const p_input = param_ctr.querySelector(`input[type="number"]`) as HTMLInputElement;
-                                    p_input.value = last_entry_call_history_params[lechp_keys[i]];
-                                    p_input.dispatchEvent(new Event('change'));
-                                    break;
-                                }
-
-                                case "string": {
-                                    const p_input = param_ctr.querySelector(`input`) as HTMLInputElement;
-                                    p_input.value = last_entry_call_history_params[lechp_keys[i]];
-                                    p_input.dispatchEvent(new Event('change'));
-                                    break;
-                                }
-
-                                default:
-                                    console.error(`Complex type ${lechp_keys[i]}. TODO.`);
-                                    break;
-
+                        // TODO allow unsigned int parameters to change (u.includes(lechp_keys[j]))
+                        // let unsigned_ints = ["u8", "u16", "u32", "u64", "u128", "u256", "u512"];
+                        // check if the corresponding param keys match the current entry call history params.
+                        let match_found = true;
+                        for(let j = 0; j < params.length; j++) {
+                            if(lechp_keys[j] !== params[j].signature.toLowerCase()) {
+                                match_found = false;
+                                break;
                             }
-                            // param_input.value = value;
                         }
+
+                        if(match_found) {
+                            ch_match = true;
+                            for(let j = 0; j < params.length; j++) {
+                                //console.log(`lechp_keys[${j}] = ${lechp_keys[j]} params sig: ${params[j].signature} `);
+                                if(lechp_keys[j] === params[j].signature.toLowerCase()) {
+                                    const param_container = param_containers[j];
+                                    switch(lechp_keys[j]) {
+                                        case "u8":
+                                        case "u16":
+                                        case "u32":
+                                        case "u64":
+                                        case "u128":
+                                        case "u256":
+                                        case "u512":
+                                        case "string":
+                                        {
+                                            const p_input = param_container.querySelector(`.input-container[data-type="${lechp_keys[j]}"] input`) as HTMLInputElement;
+                                            p_input.value = current_call_history_params[lechp_keys[j]];
+                                            p_input.dispatchEvent(new Event('change'));
+                                            break;
+                                        }
+
+                                        case "address":
+                                        case "hash": {
+                                            const p_input = param_container.querySelector(`.type-container > textarea`) as HTMLInputElement;
+                                            p_input.value = current_call_history_params[lechp_keys[j]];
+                                            p_input.dispatchEvent(new Event('change'));
+                                            break;
+                                        }
+
+                                        default:
+                                            console.error(`Complex type ${lechp_keys[j]}. TODO.`);
+                                            break;
+
+                                    }
+                                }
+                            }
+                        }
+
+                    }
+
+                    if(ch_match) {
+                        break;
                     }
                 }
+
+
+                // for(let i = _thisApp.call_history.length - 1; i >= 0; --i) {
+                //     let current_call_history_params: Record<string, string> = _thisApp.call_history[_thisApp.call_history.length - 1];
+                //     const param_containers = document.querySelectorAll(`#pb_entry_container_${this.program_entry_index} > .pb-input-scrollbox > .pb-input-container > .param-container`) as NodeListOf<HTMLElement>;
+                //     const lechp_keys = Object.keys(current_call_history_params);
+                //
+                //     // check if the corresponding param keys match the current entry call history params.
+                //     for(let j = 0; j < params.length; j++) {
+                //
+                //     }
+                //
+                //     if(Object.keys(lechp_keys).length === params.length
+                //         && param_containers.length === params.length) {
+                //
+                //     }
+                // }
+
+                // console.log("LINK - INVOKE - last_entry_call_history_params");
+                // console.log(last_entry_call_history_params);
+                // console.log(params);
+
+
             }
 
 
@@ -746,7 +787,7 @@ export class App {
             this.output.innerHTML += this.output_success("Compiled successfully!\n");
 
             this.btn_reuse_entry_calls.removeAttribute('disabled');
-            this.btn_call_history.removeAttribute('disabled');
+            //this.btn_call_history.removeAttribute('disabled');
             this.btn_export.removeAttribute('disabled');
             this.btn_entry_call.removeAttribute('disabled');
             this.btn_entry_call.classList.add('selected');

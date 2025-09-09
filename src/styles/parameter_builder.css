@@ -327,7 +327,7 @@ input[type="number"] {
     top: 3px;
 }
 
-.left-icons .recycle-icon {
+.left-icons button .icon.recycle-icon {
     top: 4px;
 }
 
@@ -680,7 +680,14 @@ div.pb-arguments-container.readonly > pre {
 }
 
 /* Change color of dropdown links on hover */
-.dropdown-content a:hover {background-color: #000900}
+.dropdown-content a:hover {
+    background-color: #000900;
+    cursor: pointer;
+}
+
+.entry-stat-ro:hover {
+    cursor: pointer;
+}
 
 /* Show the dropdown menu on hover */
 .dropdown:hover .dropdown-content {
