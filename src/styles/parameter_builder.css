@@ -296,8 +296,59 @@ input[type="number"] {
 }
 
 .pb-arg-btns {
-    text-align: right;
-    margin-top: 15px;
+    /* text-align: right; */
+    margin-top: 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.25em;
+}
+
+.pb-arg-btns > div {
+    display: flex;
+    gap: 0.25em;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.pb-arg-btns > .left-icons {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 0.3em;
+}
+
+.left-icons button {
+    position: relative;
+}
+
+.left-icons button .icon {
+    position: relative;
+    top: 3px;
+}
+
+.left-icons button .icon.recycle-icon {
+    top: 4px;
+}
+
+button[data-toggle='on'] {
+    
+}
+
+button[data-toggle='off'] {
+    opacity: 0.4;
+}
+
+button[data-toggle='off']:hover {
+    opacity: 0.4;
+}
+
+button[data-toggle='off']:hover:disabled {
+    opacity: 0.4;
+}
+
+button[data-toggle='off']:hover:not(:disabled) {
+    opacity: 1;
 }
 
 .pb-arg-btns .opt-btn {
@@ -366,12 +417,17 @@ input[type="number"] {
 }
 
 #parameter-display > div.pb-arguments-container.readonly {
-    position:unset;
+    position: unset;
     width: auto;
     margin: auto;
-    height:  auto;
+    height: auto;
+    min-height: 100px;
     padding-top: 0.4rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
+
 
 div.pb-arguments-container.readonly {
     font-size: larger;
@@ -624,7 +680,14 @@ div.pb-arguments-container.readonly > pre {
 }
 
 /* Change color of dropdown links on hover */
-.dropdown-content a:hover {background-color: #000900}
+.dropdown-content a:hover {
+    background-color: #000900;
+    cursor: pointer;
+}
+
+.entry-stat-ro:hover {
+    cursor: pointer;
+}
 
 /* Show the dropdown menu on hover */
 .dropdown:hover .dropdown-content {

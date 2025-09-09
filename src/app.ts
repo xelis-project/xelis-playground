@@ -14,6 +14,13 @@ import { XVMParamParser } from './parameter_builder/xvm_param_parser';
 import { ParameterBuilder } from './parameter_builder/parameter_builder';
 import {PanelOptions, UIContainers} from "./UIContainers";
 
+import HistoryIcon from "./resources/icons/history-icon.svg";
+import ReuseIcon from "./resources/icons/recycle-icon.svg";
+
+import {Utils} from "./Utils";
+
+type EntryCallParam = [string: string];
+
 export class App {
     silex: any;
 
@@ -47,6 +54,8 @@ export class App {
     signature_container: HTMLElement;
     btn_entry_call: HTMLElement;
     btn_signature: HTMLElement;
+    btn_call_history: HTMLElement;
+    btn_reuse_entry_calls: HTMLElement;
     btn_copy: HTMLElement;
 
     /* Editor Project Panel */
@@ -62,8 +71,6 @@ export class App {
     entry_menu: HTMLElement;
     arg_ro_message: HTMLElement;
 
-
-
     program_code: string;
     program_entry_index: number;
     xvm_param_parser: XVMParamParser;
@@ -72,9 +79,13 @@ export class App {
     project_manager: ProjectManager;
     btn_close_arg_editor: HTMLElement;
 
+    call_history: Record<string, string>[] = [];
+    prefs_CALL_HISTORY_MAX = 10;
+    prefs_REUSE_ENTRY_CALLS = true;
 
     constructor(silex: Silex) {
         const _thisApp = this;
+
         this.silex = silex;
         this.program_code = "";
         this.program_entry_index = 0;
@@ -106,7 +117,7 @@ export class App {
         this.entry_call_container = document.querySelector(`#entry-call-container`) as HTMLElement;
         this.signature_container = document.querySelector(`#signature-container`) as HTMLElement;
         this.entry_menu = document.getElementById('entry-menu') as HTMLElement;
-        this.arg_ro_message = document.querySelector(`#pba-readonly > div.message`) as HTMLElement;
+        this.arg_ro_message = document.querySelector(`#pba-readonly .message`) as HTMLElement;
         this.btn_close_arg_editor = document.querySelector(`#btn_close_arg_editor`) as HTMLElement;
         /* end Argument Editor (Parameter Builder)*/
 
@@ -129,6 +140,32 @@ export class App {
 
         this.btn_output_copy.addEventListener('click', () => this.copy_text_to_clipboard(this.output.textContent || ""));
         this.btn_output_panel_toggle.addEventListener('click', () => this.output_panel_toggle(undefined));
+
+        this.btn_call_history = document.querySelector(`#btn-call-history`) as HTMLButtonElement;
+        HistoryIcon.classList.add("icon", "history-icon");
+        _thisApp.btn_call_history.innerHTML =  Utils.convertSvgElementToHtml(HistoryIcon) as string;
+
+        this.btn_reuse_entry_calls = document.querySelector(`#btn-reuse-last-call`) as HTMLButtonElement;
+        ReuseIcon.classList.add("icon", "recycle-icon");
+        _thisApp.btn_reuse_entry_calls.innerHTML =  Utils.convertSvgElementToHtml(ReuseIcon) as string;
+        _thisApp.btn_reuse_entry_calls.addEventListener("click", e => {
+            const data_toggle = _thisApp.btn_reuse_entry_calls.getAttribute("data-toggle");
+            if(data_toggle !== undefined && data_toggle !== null) {
+                if(data_toggle === "on") {
+                    _thisApp.prefs_REUSE_ENTRY_CALLS = false;
+                    _thisApp.btn_reuse_entry_calls.setAttribute("data-tooltip", "Enable call reuse");
+                    _thisApp.btn_reuse_entry_calls.setAttribute("data-toggle", "off");
+                } else {
+                    _thisApp.prefs_REUSE_ENTRY_CALLS = true;
+                    _thisApp.btn_reuse_entry_calls.setAttribute("data-tooltip", "Disable call reuse");
+                    _thisApp.btn_reuse_entry_calls.setAttribute("data-toggle", "on");
+                }
+
+                _thisApp.compile_code()
+            }
+
+            localStorage.setItem('reuse_entry_calls', JSON.stringify(_thisApp.prefs_REUSE_ENTRY_CALLS));
+        });
 
         this.btn_close_arg_editor.addEventListener("click", () => {
             const after_close = () => {
@@ -362,8 +399,50 @@ export class App {
             this.custom_select.build_selects();
         });
 
+        _thisApp.call_history_init();
+        _thisApp.reuse_entry_calls_init();
         this.load_save();
 
+    }
+
+    call_history_init() {
+        const _thisApp = this;
+        // get saved call history
+        const saved_call_history = localStorage.getItem('call_history');
+        if(saved_call_history !== null) {
+            _thisApp.call_history = JSON.parse(saved_call_history);
+        }
+
+        if(_thisApp.prefs_CALL_HISTORY_MAX <= 0) {
+            _thisApp.call_history = [];
+        }
+
+        if(_thisApp.prefs_CALL_HISTORY_MAX >= 0 && _thisApp.call_history.length > _thisApp.prefs_CALL_HISTORY_MAX) {
+            _thisApp.call_history.splice(0, _thisApp.call_history.length - _thisApp.prefs_CALL_HISTORY_MAX);
+        }
+
+        localStorage.setItem('call_history', JSON.stringify(_thisApp.call_history));
+    }
+
+    reuse_entry_calls_init() {
+        const _thisApp = this;
+        // get saved call history
+        const reuse_last_call = localStorage.getItem('reuse_entry_calls');
+        if(reuse_last_call !== null) {
+            _thisApp.prefs_REUSE_ENTRY_CALLS = JSON.parse(reuse_last_call);
+        }
+
+        if(_thisApp.prefs_REUSE_ENTRY_CALLS) {
+            _thisApp.prefs_REUSE_ENTRY_CALLS = true;
+            _thisApp.btn_reuse_entry_calls.setAttribute("data-tooltip", "Disable call reuse");
+            _thisApp.btn_reuse_entry_calls.setAttribute("data-toggle", "on");
+        } else {
+            _thisApp.prefs_REUSE_ENTRY_CALLS = false;
+            _thisApp.btn_reuse_entry_calls.setAttribute("data-tooltip", "Enable call reuse");
+            _thisApp.btn_reuse_entry_calls.setAttribute("data-toggle", "off");
+        }
+
+        localStorage.setItem('reuse_entry_calls', JSON.stringify(_thisApp.prefs_REUSE_ENTRY_CALLS));
     }
 
 
@@ -394,7 +473,6 @@ export class App {
         } else {
             current_file_info.textContent = "-";
         }
-
     }
 
     load_save() {
@@ -442,13 +520,15 @@ export class App {
 
         // UI
         const e_name_ro = document.querySelector(`#hud-entry-name`) as HTMLElement;
-        e_name_ro.textContent = `- none -`;
+        e_name_ro.innerHTML = `&nbsp;`;
 
         // entry call window
         this.btn_entry_call.click();
 
         this.btn_run.setAttribute('disabled', '');
         this.btn_export.setAttribute("disabled", "");
+        this.btn_reuse_entry_calls.setAttribute('disabled', '');
+        this.btn_call_history.setAttribute('disabled', '');
         this.btn_edit_params.setAttribute('disabled', '');
         this.btn_entry_call.setAttribute('disabled', '');
         this.btn_signature.setAttribute('disabled', '');
@@ -457,6 +537,8 @@ export class App {
     }
 
     add_entry(entry: any, index: number) {
+        const _thisApp = this;
+
         const link = document.createElement(`a`);
         link.classList.add(`entry-link`);
         link.setAttribute(`data-entry-index`, `${index}`);
@@ -504,6 +586,101 @@ export class App {
                 this.entry_menu.classList.add('dropdown-content');
             }, 500);
 
+            // reuse call history
+            if(_thisApp.prefs_REUSE_ENTRY_CALLS && _thisApp.call_history.length > 0) {
+
+                let ch_match = false;
+
+                for(let i = _thisApp.call_history.length - 1; i >= 0; --i) {
+                    let current_call_history_params: Record<string, string> = _thisApp.call_history[i];
+                    const param_containers = document.querySelectorAll(`#pb_entry_container_${this.program_entry_index} > .pb-input-scrollbox > .pb-input-container > .param-container`) as NodeListOf<HTMLElement>;
+                    const lechp_keys = Object.keys(current_call_history_params);
+
+                    if(Object.keys(lechp_keys).length === params.length
+                        && param_containers.length === params.length) {
+
+                        // TODO allow unsigned int parameters to change (u.includes(lechp_keys[j]))
+                        // let unsigned_ints = ["u8", "u16", "u32", "u64", "u128", "u256", "u512"];
+                        // check if the corresponding param keys match the current entry call history params.
+                        let match_found = true;
+                        for(let j = 0; j < params.length; j++) {
+                            if(lechp_keys[j] !== params[j].signature.toLowerCase()) {
+                                match_found = false;
+                                break;
+                            }
+                        }
+
+                        if(match_found) {
+                            ch_match = true;
+                            for(let j = 0; j < params.length; j++) {
+                                //console.log(`lechp_keys[${j}] = ${lechp_keys[j]} params sig: ${params[j].signature} `);
+                                if(lechp_keys[j] === params[j].signature.toLowerCase()) {
+                                    const param_container = param_containers[j];
+                                    switch(lechp_keys[j]) {
+                                        case "u8":
+                                        case "u16":
+                                        case "u32":
+                                        case "u64":
+                                        case "u128":
+                                        case "u256":
+                                        case "u512":
+                                        case "string":
+                                        {
+                                            const p_input = param_container.querySelector(`.input-container[data-type="${lechp_keys[j]}"] input`) as HTMLInputElement;
+                                            p_input.value = current_call_history_params[lechp_keys[j]];
+                                            p_input.dispatchEvent(new Event('change'));
+                                            break;
+                                        }
+
+                                        case "address":
+                                        case "hash": {
+                                            const p_input = param_container.querySelector(`.type-container > textarea`) as HTMLInputElement;
+                                            p_input.value = current_call_history_params[lechp_keys[j]];
+                                            p_input.dispatchEvent(new Event('change'));
+                                            break;
+                                        }
+
+                                        default:
+                                            console.error(`Complex type ${lechp_keys[j]}. TODO.`);
+                                            break;
+
+                                    }
+                                }
+                            }
+                        }
+
+                    }
+
+                    if(ch_match) {
+                        break;
+                    }
+                }
+
+
+                // for(let i = _thisApp.call_history.length - 1; i >= 0; --i) {
+                //     let current_call_history_params: Record<string, string> = _thisApp.call_history[_thisApp.call_history.length - 1];
+                //     const param_containers = document.querySelectorAll(`#pb_entry_container_${this.program_entry_index} > .pb-input-scrollbox > .pb-input-container > .param-container`) as NodeListOf<HTMLElement>;
+                //     const lechp_keys = Object.keys(current_call_history_params);
+                //
+                //     // check if the corresponding param keys match the current entry call history params.
+                //     for(let j = 0; j < params.length; j++) {
+                //
+                //     }
+                //
+                //     if(Object.keys(lechp_keys).length === params.length
+                //         && param_containers.length === params.length) {
+                //
+                //     }
+                // }
+
+                // console.log("LINK - INVOKE - last_entry_call_history_params");
+                // console.log(last_entry_call_history_params);
+                // console.log(params);
+
+
+            }
+
+
             this.update_ro_argument_display();
         });
     }
@@ -528,42 +705,6 @@ export class App {
             this.entry_call_container.appendChild(close_func_name);
         }
     }
-
-    /*
-    add_entry_params(entry: any, index: number) {
-        const container = document.createElement(`div`);
-        container.id = `entry_params_${index}`;
-        container.classList.add(`spec-column`, `hidden`);
-        const params = entry.parameters();
-
-        params.forEach((param: any, param_index: number) => {
-            const item = document.createElement(`div`);
-            item.classList.add(`spec-param`);
-
-            const title = document.createElement(`div`);
-            title.textContent = `${param.name()} (${param.type_name()})`;
-
-            const input = document.createElement(`input`);
-            input.type = "text";
-            input.autocomplete = `off`;
-            input.autocapitalize = `off`;
-            input.placeholder = `required`;
-            input.setAttribute(`data-type`, param.type_name());
-            input.classList.add('input');
-            input.name = `entry_params_${index}_input`;
-
-            item.appendChild(title);
-            item.appendChild(input);
-            container.appendChild(item);
-        });
-
-        if (params.length === 0) {
-            container.innerHTML = `None`;
-        }
-
-        this.program_entry_params.appendChild(container);
-    }
-        */
 
     output_error(text: string, append: boolean = false) {
         return `<span class="out-err">${text}</span>`;
@@ -647,6 +788,8 @@ export class App {
             this.program_code = code;
             this.output.innerHTML += this.output_success("Compiled successfully!\n");
 
+            this.btn_reuse_entry_calls.removeAttribute('disabled');
+            //this.btn_call_history.removeAttribute('disabled');
             this.btn_export.removeAttribute('disabled');
             this.btn_entry_call.removeAttribute('disabled');
             this.btn_entry_call.classList.add('selected');
@@ -659,13 +802,18 @@ export class App {
 
     get_program_params() {
         const params = [] as string[];
+        const call_hist_params: Record<string, string> = {};
+
+
         const pbe_params_elems = document.querySelectorAll(`#pb_entry_container_${this.program_entry_index} > div.pb-arguments-container > pre`);
         pbe_params_elems.forEach((pbe, index) => {
             // remove the quotes
             const copy_pbe = pbe.cloneNode(true) as HTMLElement;
-            const type_name = copy_pbe.firstChild?.nodeName.toLowerCase();
+            const type_name = copy_pbe.firstChild?.nodeName.toLowerCase() ?? "unknown_type";
+            let ch_type_name = type_name;
 
             let content: string | null | undefined;
+            const call_hist_params_content = {} as Record<string, string>;
 
             ['quote'].forEach(c => {
                 const brace_children = copy_pbe.querySelectorAll(c);
@@ -682,7 +830,11 @@ export class App {
                     console.log(opaque_type);
                     //const ot_name = opaque_type?.nodeName.toLowerCase();
                     //content =`{type: "${ot_name}", value: ${opaque_type?.textContent}}`
-                    content = opaque_type?.textContent
+                    content = opaque_type?.textContent;
+
+                    if(opaque_type !== null && opaque_type !== undefined) {
+                        ch_type_name = opaque_type?.nodeName.toLowerCase();
+                    }
                     break;
 
                 default:
@@ -691,10 +843,13 @@ export class App {
             }
 
             params.push(`${content}`);
+            call_hist_params[ch_type_name] = `${content}`;
         });
 
         console.log("GET_PARAMS OUTPUT");
         console.log(params);
+
+        this.call_history_add(call_hist_params);
 
         return params;
     }
@@ -894,5 +1049,74 @@ export class App {
         });
 
         document.dispatchEvent(screen_right_reset);
+    }
+
+    private call_history_add(params: Record<string, string>) {
+        const _thisApp = this;
+
+        // if there are no history entries, we should add the first entry.
+        // If there are entries, we should check if the call history has an exact copy
+        // of the current entry and remove it.
+        let should_add = this.call_history.length === 0;
+
+        if(!should_add) {  // confirm it shouldn't be added or remove a copy'
+
+            let found_match = false;
+
+            for(let i = _thisApp.call_history.length - 1; i >= 0; --i) {
+                let call_hist_entry: Record<string, string> = _thisApp.call_history[i];
+
+                if(Object.keys(call_hist_entry).length === Object.keys(params).length) {
+                    const le_keys = Object.keys(call_hist_entry);
+                    const pe_keys = Object.keys(params);
+
+                    let local_match = true;
+
+                    for(let j = 0; j < le_keys.length; j++) {
+                        if(le_keys[j] !== pe_keys[j]) {
+                            local_match = false
+                            break;
+                        }
+
+                        if(call_hist_entry[le_keys[j]] !== params[le_keys[j]]) {
+                            local_match = false
+                            break;
+                        }
+                    }
+
+                    if(local_match) {
+                        found_match = true;
+                        if(i === _thisApp.call_history.length - 1) {
+                            console.log("DEBUG --- latest entry in the call history is a copy of the current entry.");
+                            break;
+                        } else {
+                            // splice out the entry
+                            _thisApp.call_history.splice(i, 1);
+                            should_add = true;   // bubble to the top of the list.
+                            break;
+                        }
+                    }
+                }
+
+                if(found_match) {
+                    break;
+                }
+            }
+
+            if(!found_match) {
+                should_add = true;
+            }
+        }
+
+        if (should_add) {
+            if(_thisApp.call_history.length >= _thisApp.prefs_CALL_HISTORY_MAX) {
+                _thisApp.call_history.shift();
+            }
+            _thisApp.call_history.push(params);
+
+            localStorage.setItem('call_history', JSON.stringify(_thisApp.call_history));
+        }
+
+        //console.log(_thisApp.call_history);
     }
 }
