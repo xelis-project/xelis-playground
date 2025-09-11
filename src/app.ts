@@ -18,6 +18,7 @@ import HistoryIcon from "./resources/icons/history-icon.svg";
 import ReuseIcon from "./resources/icons/recycle-icon.svg";
 
 import {Utils} from "./Utils";
+import { highlight } from 'ace-builds/src-noconflict/ext-static_highlight';
 
 type EntryCallParam = [string: string];
 
@@ -599,6 +600,57 @@ export class App {
             // reuse call history
             if(_thisApp.prefs_REUSE_ENTRY_CALLS && _thisApp.call_history.length > 0) {
 
+                // function populate_inputs(param_container: HTMLElement, k: any, v: any) {
+                //     switch(k) {
+                //         case "u8":
+                //         case "u16":
+                //         case "u32":
+                //         case "u64":
+                //         case "u128":
+                //         case "u256":
+                //         case "u512":
+                //         case "string": {
+                //             const p_input = param_container.querySelector(`.input-container[data-type="${k}"] input`) as HTMLInputElement;
+                //             p_input.value = v;
+                //             p_input.dispatchEvent(new Event('change'));
+                //             break;
+                //         }
+                //
+                //         case "address":
+                //         case "hash": {
+                //             const p_input = param_container.querySelector(`.type-container > textarea`) as HTMLInputElement;
+                //             p_input.value = v;
+                //             p_input.dispatchEvent(new Event('change'));
+                //             break;
+                //         }
+                //
+                //         case "bool": {
+                //             const p_input = param_container.querySelector(`.input-container[data-type="bool"] input`) as HTMLInputElement;
+                //             p_input.checked = v === "true";
+                //             p_input.dispatchEvent(new Event('change'));
+                //             break;
+                //         }
+                //
+                //         case "array": {
+                //             console.log("Implement restore input for array.");
+                //             break;
+                //         }
+                //         case "struct": {
+                //             console.log("Implement restore input for struct.");
+                //             break;
+                //         }
+                //         case "map": {
+                //             console.log("Implement restore input for map.");
+                //             break;
+                //         }
+                //         default:
+                //             console.error(`Complex type ${k}. TODO.`);
+                //             break;
+                //
+                //     }
+                // }
+
+
                 let ch_match = false;
 
                 for(let i = _thisApp.call_history.length - 1; i >= 0; --i) {
@@ -626,6 +678,9 @@ export class App {
                                 //console.log(`lechp_keys[${j}] = ${lechp_keys[j]} params sig: ${params[j].signature} `);
                                 if(lechp_keys[j] === params[j].signature.toLowerCase()) {
                                     const param_container = param_containers[j];
+
+                                    //populate_inputs(param_container, lechp_keys[j], current_call_history_params[lechp_keys[j]]);
+
                                     switch(lechp_keys[j]) {
                                         case "u8":
                                         case "u16":
@@ -634,8 +689,7 @@ export class App {
                                         case "u128":
                                         case "u256":
                                         case "u512":
-                                        case "string":
-                                        {
+                                        case "string": {
                                             const p_input = param_container.querySelector(`.input-container[data-type="${lechp_keys[j]}"] input`) as HTMLInputElement;
                                             p_input.value = current_call_history_params[lechp_keys[j]];
                                             p_input.dispatchEvent(new Event('change'));
@@ -650,6 +704,25 @@ export class App {
                                             break;
                                         }
 
+                                        case "bool": {
+                                            const p_input = param_container.querySelector(`.input-container[data-type="bool"] input`) as HTMLInputElement;
+                                            p_input.checked = current_call_history_params[lechp_keys[j]] === "true";
+                                            p_input.dispatchEvent(new Event('change'));
+                                            break;
+                                        }
+
+                                        case "array": {
+                                            console.log("Implement restore input for array.");
+                                            break;
+                                        }
+                                        case "struct": {
+                                            console.log("Implement restore input for struct.");
+                                            break;
+                                        }
+                                        case "map": {
+                                            console.log("Implement restore input for map.");
+                                            break;
+                                        }
                                         default:
                                             console.error(`Complex type ${lechp_keys[j]}. TODO.`);
                                             break;
@@ -658,7 +731,6 @@ export class App {
                                 }
                             }
                         }
-
                     }
 
                     if(ch_match) {
@@ -787,9 +859,61 @@ export class App {
     }
 
     get_program_params() {
+
+        function process_params(type_name: string, ch_type_name: string, pbe: HTMLElement) {
+            let content = "";
+            // TODO: Verify that the opaque type format will be specialized.
+            switch (type_name) {
+                case 'opaque':
+                    // address tag, hash tag, etc.
+                    const opaque_type = pbe.firstChild?.firstChild?.firstChild;
+                    console.log(opaque_type);
+                    //const ot_name = opaque_type?.nodeName.toLowerCase();
+                    //content =`{type: "${ot_name}", value: ${opaque_type?.textContent}}`
+                    content = opaque_type?.textContent ?? "";
+
+                    if(opaque_type !== null && opaque_type !== undefined) {
+                        ch_type_name = opaque_type?.nodeName.toLowerCase();
+                    }
+                    break;
+                case 'array': {
+
+                    let array_content = "";
+                    const array_type_content = pbe.firstChild?.childNodes[1];
+
+                    if(array_type_content !== null && array_type_content !== undefined && array_type_content.childNodes.length > 0) {   // not empty array
+                        console.log('DEBUG ARRAY PARAM');
+                        console.log(pbe.firstChild?.childNodes[1]);
+
+                        for(let i = 0; i < array_type_content.childNodes.length; i++) {
+                            const array_type_content_child = array_type_content.childNodes[i];
+                            // get type
+                            const array_type_name = array_type_content.childNodes[i].nodeName.toLowerCase();
+                            console.log(array_type_name);
+
+                            if(array_type_name === 'comma') {
+                                array_content += ", ";
+                            } else {
+                                array_content += array_type_content_child.textContent;
+                            }
+                        }
+                    }
+
+                    content = `[${array_content}]`;
+                    break;
+                }
+
+                default:
+                    content = pbe.textContent;
+                    break;
+            }
+
+            return content;
+        }
+
+
         const params = [] as string[];
         const call_hist_params: Record<string, string> = {};
-
 
         const pbe_params_elems = document.querySelectorAll(`#pb_entry_container_${this.program_entry_index} > div.pb-arguments-container > pre`);
         pbe_params_elems.forEach((pbe, index) => {
@@ -799,7 +923,7 @@ export class App {
             let ch_type_name = type_name;
 
             let content: string | null | undefined;
-            const call_hist_params_content = {} as Record<string, string>;
+            //const call_hist_params_content = {} as Record<string, string>;
 
             ['quote'].forEach(c => {
                 const brace_children = copy_pbe.querySelectorAll(c);
@@ -808,25 +932,7 @@ export class App {
                 }
             });
 
-            // TODO: Verify that the opaque type format will be specialized.
-            switch (type_name) {
-                case 'opaque':
-                    // address tag, hash tag, etc.
-                    const opaque_type = copy_pbe.firstChild?.firstChild?.firstChild;
-                    console.log(opaque_type);
-                    //const ot_name = opaque_type?.nodeName.toLowerCase();
-                    //content =`{type: "${ot_name}", value: ${opaque_type?.textContent}}`
-                    content = opaque_type?.textContent;
-
-                    if(opaque_type !== null && opaque_type !== undefined) {
-                        ch_type_name = opaque_type?.nodeName.toLowerCase();
-                    }
-                    break;
-
-                default:
-                    content = copy_pbe.textContent;
-                    break;
-            }
+            content = process_params(type_name, ch_type_name, copy_pbe);
 
             params.push(`${content}`);
             call_hist_params[ch_type_name] = `${content}`;

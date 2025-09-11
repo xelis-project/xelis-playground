@@ -16,6 +16,14 @@ export function boolean_type(parameter: Parameter, root_container: HTMLElement) 
 
     input.addEventListener("change", () => {
         content.textContent = input.checked ? 'true' : 'false';
+
+        const pbi_did_change_event = new CustomEvent("pb-input-did-change", {
+            detail: {
+                text: content.textContent,
+            },
+        });
+
+        document.dispatchEvent(pbi_did_change_event);
     });
 
     input_container.appendChild(input);

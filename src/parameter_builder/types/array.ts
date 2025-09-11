@@ -88,7 +88,15 @@ export function array_type(parameter: Parameter, root_container: HTMLElement) {
 
             content.removeChild(item_content);
             array_container.removeChild(item_container);
-        });
+
+            const pbi_did_change_event = new CustomEvent("pb-input-did-change", {
+                detail: {
+                    text: content.textContent,
+                },
+            });
+
+            document.dispatchEvent(pbi_did_change_event);
+        }, { once: true});
 
         /** end remove button **/
     }
