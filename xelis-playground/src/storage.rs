@@ -53,8 +53,10 @@ impl ContractProvider for MockStorage {
         Ok(None)
     }
 
-    async fn load_asset_supply(&self, _: &Hash, _: TopoHeight) -> Result<Option<(TopoHeight, u64)>, anyhow::Error> {
-        Ok(None)
+    // Load the asset supply
+    // Supply is the current circulating supply
+    async fn load_asset_circulating_supply(&self, _: &Hash, topoheight: TopoHeight) -> Result<(TopoHeight, u64), anyhow::Error> {
+        Ok((topoheight, 0))
     }
 
     async fn account_exists(&self, _: &PublicKey, _: TopoHeight) -> Result<bool, anyhow::Error> {
