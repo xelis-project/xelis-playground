@@ -239,3 +239,10 @@
     visibility: hidden;
     opacity: 0;
 }
+
+.call-history-container {
+    position: absolute;
+    top: -20px;
+    left: 50px;
+    border: solid 1px #93d6ff;
+}

@@ -150,6 +150,10 @@ export class App {
         this.btn_call_history = document.querySelector(`#btn-call-history`) as HTMLButtonElement;
         HistoryIcon.classList.add("icon", "history-icon");
         _thisApp.btn_call_history.innerHTML =  Utils.convertSvgElementToHtml(HistoryIcon) as string;
+        // const call_history_container = document.createElement(`div`);
+        // call_history_container.classList.add("call-history-container");
+        // call_history_container.textContent = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+        // this.btn_call_history.appendChild(call_history_container);
 
         this.btn_reuse_entry_calls = document.querySelector(`#btn-reuse-last-call`) as HTMLButtonElement;
         ReuseIcon.classList.add("icon", "recycle-icon");
@@ -503,6 +507,8 @@ export class App {
 
     set_editor_code(code: string) {
         this.editor.setValue(code, -1); // -1 places the cursor at the top -- undefined or 0 select all text
+        const undoManager = this.editor.session.getUndoManager();
+        undoManager.reset();
         this.program_changed();
     }
 
