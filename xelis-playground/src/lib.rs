@@ -553,7 +553,7 @@ impl Silex {
                     contract: Hash::zero(),
                     deposits: Default::default(),
                     parameters: Vec::new(),
-                    chunk_id: entry_id,
+                    entry_id,
                     max_gas: max_gas.unwrap_or(0),
                 }),
                 0,
@@ -597,13 +597,14 @@ impl Silex {
                 entry_contract: &zero_hash,
                 block_hash: &zero_hash,
                 topoheight: 0,
-                tx_hash: &zero_hash,
+                tx_hash: Some(&zero_hash),
                 modules: HashMap::new(),
                 outputs: Vec::new(),
                 caches: HashMap::new(),
                 tracker: ContractEventTracker::default(),
                 assets: Default::default(),
-                global_caches: &Default::default()
+                global_caches: &Default::default(),
+                injected_gas: IndexMap::new(),
             };
 
             let mut logs = Vec::new();
