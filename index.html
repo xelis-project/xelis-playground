@@ -154,7 +154,65 @@
                 <div class="controls">
                     <div class="title">CONTRACT</div>
                 </div>
-                <div id="parameter_builder_container" class="panel_container">
+                <div id="storage_preset_container" class="panel_container type-2">
+                    <div class="panel_backdrop bkdrp-strong hide"></div>
+                    <div class="panel_body hide">
+                        <div class="panel-title title">Storage Editor</div>
+                        <div class="info-block">
+                            <div>
+                                <key>Storage Map</key>
+                                <div class="dropdown">
+                                    <div class="menu-stat-ro">
+                                        <span id="storage-editor-menu-selected" class="menu-item-name"></span>
+                                    </div>
+                                    <div id="storage-editor-menu-content" class="dropdown-content">
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="info-block-button-container">
+                                <button id="btn_close_storage_editor" data-panel-id="storage_preset_container" class="opt-btn icon-green right">DONE</button>
+                            </div>
+                        </div>
+                        <div class="panel-options-container">
+                            <div class="po-btns" style="display: none;"></div>
+                            <div id="storage-modal-content" class="modal-content" style="display: none;"></div>
+                            <div class="po-selection">
+
+                                <div id="storage-map-new-dialog" class="dialog-container layout-tight" style="display: none;">
+                                    <div class="dialog-title">New Storage Map</div>
+                                    <div class="vertical"><label>Name</label><input id="sm-input-name" type="text"
+                                                                                            placeholder="Map Name (required)"
+                                                                                            class="large-input"
+                                                                                            required=""></div>
+                                    <div class="vertical"><label>Description</label><input id="sm-input-description" type="text"
+                                                                                                   placeholder="Description"
+                                                                                                   class="large-input">
+                                    </div>
+                                    <div class="dialog-btn-container right">
+                                        <button id="sm-cancel-new" class="dialog-btn btn">Cancel</button>
+                                        <button id="sm-create-new" class="dialog-btn btn" disabled="">Create</button>
+                                    </div>
+                                </div  >
+
+                                <div id="storage-map-insert-update-dialog" class="dialog-container layout-tight" style="display: none;">
+                                    <div class="storage-info-block">
+                                        <div class="sm-info">
+                                            <input id="sm-info-name" type="text" placeholder="Map Name" class="" />
+                                            <input id="sm-info-description" type="text" placeholder="Description" class="" />
+                                        </div>
+                                        <div class="storage-map-update-btn-container right">
+                                            <button id="btn_update_storage_map" class="opt-btn icon-green right" disabled>UPDATE</button>
+                                            <button id="btn_delete_storage_map" class="opt-btn icon-green right">Delete</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="parameter_builder_container" class="panel_container type-2">
                     <div class="panel_backdrop bkdrp-strong hide"></div>
                     <div class="panel_body hide">
                         <div class="panel-title title">Argument Editor</div>
@@ -175,14 +233,21 @@
                         <div class="info-block">
                             <div><key>Entry</key>
                                 <div class="dropdown">
-                                    <div class="entry-stat-ro">
-                                        <span id="hud-entry-name" class="entry-name" style="visibility: hidden;">&nbsp;</span>
+                                    <div class="menu-stat-ro">
+                                        <span id="hud-entry-name" class="menu-item-name" style="visibility: hidden;">&nbsp;</span>
                                     </div>
                                     <div id="entry-menu" class="dropdown-content"></div>
                                 </div>
                             </div>
+                            <div><key>Storage Map</key>
+                                <div class="dropdown">
+                                    <div class="menu-stat-ro">
+                                        <span id="hud-storage-preset-map-selected" class="menu-item-name">&nbsp;</span>
+                                    </div>
+                                    <div id="hud-storage-preset-map-menu-content" class="dropdown-content"></div>
+                                </div>
+                            </div>
                             <div class="info-block-button-container">
-                                <button class="opt-btn icon-green right" disabled id="btn_storage">STORAGE</button>
                                 <button class="opt-btn icon-green right" disabled id="btn_run" >RUN</button>
                                 <button class="opt-btn icon-green right" disabled id="btn_export">EXPORT</button>
                             </div>

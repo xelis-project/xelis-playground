@@ -72,7 +72,7 @@
   background-color: #002c1e;
 }
 
-.entry-name:after {
+.menu-item-name:after {
     content: "";
     position: relative;
     margin-left: 0.75rem;
@@ -81,7 +81,13 @@
     border-color: #00eaff transparent transparent transparent;
 }
 
-.dropdown:hover .entry-name:after {
+.dropdown:hover .menu-item-name:after {
     border-color: transparent transparent #00eaff transparent;
     top: -0.75rem;
+}
+
+.menu-separator {
+    border: 0;
+    border-top: 1px solid #006676;
+    margin: 0.25rem 0;
 }

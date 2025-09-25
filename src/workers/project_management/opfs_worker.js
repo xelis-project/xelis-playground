@@ -173,7 +173,6 @@ onmessage = async (e) => {
             //TODO: make recursive check.
         case "verify_project_directory":
             const pd_verify = await verify_project_directory(cmd_opts.project);
-            console.log("DEBUG Z");
             postMessage({notice: cmd_opts.notice, data: {verify: pd_verify}});
             break;
         case "verify_path":

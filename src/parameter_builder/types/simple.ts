@@ -7,7 +7,12 @@ export function simple_type(parameter: Parameter, root_container: HTMLElement) {
     input_container.setAttribute("data-type", parameter.type);
 
     const input = document.createElement('input');
-    input.type = parameter.type.toLowerCase() === DataType.STRING_TYPE.name.toLowerCase() ? 'text': 'number' ;
+    if(parameter.type.toLowerCase() === DataType.STRING_TYPE.name.toLowerCase()) {
+        input.type = 'text';
+    } else {
+        input.type = 'number';
+        input.value = '0';
+    }
     input.placeholder = parameter.type;
 
     // argument display construction

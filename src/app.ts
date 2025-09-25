@@ -19,6 +19,7 @@ import ReuseIcon from "./resources/icons/recycle-icon.svg";
 
 import {Utils} from "./Utils";
 import { highlight } from 'ace-builds/src-noconflict/ext-static_highlight';
+import {StorageEditor} from "./StorageEditor";
 
 type EntryCallParam = [string: string];
 
@@ -86,6 +87,8 @@ export class App {
     prefs_REUSE_ENTRY_CALLS = true;
     did_run_program = false;
 
+    storage_editor: StorageEditor;
+
     constructor(silex: Silex) {
         const _thisApp = this;
 
@@ -97,7 +100,13 @@ export class App {
         this.output = document.getElementById('output') as HTMLElement;
         //this.program_entries_select = document.getElementById('program_entries_select') as HTMLSelectElement;
         //this.program_entry_params = document.getElementById('program_entry_params') as HTMLElement;
+
         this.btn_run = document.getElementById('btn_run') as HTMLElement;
+        this.btn_export = document.getElementById('btn_export') as HTMLElement;
+        // force. caching issue in firefox.
+        this.btn_run.setAttribute("disabled", "");
+        this.btn_export.setAttribute("disabled", "");
+
         this.btn_compile = document.getElementById('btn_editor_compile') as HTMLElement;
         this.input_max_gas = document.getElementById('input_max_gas') as HTMLInputElement;
 
@@ -105,7 +114,7 @@ export class App {
         this.btn_output_copy = document.getElementById('btn_output_copy') as HTMLElement;
         this.btn_output_panel_toggle = document.getElementById('btn_output_panel_toggle') as HTMLElement;
         this.editor_lines = document.getElementById('editor_lines') as HTMLElement;
-        this.btn_export = document.getElementById('btn_export') as HTMLElement;
+
         this.tabsize_select = document.getElementById('tabsize_select') as HTMLSelectElement;
 
         this.btn_edit_params = document.getElementById('edit-entry-params-btn') as HTMLButtonElement;
@@ -126,6 +135,10 @@ export class App {
         this.arg_ro_message = document.querySelector(`#pba-readonly .message`) as HTMLElement;
         this.btn_close_arg_editor = document.querySelector(`#btn_close_arg_editor`) as HTMLElement;
         /* end Argument Editor (Parameter Builder)*/
+
+        /* Storage Editor*/
+        this.storage_editor = StorageEditor.default();
+        /* Storage Editor*/
 
         /* editor Project panel */
         this.btn_project_panel = document.querySelector(`#btn_editor_project`) as HTMLElement;
@@ -186,6 +199,14 @@ export class App {
             }
 
             UIContainers.panel_close(UIContainers.panel_options({initiator: this.btn_close_arg_editor, after_close: after_close} as PanelOptions));
+        });
+
+        this.storage_editor.btn_close().addEventListener("click", () => {
+            const after_close = () => {
+                this.editor.focus();
+            }
+
+            UIContainers.panel_close(UIContainers.panel_options({initiator: this.storage_editor.btn_close(), after_close: after_close} as PanelOptions));
         });
 
         this.btn_editor_save_code.addEventListener('click', (_) => {
@@ -315,6 +336,7 @@ export class App {
         document.addEventListener("screen-right-reset", () => {
             console.log("Argument editor reset - did screen-right-reset.");
             UIContainers.panel_close(UIContainers.panel_options({initiator: this.btn_close_arg_editor} as PanelOptions));
+            UIContainers.panel_close(UIContainers.panel_options({initiator: this.storage_editor.btn_close()} as PanelOptions));
         });
 
         /* Project Manager */
@@ -605,57 +627,6 @@ export class App {
 
             // reuse call history
             if(_thisApp.prefs_REUSE_ENTRY_CALLS && _thisApp.call_history.length > 0) {
-
-                // function populate_inputs(param_container: HTMLElement, k: any, v: any) {
-                //     switch(k) {
-                //         case "u8":
-                //         case "u16":
-                //         case "u32":
-                //         case "u64":
-                //         case "u128":
-                //         case "u256":
-                //         case "u512":
-                //         case "string": {
-                //             const p_input = param_container.querySelector(`.input-container[data-type="${k}"] input`) as HTMLInputElement;
-                //             p_input.value = v;
-                //             p_input.dispatchEvent(new Event('change'));
-                //             break;
-                //         }
-                //
-                //         case "address":
-                //         case "hash": {
-                //             const p_input = param_container.querySelector(`.type-container > textarea`) as HTMLInputElement;
-                //             p_input.value = v;
-                //             p_input.dispatchEvent(new Event('change'));
-                //             break;
-                //         }
-                //
-                //         case "bool": {
-                //             const p_input = param_container.querySelector(`.input-container[data-type="bool"] input`) as HTMLInputElement;
-                //             p_input.checked = v === "true";
-                //             p_input.dispatchEvent(new Event('change'));
-                //             break;
-                //         }
-                //
-                //         case "array": {
-                //             console.log("Implement restore input for array.");
-                //             break;
-                //         }
-                //         case "struct": {
-                //             console.log("Implement restore input for struct.");
-                //             break;
-                //         }
-                //         case "map": {
-                //             console.log("Implement restore input for map.");
-                //             break;
-                //         }
-                //         default:
-                //             console.error(`Complex type ${k}. TODO.`);
-                //             break;
-                //
-                //     }
-                // }
-
 
                 let ch_match = false;
 
@@ -994,7 +965,8 @@ export class App {
 
             const params = this.get_program_params();
             this.btn_compile.setAttribute("disabled", "");
-            let result = await this.silex.execute_program(program, entry.id(), max_gas, params);
+
+            let result = await this.silex.execute_program(program, entry.id(), max_gas, params, this.storage_editor.get_storage_presets_with_map_id(this.storage_editor.current_storage_map_uuid));
             output_dot_loading.stop();
 
             this.output.textContent = "";
@@ -1187,7 +1159,6 @@ export class App {
                     if(local_match) {
                         found_match = true;
                         if(i === _thisApp.call_history.length - 1) {
-                            console.log("DEBUG --- latest entry in the call history is a copy of the current entry.");
                             break;
                         } else {
                             // splice out the entry

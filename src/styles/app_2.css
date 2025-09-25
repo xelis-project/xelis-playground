@@ -152,6 +152,10 @@
     color: #ffd500;
 }
 
+.type-2 .info-block {
+    margin: 1.25rem 0 0;
+}
+
 
 /* component specific styles */
 
@@ -245,4 +249,89 @@
     top: -20px;
     left: 50px;
     border: solid 1px #93d6ff;
+}
+
+.storage-info-block {
+    display: flex;
+    flex-shrink: 4;
+    flex-direction: row;
+    align-items: flex-start;
+    background: none;
+    justify-content: space-between;
+}
+
+.storage-info-block textarea {
+    height: 4rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    box-sizing: border-box;
+    margin-top: .5rem;
+}
+
+.key-hr-menu {
+    display: flex;
+    flex-direction: row;
+    align-content: flex-end;
+    align-items: baseline;
+}
+
+.ui-horiz-layout {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 1.5rem;
+    width: 100%;
+    width: -webkit-fill-available;
+}
+
+.sp-content-dtc {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    height: 50vh;
+    margin-bottom: 3rem;
+}
+
+.sp-content-dtc .data-table-container {
+    max-height: none;
+    width: 100%;
+    height: 100%;
+}
+
+.storage-preset-row input, .storage-preset-row textarea, .storage-preset-row select, .storage-preset-row option {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.storage-preset-row select, .storage-preset-row option {
+    background: #021926;
+    border: none;
+    outline: 0px solid #00eaff;
+}
+
+#storage-map-insert-update-dialog {
+    padding: 0.75rem;
+}
+
+.sm-info {
+    display: flex;
+    flex-shrink: 1;
+    gap: 1rem;
+}
+
+.sm-info input {
+    flex-shrink: 1;
+    width: 50%;
+    min-width: 3rem;
+}
+
+.storage-info-block.controls {
+    margin-top: 1.5rem;
+}
+
+.storage-map-update-btn-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
 }

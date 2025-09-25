@@ -2104,6 +2104,7 @@ dependencies = [
  "human_bytes",
  "humantime",
  "indexmap",
+ "serde",
  "serde-wasm-bindgen",
  "serde_json",
  "tokio",

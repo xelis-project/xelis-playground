@@ -5,7 +5,7 @@
 pre, pre *
 , .code
 , .pb-arguments-container > pre *
-, textarea, input, #output_container
+, textarea, input, select, option, #output_container
 , #signature-container > parameter *
 , #export_program_value {
     font-family: 'Source Code Pro', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace !important;
@@ -117,14 +117,14 @@ h2 {
     margin: 0 0 15px 0;
 }
 
-textarea, input {
+textarea, input, select, option {
     color: rgb(187, 225, 255);
     font-size: 0.9rem;
     border: 1px solid #00dbff40;
     background-color: #00000036;
 }
 
-input:focus, textarea:focus {
+input:focus, textarea:focus, select:focus, option:focus {
     border: 1px solid #00dbffb0 !important;
     outline: none;
 }
@@ -139,7 +139,7 @@ textarea {
     box-sizing: border-box;
 }
 
-input {
+input, select, option {
     padding: 4px;
     margin-bottom: 4px;
 }
@@ -556,11 +556,6 @@ div.pb-arguments-container.readonly > pre {
     box-sizing: border-box;
 }
 
-
-#parameter_builder_container .info-block {
-    margin: 1.25rem 0 0;
-}
-
 #parameter_builder_container .po-selection {
   margin-top: 1rem;
 }
@@ -667,7 +662,7 @@ div.pb-arguments-container.readonly > pre {
     width: auto;
     /* min-width: 260px; */
     box-shadow: 0 10px 20px 0 rgba(0,0,0,0.2);
-    z-index: 1;
+    z-index: 10;
     min-width: fit-content;
     padding-top: 0.51rem;
     margin-left: -0.75rem;
@@ -677,6 +672,7 @@ div.pb-arguments-container.readonly > pre {
     padding: 0.75rem 4rem 0.75rem 0.75rem;
     text-decoration: none;
     display: block;
+    white-space: nowrap;
     /* font-size: smaller; */
 }
 
@@ -686,7 +682,7 @@ div.pb-arguments-container.readonly > pre {
     cursor: pointer;
 }
 
-.entry-stat-ro:hover {
+.menu-stat-ro:hover {
     cursor: pointer;
 }
 

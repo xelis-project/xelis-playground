@@ -4,7 +4,7 @@ use std::{collections::HashMap, sync::{
     atomic::{AtomicBool, Ordering},
     mpsc, Mutex,
 }};
-
+use anyhow::Error;
 use cfg_if::cfg_if;
 use human_bytes::human_bytes;
 use humantime::format_duration;
@@ -53,6 +53,7 @@ use xelis_lexer::Lexer;
 use xelis_parser::Parser;
 use xelis_types::Type;
 use xelis_vm::{Primitive, SysCallResult, FnInstance, FnParams, FnReturnType, FunctionHandler, Context, ValueCell, VM};
+use serde::Deserialize;
 
 #[wasm_bindgen]
 extern "C" {
@@ -287,6 +288,24 @@ impl ConstFunc {
 }
 
 static LOGS_SENDER: Mutex<Option<mpsc::Sender<String>>> = Mutex::new(None);
+
+#[wasm_bindgen]
+#[derive(Deserialize, Debug, Clone)]
+pub struct StoragePresetJSON {
+    key_type_id: u8,
+    key: String,
+    value_type_id: u8,
+    value: String,
+}
+
+#[wasm_bindgen]
+#[derive(Debug, Clone)]
+pub struct StoragePreset {
+    key_type: Type,
+    key: ValueCell,
+    value_type: Type,
+    value: ValueCell,
+}
 
 #[wasm_bindgen]
 impl Silex {
@@ -528,6 +547,39 @@ impl Silex {
         })
     }
 
+    pub fn js_to_storage_preset(&self, js_value: JsValue) -> Result<StoragePreset, JsValue> {
+        let storage_preset_json: Result<StoragePresetJSON, serde_wasm_bindgen::Error> = serde_wasm_bindgen::from_value(js_value);
+        match storage_preset_json {
+            Ok(sp_json) => {
+                let key_type = Type::primitive_type_from_byte(sp_json.key_type_id);
+                let value_type = Type::primitive_type_from_byte(sp_json.value_type_id);
+                if key_type.is_none() {
+                    return Err(JsValue::from_str("Invalid key type"));
+                }
+                if value_type.is_none() {
+                    return Err(JsValue::from_str("Invalid value type"));
+                }
+
+                let key_type = key_type.unwrap();
+                let value_type = value_type.unwrap();
+
+                let storage_key = self.parse_js_value_to_const(JsValue::from_str(sp_json.key.as_str()), &key_type)?;
+                let storage_value = self.parse_js_value_to_const(JsValue::from_str(sp_json.value.as_str()), &value_type)?;
+
+                let sp = StoragePreset {
+                    key_type,
+                    value_type,
+                    key: storage_key,
+                    value: storage_value,
+                };
+
+                //log!("key type: {:?}, key: {:?}", key_type, storage_key_name);
+                Ok(sp)
+            }
+            Err(err) => Err(JsValue::from_str(format!("Failed to parse storage preset: {}", err).as_str())),
+        }
+    }
+
     async fn execute_program_internal(
         &self,
         program: Program,
@@ -535,6 +587,7 @@ impl Silex {
         max_gas: Option<u64>,
         deposits: IndexMap<Hash, ContractDeposit>,
         values: Vec<ValueCell>,
+        sp_list: Vec<StoragePreset>,
     ) -> Result<ExecutionResult, String> {
         log!("Executing program with entry_id: {}, max_gas: {:?}, values: {:?}", entry_id, max_gas, values);
         let environment = self.environment.environment().clone();
@@ -546,6 +599,11 @@ impl Silex {
                 data: Default::default(),
                 balances: Default::default(),
             };
+
+            for preset in sp_list {
+                storage.data.insert(preset.key, preset.value);
+            }
+
             let transaction = Transaction::new(
                 TxVersion::V0,
                 CompressedPublicKey::new(Default::default()),
@@ -696,6 +754,7 @@ impl Silex {
         entry_id: usize,
         max_gas: Option<u64>,
         params: Vec<JsValue>,
+        storage_presets: Vec<JsValue>,
     ) -> Result<ExecutionResult, JsValue> {
         if self.has_program_running() {
             return Err(JsValue::from_str("A program is already running"));
@@ -712,7 +771,14 @@ impl Silex {
 
         let mut values = Vec::with_capacity(params.len());
         for (value, param) in params.into_iter().zip(entry.parameters.iter()) {
-            values.push(self.parse_js_value_to_const(value, &param.ty)?);
+            let p = &param.ty;
+            values.push(self.parse_js_value_to_const(value, p)?);
+        }
+
+        let mut sp_list: Vec<StoragePreset> = Vec::with_capacity(storage_presets.len());
+
+        for preset in storage_presets {
+            sp_list.push(self.js_to_storage_preset(preset)?);
         }
 
         // Mark it as running
@@ -720,7 +786,7 @@ impl Silex {
 
         let chunk_id = entry.chunk_id;
         // TODO: support deposits configuration
-        let handle = self.execute_program_internal(program, chunk_id, max_gas, Default::default(), values).await
+        let handle = self.execute_program_internal(program, chunk_id, max_gas, Default::default(), values, sp_list).await
             .map_err(|err| JsValue::from_str(&format!("{:#}", err)));
 
         // Mark it as not running

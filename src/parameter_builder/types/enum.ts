@@ -53,7 +53,7 @@ export function enum_type(parameter: Parameter, root_container: HTMLElement) {
         enum_type.appendChild(double_colon);
 
         const variant = parameter.value.variants[parseInt(index)];
-        console.log("debug: enum variant field name -: " + variant[0])
+        //console.log("debug: enum variant field name -: " + variant[0])
 
         let variant_tag = document.createElement("variant");
         const variant_name = document.createElement("variant-name");
