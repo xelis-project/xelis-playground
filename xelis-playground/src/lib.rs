@@ -604,7 +604,9 @@ impl Silex {
                 tracker: ContractEventTracker::default(),
                 assets: Default::default(),
                 global_caches: &Default::default(),
-                injected_gas: IndexMap::new(),
+                injected_gas: Default::default(),
+                delayed_executions: Default::default(),
+                planned_executions: Default::default(),
             };
 
             let mut logs = Vec::new();
