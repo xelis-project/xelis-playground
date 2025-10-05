@@ -45,6 +45,11 @@ impl ContractProvider for MockStorage {
         Ok(None)
     }
 
+    async fn has_delayed_execution_at_topoheight(&self, _: &Hash, _: TopoHeight) -> Result<bool, anyhow::Error> {
+        Ok(false)
+    }
+
+
     async fn asset_exists(&self, _: &Hash, _: TopoHeight) -> Result<bool, anyhow::Error> {
         Ok(false)
     }
