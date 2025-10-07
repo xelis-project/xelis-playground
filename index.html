@@ -30,11 +30,19 @@
         <div>Toggle functions</div>
       </button>
       <div id="function_list" class="hidden">
-        <div>Functions</div>
-        <div>
-          <input id="search_func_list" type="text" placeholder="Search" />
-        </div>
-        <div id="function_list_items">
+          <div class="function-list-header">
+              <div class="controls">
+                  <div class="title">Functions</div>
+              </div>
+
+              <div class="search-container">
+                  <input id="search_func_list" type="text" placeholder="Search" class="large-input" />
+<!--                  <div class="search-results info-block">-->
+<!--                      <div><key>Results</key><div>All items</div></div>-->
+<!--                  </div>-->
+              </div>
+          </div>
+          <div id="function_list_items">
           <!-- populated by JS -->
         </div>
       </div>

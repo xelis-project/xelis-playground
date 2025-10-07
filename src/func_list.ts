@@ -8,6 +8,8 @@ export class FuncList {
   search_func_list: HTMLInputElement;
   is_opened: boolean;
 
+  search_results_default_show: boolean = false;
+
   funcs: any[];
   const_funcs: any[];
 
@@ -67,6 +69,8 @@ export class FuncList {
   }
 
   load_function_list() {
+      const _thisFuncList = this;
+
     let el_on_types = new Map<string, HTMLElement>();
 
     const filtered_funcs = this.funcs.filter((f) => {
@@ -76,32 +80,54 @@ export class FuncList {
         || (f.on_type() != null && f.on_type().toLowerCase().indexOf(this.search_func_list.value.toLowerCase()) !== -1);
     });
 
+      let method_container: HTMLElement;
+
     filtered_funcs.forEach((f) => {
       let el_on_type = el_on_types.get(f.on_type());
 
       if (!el_on_type) {
         el_on_type = document.createElement(`div`);
+        el_on_type.classList.add(`section-header`, `info-block`, `accordion`);
         const title = document.createElement(`div`);
         title.innerText = f.on_type() ? f.on_type() : `func`;
         el_on_type.append(title);
         el_on_types.set(f.on_type(), el_on_type);
-        this.items.append(el_on_type);
+
+          // make the method container for this type
+          method_container = document.createElement(`div`);
+          method_container.classList.add(`method-container`, (_thisFuncList.search_results_default_show ? `active` : `inactive`));
+
+          this.items.append(el_on_type);
+          this.items.append(method_container);
+
+          el_on_type.addEventListener("click", function() {
+              this.classList.toggle("active");
+              const mc = this.nextElementSibling as HTMLElement;
+
+              if (mc.classList.contains("active")) {
+                  mc.classList.remove("active");
+                  mc.classList.add("inactive");
+              } else if (mc.classList.contains("inactive")) {
+                  mc.classList.add("active");
+                  mc.classList.remove("inactive");
+              }
+          });
       }
 
       const el_func = document.createElement(`div`);
+      el_func.classList.add(`func-item`);
       if (f.return_type()) {
-        el_func.innerText = `${f.name()}(${f.params().join(", ")}) -> ${f.return_type()}`;
+        el_func.innerHTML = `<function>${f.name()}</function><parameter>(${f.params().join(", ")})</parameter> <arrow>⟶</arrow> <ret_type>${f.return_type()}</ret_type>`;
       } else {
-        el_func.innerText = `${f.name()}(${f.params().join(", ")})`;
+        el_func.innerHTML = `<function>${f.name()}</function><parameter>(${f.params().join(", ")})</parameter>`;
       }
 
       el_func.setAttribute(`title`, `Syscall id: ${f.syscall_id()}`);
 
       if (!f.is_on_instance() && f.on_type()) {
-        el_func.innerText = `${f.on_type()}::` + el_func.innerText;
+        el_func.innerHTML = `<ret_type>${f.on_type()}</ret_type>::` + el_func.innerHTML;
       }
-
-      el_on_type.append(el_func);
+        method_container.append(el_func);
     });
 
     const filtered_const_funcs = this.const_funcs.filter((f) => {
@@ -110,31 +136,63 @@ export class FuncList {
 
     let el_const_on_types = new Map<string, HTMLElement>();
 
-    const separator = document.createElement(`h3`);
-    separator.innerText = `-- Const functions (executed at compile time only) --`;
-    this.items.append(separator);
+    if(filtered_const_funcs.length > 0) {
+        const separator = document.createElement(`div`);
+        separator.classList.add(`panel-title`, `title`, `const-section-title`);
+        separator.innerText = `Const functions`;
+
+        const note = document.createElement(`div`);
+        note.classList.add(`note`);
+        note.innerText = `(executed at compile time only)`;
+
+        separator.append(note);
+        this.items.append(separator);
+    }
+
 
     filtered_const_funcs.forEach((f) => {
       let el_on_type = el_const_on_types.get(f.for_type());
 
       if (!el_on_type) {
-        el_on_type = document.createElement(`div`);
+          el_on_type = document.createElement(`div`);
+          el_on_type.classList.add(`section-header`, `info-block`, `accordion`);
         const title = document.createElement(`div`);
         title.innerText = f.for_type();
         el_on_type.append(title);
         el_const_on_types.set(f.for_type(), el_on_type);
-        this.items.append(el_on_type);
+
+          // make the method container for this type
+          method_container = document.createElement(`div`);
+          method_container.classList.add(`method-container`, (_thisFuncList.search_results_default_show ? `active` : `inactive`));
+
+          this.items.append(el_on_type);
+          this.items.append(method_container);
+
+          el_on_type.addEventListener("click", function() {
+              this.classList.toggle("active");
+              const mc = this.nextElementSibling as HTMLElement;
+
+              if (mc.classList.contains("active")) {
+                  mc.classList.remove("active");
+                  mc.classList.add("inactive");
+              } else if (mc.classList.contains("inactive")) {
+                  mc.classList.add("active");
+                  mc.classList.remove("inactive");
+              }
+          });
       }
 
       const el_func = document.createElement(`div`);
-      el_func.innerText = `(const) ${f.for_type()}::${f.name()}(${f.params().join(", ")}) -> ${f.for_type()}`;
-      el_on_type.append(el_func);
+        el_func.innerHTML = `(const) <ret_type>${f.for_type()}</ret_type>::<function>${f.name()}</function>(${f.params().join(", ")}) <arrow>⟶</arrow> <ret_type>${f.for_type()}</ret_type>`;
+      method_container.append(el_func);
     });
   }
 
   load_funcs(silex: any) {
     this.funcs = silex.get_env_functions();
     this.const_funcs = silex.get_constants_functions();
+    console.log(this.funcs);
+    console.log(this.const_funcs);
     this.load_function_list();
   }
 }
