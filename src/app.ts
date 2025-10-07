@@ -20,6 +20,7 @@ import ReuseIcon from "./resources/icons/recycle-icon.svg";
 import {Utils} from "./Utils";
 import { highlight } from 'ace-builds/src-noconflict/ext-static_highlight';
 import {StorageEditor} from "./StorageEditor";
+import { RightPanelModes } from './RightPanelModes';
 
 type EntryCallParam = [string: string];
 
@@ -31,6 +32,8 @@ export class App {
     modal_export: ModalExport;
     split_layout: SplitLayout;
     custom_select: CustomSelect;
+
+    right_panel_modes: RightPanelModes = new RightPanelModes();
 
     editor: ace.Editor;
     editor_has_unsaved_changes: boolean = false;
@@ -334,9 +337,10 @@ export class App {
         });
 
         document.addEventListener("screen-right-reset", () => {
-            console.log("Argument editor reset - did screen-right-reset.");
+            //console.log("Argument editor reset - did screen-right-reset.");
             UIContainers.panel_close(UIContainers.panel_options({initiator: this.btn_close_arg_editor} as PanelOptions));
             UIContainers.panel_close(UIContainers.panel_options({initiator: this.storage_editor.btn_close()} as PanelOptions));
+            this.right_panel_modes.contract_mode();
         });
 
         /* Project Manager */
@@ -429,7 +433,6 @@ export class App {
                     break;
             }
         });
-
         document.addEventListener("project-manager-loaded", (e) => {
             this.custom_select.build_selects();
         });

@@ -4,9 +4,9 @@ export class FuncList {
   app: App;
   element: HTMLElement;
   items: HTMLElement;
-  btn_toggle_func_list: HTMLButtonElement;
+  //btn_toggle_func_list: HTMLButtonElement;
   search_func_list: HTMLInputElement;
-  is_opened: boolean;
+  //is_opened: boolean;
 
   search_results_default_show: boolean = false;
 
@@ -18,7 +18,7 @@ export class FuncList {
 
     this.element = document.getElementById('function_list') as HTMLElement;
     this.items = document.getElementById('function_list_items') as HTMLElement;
-    this.btn_toggle_func_list = document.getElementById('btn_toggle_func_list') as HTMLButtonElement;
+    //this.btn_toggle_func_list = document.getElementById('btn_toggle_func_list') as HTMLButtonElement;
     this.search_func_list = document.getElementById('search_func_list') as HTMLInputElement;
 
     this.funcs = [];
@@ -26,13 +26,13 @@ export class FuncList {
 
     this.search_func_list.addEventListener("input", (e) => this.handle_search_input(e));
     this.search_func_list.value = localStorage.getItem(`list-functions-search`) || ``;
-    this.btn_toggle_func_list.addEventListener("click", () => this.toggle_list_functions());
+    //this.btn_toggle_func_list.addEventListener("click", () => this.toggle_list_functions());
 
-    const list_functions = localStorage.getItem(`list-functions`);
-    this.is_opened = false;
-    if (list_functions === `true`) {
-      this.open_list_functions();
-    }
+    // const list_functions = localStorage.getItem(`list-functions`);
+    // this.is_opened = false;
+    // if (list_functions === `true`) {
+    //   this.open_list_functions();
+    // }
   }
 
   handle_search_input(e: Event) {
@@ -42,27 +42,27 @@ export class FuncList {
     this.load_function_list();
   }
 
-  toggle_list_functions() {
-    if (this.element.classList.contains("hidden")) {
-      this.open_list_functions();
-    } else {
-      this.close_list_functions();
-    }
+  // toggle_list_functions() {
+  //   if (this.element.classList.contains("hidden")) {
+  //     this.open_list_functions();
+  //   } else {
+  //     this.close_list_functions();
+  //   }
+  //
+  //   this.app.split_layout.update_split();
+  // }
 
-    this.app.split_layout.update_split();
-  }
+  // open_list_functions() {
+  //   this.element.classList.remove('hidden');
+  //   localStorage.setItem(`list-functions`, 'true');
+  //   this.is_opened = true;
+  // }
 
-  open_list_functions() {
-    this.element.classList.remove('hidden');
-    localStorage.setItem(`list-functions`, 'true');
-    this.is_opened = true;
-  }
-
-  close_list_functions() {
-    this.element.classList.add('hidden');
-    localStorage.setItem(`list-functions`, 'false');
-    this.is_opened = false;
-  }
+  // close_list_functions() {
+  //   this.element.classList.add('hidden');
+  //   localStorage.setItem(`list-functions`, 'false');
+  //   this.is_opened = false;
+  // }
 
   clear_function_list() {
     this.items.innerHTML = ``;
@@ -88,6 +88,20 @@ export class FuncList {
     });
 
       let method_container: HTMLElement;
+
+      if(filtered_funcs.length > 0) {
+          const separator = document.createElement(`div`);
+          separator.classList.add(`panel-title`, `title`, `const-section-title`);
+          separator.innerText = `Standard functions`;
+
+          const note = document.createElement(`div`);
+          note.classList.add(`note`);
+          note.innerText = `(Built in functions)`;
+
+          separator.append(note);
+          this.items.append(separator);
+      }
+
 
     filtered_funcs.forEach((f) => {
       let el_on_type = el_on_types.get(f.on_type());
@@ -135,7 +149,8 @@ export class FuncList {
         el_func.innerHTML = `<function>${name}</function><parameter>(${params})</parameter>`;
       }
 
-      el_func.setAttribute("title", `Syscall id: ${f.syscall_id()}`);
+      el_func.classList.add(`with-tooltip`);
+      el_func.setAttribute("data-tooltip", `Syscall id: ${f.syscall_id()}`);
 
       if (!f.is_on_instance() && f.on_type()) {
         el_func.innerHTML = `<ret_type>${onType}</ret_type>::` + el_func.innerHTML;

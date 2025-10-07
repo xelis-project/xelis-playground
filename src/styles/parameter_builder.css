@@ -27,7 +27,7 @@ pre:not(.input_editor > pre), .code {
 
 body, #modal_parameter_builder *, #parameter-display *
 , .controls, .btn, .opt-btn, #screen_right > .controls .title, #screen_right > #program-spec > #entry-controls *:not(pre *)
-, #screen_right > #program-spec > #entry-controls *:not(input), h2.title1, .title, #function_list> :nth-child(1) {
+, #screen_right > #program-spec > #entry-controls *:not(input), h2.title1, .title {
     font-family: "Michroma", "Nimbus-ExtLight", sans-serif;
 }
 

@@ -244,6 +244,13 @@
     opacity: 0;
 }
 
+#function_list .with-tooltip::after {
+    bottom: 0;
+    left: 4rem;
+    z-index: 100;
+    width: fit-content;
+}
+
 .call-history-container {
     position: absolute;
     top: -20px;

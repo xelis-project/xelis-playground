@@ -22,30 +22,6 @@
   </head>
   <body>
     <div id="app">
-      <button
-        id="btn_toggle_func_list"
-        type="button"
-        title="Toggle function list"
-      >
-        <div>Toggle functions</div>
-      </button>
-      <div id="function_list" class="hidden">
-          <div class="function-list-header">
-              <div class="controls">
-                  <div class="title">Functions</div>
-              </div>
-
-              <div class="search-container">
-                  <input id="search_func_list" type="text" placeholder="Search" class="large-input" />
-<!--                  <div class="search-results info-block">-->
-<!--                      <div><key>Results</key><div>All items</div></div>-->
-<!--                  </div>-->
-              </div>
-          </div>
-          <div id="function_list_items">
-          <!-- populated by JS -->
-        </div>
-      </div>
       <div id="screen_left">
         <div class="controls">
           <div class="title">
@@ -160,185 +136,203 @@
         <div id="screen_right">
             <div id="screen_right_content">
                 <div class="controls">
-                    <div class="title">CONTRACT</div>
-                </div>
-                <div id="storage_preset_container" class="panel_container type-2">
-                    <div class="panel_backdrop bkdrp-strong hide"></div>
-                    <div class="panel_body hide">
-                        <div class="panel-title title">Storage Editor</div>
-                        <div class="info-block">
-                            <div>
-                                <key>Storage Map</key>
-                                <div class="dropdown">
-                                    <div class="menu-stat-ro">
-                                        <span id="storage-editor-menu-selected" class="menu-item-name"></span>
-                                    </div>
-                                    <div id="storage-editor-menu-content" class="dropdown-content">
-
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="info-block-button-container">
-                                <button id="btn_close_storage_editor" data-panel-id="storage_preset_container" class="opt-btn icon-green right">DONE</button>
-                            </div>
-                        </div>
-                        <div class="panel-options-container">
-                            <div class="po-btns" style="display: none;"></div>
-                            <div id="storage-modal-content" class="modal-content" style="display: none;"></div>
-                            <div class="po-selection">
-
-                                <div id="storage-map-new-dialog" class="dialog-container layout-tight" style="display: none;">
-                                    <div class="dialog-title">New Storage Map</div>
-                                    <div class="vertical"><label>Name</label><input id="sm-input-name" type="text"
-                                                                                            placeholder="Map Name (required)"
-                                                                                            class="large-input"
-                                                                                            required=""></div>
-                                    <div class="vertical"><label>Description</label><input id="sm-input-description" type="text"
-                                                                                                   placeholder="Description"
-                                                                                                   class="large-input">
-                                    </div>
-                                    <div class="dialog-btn-container right">
-                                        <button id="sm-cancel-new" class="dialog-btn btn">Cancel</button>
-                                        <button id="sm-create-new" class="dialog-btn btn" disabled="">Create</button>
-                                    </div>
-                                </div  >
-
-                                <div id="storage-map-insert-update-dialog" class="dialog-container layout-tight" style="display: none;">
-                                    <div class="storage-info-block">
-                                        <div class="sm-info">
-                                            <input id="sm-info-name" type="text" placeholder="Map Name" class="" />
-                                            <input id="sm-info-description" type="text" placeholder="Description" class="" />
-                                        </div>
-                                        <div class="storage-map-update-btn-container right">
-                                            <button id="btn_update_storage_map" class="opt-btn icon-green right" disabled>UPDATE</button>
-                                            <button id="btn_delete_storage_map" class="opt-btn icon-green right">Delete</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <div id="r_mode_title" class="title">CONTRACT</div>
+                    <div class="mode-panel-controls">
+                        <button id="btn_mode_contract" class="opt-btn icon-green" data-panel-id="contract_container" disabled>Contract</button>
+                        <button id="btn_mode_documentation" class="opt-btn icon-green" data-panel-id="contract_container">Library</button>
                     </div>
                 </div>
-                <div id="parameter_builder_container" class="panel_container type-2">
-                    <div class="panel_backdrop bkdrp-strong hide"></div>
-                    <div class="panel_body hide">
-                        <div class="panel-title title">Argument Editor</div>
-                        <div class="info-block">
-                            <div><key>Entry</key><div id="pb-ui-entry-stat"></div></div>
-                            <div><key>Parameters</key><div id="pb-ui-params-stat"></div></div>
-                            <div class="info-block-button-container"><button id="btn_close_arg_editor" data-panel-id="parameter_builder_container" class="opt-btn icon-green right">DONE</button></div>
-                        </div>
-                        <div class="panel-options-container">
-                            <div class="po-btns" style="display: none;"></div>
-                            <div id="pb-modal-content" class="modal-content" style="display: none;"></div>
-                            <div class="po-selection"></div>
-                        </div>
-                    </div>
-                </div>
-                <div id="program-spec">
-                    <div class="info-block-container entry-controls">
-                        <div class="info-block">
-                            <div><key>Entry</key>
-                                <div class="dropdown">
-                                    <div class="menu-stat-ro">
-                                        <span id="hud-entry-name" class="menu-item-name" style="visibility: hidden;">&nbsp;</span>
-                                    </div>
-                                    <div id="entry-menu" class="dropdown-content"></div>
-                                </div>
-                            </div>
-                            <div><key>Storage Map</key>
-                                <div class="dropdown">
-                                    <div class="menu-stat-ro">
-                                        <span id="hud-storage-preset-map-selected" class="menu-item-name">&nbsp;</span>
-                                    </div>
-                                    <div id="hud-storage-preset-map-menu-content" class="dropdown-content"></div>
-                                </div>
-                            </div>
-                            <div class="info-block-button-container">
-                                <button class="opt-btn icon-green right" disabled id="btn_run" >RUN</button>
-                                <button class="opt-btn icon-green right" disabled id="btn_export">EXPORT</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="parameter-display" class="">
-                        <h2 class="title1">Parameters</h2>
-                        <div id="pba-readonly" class="pb-arguments-container readonly">
-                            <div>
-                                <div class="message hide">This entry has no parameters.</div>
-                                <div id="entry-call-container"></div>
-                                <div id="signature-container" class="hide code"></div>
-                            </div>
-                            <div class="pb-arg-btns">
-                                <div class="left-icons">
-                                    <button id="btn-reuse-last-call" class="icon-button with-tooltip" data-tooltip="Disable call reuse" data-toggle="on" disabled></button>
-                                    <button id="btn-call-history" class="icon-button with-tooltip" data-tooltip="Contract call history" disabled></button>
-                                </div>
+                <div id="contract_container">
+                    <div id="storage_preset_container" class="panel_container type-2">
+                        <div class="panel_backdrop bkdrp-strong hide"></div>
+                        <div class="panel_body hide">
+                            <div class="panel-title title">Storage Editor</div>
+                            <div class="info-block">
                                 <div>
-                                    <button id="edit-entry-params-btn" data-panel-id="parameter_builder_container" class="opt-btn blue" disabled>Arguments</button>
-                                    <button id="entry-call-btn" class="opt-btn blue hide" disabled>Entry Call</button>
-                                    <button id="signature-btn" class="opt-btn blue" disabled>XVM SiG</button>
-                                    <button id="copy-ec-btn" class="opt-btn blue" disabled>Copy</button>
+                                    <key>Storage Map</key>
+                                    <div class="dropdown">
+                                        <div class="menu-stat-ro">
+                                            <span id="storage-editor-menu-selected" class="menu-item-name"></span>
+                                        </div>
+                                        <div id="storage-editor-menu-content" class="dropdown-content">
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="info-block-button-container">
+                                    <button id="btn_close_storage_editor" data-panel-id="storage_preset_container" class="opt-btn icon-green right">DONE</button>
+                                </div>
+                            </div>
+                            <div class="panel-options-container">
+                                <div class="po-btns" style="display: none;"></div>
+                                <div id="storage-modal-content" class="modal-content" style="display: none;"></div>
+                                <div class="po-selection">
+
+                                    <div id="storage-map-new-dialog" class="dialog-container layout-tight" style="display: none;">
+                                        <div class="dialog-title">New Storage Map</div>
+                                        <div class="vertical"><label>Name</label><input id="sm-input-name" type="text"
+                                                                                        placeholder="Map Name (required)"
+                                                                                        class="large-input"
+                                                                                        required=""></div>
+                                        <div class="vertical"><label>Description</label><input id="sm-input-description" type="text"
+                                                                                               placeholder="Description"
+                                                                                               class="large-input">
+                                        </div>
+                                        <div class="dialog-btn-container right">
+                                            <button id="sm-cancel-new" class="dialog-btn btn">Cancel</button>
+                                            <button id="sm-create-new" class="dialog-btn btn" disabled="">Create</button>
+                                        </div>
+                                    </div  >
+
+                                    <div id="storage-map-insert-update-dialog" class="dialog-container layout-tight" style="display: none;">
+                                        <div class="storage-info-block">
+                                            <div class="sm-info">
+                                                <input id="sm-info-name" type="text" placeholder="Map Name" class="" />
+                                                <input id="sm-info-description" type="text" placeholder="Description" class="" />
+                                            </div>
+                                            <div class="storage-map-update-btn-container right">
+                                                <button id="btn_update_storage_map" class="opt-btn icon-green right" disabled>UPDATE</button>
+                                                <button id="btn_delete_storage_map" class="opt-btn icon-green right">Delete</button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div id="gas_limit_display">
-                        <h2 class="title1">Max Gas</h2>
-                        <input
-                                id="input_max_gas"
-                                type="number"
-                                placeholder="infinite"
-                                class="large-input"
-                        />
+                    <div id="parameter_builder_container" class="panel_container type-2">
+                        <div class="panel_backdrop bkdrp-strong hide"></div>
+                        <div class="panel_body hide">
+                            <div class="panel-title title">Argument Editor</div>
+                            <div class="info-block">
+                                <div><key>Entry</key><div id="pb-ui-entry-stat"></div></div>
+                                <div><key>Parameters</key><div id="pb-ui-params-stat"></div></div>
+                                <div class="info-block-button-container"><button id="btn_close_arg_editor" data-panel-id="parameter_builder_container" class="opt-btn icon-green right">DONE</button></div>
+                            </div>
+                            <div class="panel-options-container">
+                                <div class="po-btns" style="display: none;"></div>
+                                <div id="pb-modal-content" class="modal-content" style="display: none;"></div>
+                                <div class="po-selection"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="program-spec">
+                        <div class="info-block-container entry-controls">
+                            <div class="info-block">
+                                <div><key>Entry</key>
+                                    <div class="dropdown">
+                                        <div class="menu-stat-ro">
+                                            <span id="hud-entry-name" class="menu-item-name" style="visibility: hidden;">&nbsp;</span>
+                                        </div>
+                                        <div id="entry-menu" class="dropdown-content"></div>
+                                    </div>
+                                </div>
+                                <div><key>Storage Map</key>
+                                    <div class="dropdown">
+                                        <div class="menu-stat-ro">
+                                            <span id="hud-storage-preset-map-selected" class="menu-item-name">&nbsp;</span>
+                                        </div>
+                                        <div id="hud-storage-preset-map-menu-content" class="dropdown-content"></div>
+                                    </div>
+                                </div>
+                                <div class="info-block-button-container">
+                                    <button class="opt-btn icon-green right" disabled id="btn_run" >RUN</button>
+                                    <button class="opt-btn icon-green right" disabled id="btn_export">EXPORT</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="parameter-display" class="">
+                            <h2 class="title1">Parameters</h2>
+                            <div id="pba-readonly" class="pb-arguments-container readonly">
+                                <div>
+                                    <div class="message hide">This entry has no parameters.</div>
+                                    <div id="entry-call-container"></div>
+                                    <div id="signature-container" class="hide code"></div>
+                                </div>
+                                <div class="pb-arg-btns">
+                                    <div class="left-icons">
+                                        <button id="btn-reuse-last-call" class="icon-button with-tooltip" data-tooltip="Disable call reuse" data-toggle="on" disabled></button>
+                                        <button id="btn-call-history" class="icon-button with-tooltip" data-tooltip="Contract call history" disabled></button>
+                                    </div>
+                                    <div>
+                                        <button id="edit-entry-params-btn" data-panel-id="parameter_builder_container" class="opt-btn blue" disabled>Arguments</button>
+                                        <button id="entry-call-btn" class="opt-btn blue hide" disabled>Entry Call</button>
+                                        <button id="signature-btn" class="opt-btn blue" disabled>XVM SiG</button>
+                                        <button id="copy-ec-btn" class="opt-btn blue" disabled>Copy</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="gas_limit_display">
+                            <h2 class="title1">Max Gas</h2>
+                            <input
+                                    id="input_max_gas"
+                                    type="number"
+                                    placeholder="infinite"
+                                    class="large-input"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="output-header">
+                        <div id="output-heading"><h2 class="title1">Output</h2></div>
+                        <div>
+                            <button id="btn_output_clear" class="opt-btn icon-blue" title="Clear output">
+                                <svg
+                                        style="width: 1.5rem; height: 1.5rem;"
+                                        viewBox="0 0 16 16"
+                                        fill="currentColor">
+                                    <path d="M10 12.6l.7.7 1.6-1.6 1.6 1.6.8-.7L13 11l1.7-1.6-.8-.8-1.6 1.7-1.6-1.7-.7.8 1.6 1.6-1.6 1.6zM1 4h14V3H1v1zm0 3h14V6H1v1zm8 2.5V9H1v1h8v-.5zM9 13v-1H1v1h8z"/></svg>
+                            </button>
+
+                            <button id="btn_output_copy" class="opt-btn icon-blue" title="Copy output">
+                                <svg style="width: 1.5rem; height: 1.5rem;" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" stroke-width="3" stroke="currentColor" fill="none"><rect x="11.13" y="17.72" width="33.92" height="36.85" rx="2.5"/><path d="M19.35,14.23V13.09a3.51,3.51,0,0,1,3.33-3.66H49.54a3.51,3.51,0,0,1,3.33,3.66V42.62a3.51,3.51,0,0,1-3.33,3.66H48.39"/></svg>
+                            </button>
+
+                            <button id="btn_output_panel_toggle" class="opt-btn icon-blue">
+                                <svg
+                                        id="btn_output_panel_expand"
+                                        viewBox="0 0 30 30"
+                                        fill="currentColor"
+                                        class="out-expand"
+                                        style="width: 1.5rem; height: 1.5rem;"
+                                >
+                                    <title>Expand output window</title>
+                                    <path d="M25.99 6.042l-0.004 9.735-3.732-3.733-4.454 4.455-2.665-2.665 4.454-4.454-3.384-3.383 9.785 0.045zM11.494 22.805l3.238 3.182-9.722 0.017 0.004-9.68 3.815 3.815 4.925-4.924 2.665 2.665-4.925 4.925z"></path>
+                                </svg>
+
+                                <svg
+                                        id="btn_output_panel_shrink"
+                                        viewBox="0 0 32 32"
+                                        fill="currentColor"
+                                        class="out-shrink hide"
+                                        style="width: 1.5rem; height: 1.5rem;"
+                                >
+                                    <title>Shrink output window</title>
+                                    <path d="M27.407 7.882l-2.665-2.665-4.925 4.925-3.815-3.815-0.004 9.68 9.723-0.017-3.238-3.183 4.924-4.925zM8.577 20.383l-4.453 4.453 2.665 2.666 4.453-4.455 3.732 3.732 0.004-9.734-9.784-0.045 3.383 3.383z"></path>
+                                </svg>
+
+                            </button>
+                        </div>
+                    </div>
+                    <div id="output_container">
+
+                        <div id="output">
+                            <!-- populated by JS -->
+                        </div>
                     </div>
                 </div>
-
-                <div class="output-header">
-                    <div id="output-heading"><h2 class="title1">Output</h2></div>
-                    <div>
-                        <button id="btn_output_clear" class="opt-btn icon-blue" title="Clear output">
-                            <svg
-                                    style="width: 1.5rem; height: 1.5rem;"
-                                    viewBox="0 0 16 16"
-                                    fill="currentColor">
-                                <path d="M10 12.6l.7.7 1.6-1.6 1.6 1.6.8-.7L13 11l1.7-1.6-.8-.8-1.6 1.7-1.6-1.7-.7.8 1.6 1.6-1.6 1.6zM1 4h14V3H1v1zm0 3h14V6H1v1zm8 2.5V9H1v1h8v-.5zM9 13v-1H1v1h8z"/></svg>
-                        </button>
-
-                        <button id="btn_output_copy" class="opt-btn icon-blue" title="Copy output">
-                            <svg style="width: 1.5rem; height: 1.5rem;" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" stroke-width="3" stroke="currentColor" fill="none"><rect x="11.13" y="17.72" width="33.92" height="36.85" rx="2.5"/><path d="M19.35,14.23V13.09a3.51,3.51,0,0,1,3.33-3.66H49.54a3.51,3.51,0,0,1,3.33,3.66V42.62a3.51,3.51,0,0,1-3.33,3.66H48.39"/></svg>
-                        </button>
-
-                        <button id="btn_output_panel_toggle" class="opt-btn icon-blue">
-                            <svg
-                                    id="btn_output_panel_expand"
-                                    viewBox="0 0 30 30"
-                                    fill="currentColor"
-                                    class="out-expand"
-                                    style="width: 1.5rem; height: 1.5rem;"
-                            >
-                                <title>Expand output window</title>
-                                <path d="M25.99 6.042l-0.004 9.735-3.732-3.733-4.454 4.455-2.665-2.665 4.454-4.454-3.384-3.383 9.785 0.045zM11.494 22.805l3.238 3.182-9.722 0.017 0.004-9.68 3.815 3.815 4.925-4.924 2.665 2.665-4.925 4.925z"></path>
-                            </svg>
-
-                            <svg
-                                    id="btn_output_panel_shrink"
-                                    viewBox="0 0 32 32"
-                                    fill="currentColor"
-                                    class="out-shrink hide"
-                                    style="width: 1.5rem; height: 1.5rem;"
-                            >
-                                <title>Shrink output window</title>
-                                <path d="M27.407 7.882l-2.665-2.665-4.925 4.925-3.815-3.815-0.004 9.68 9.723-0.017-3.238-3.183 4.924-4.925zM8.577 20.383l-4.453 4.453 2.665 2.666 4.453-4.455 3.732 3.732 0.004-9.734-9.784-0.045 3.383 3.383z"></path>
-                            </svg>
-
-                        </button>
+                <div id="documentation_container">
+                    <div class="function-list-header">
+                        <div class="search-container">
+                            <input id="search_func_list" type="text" placeholder="Search" class="large-input" />
+                        </div>
                     </div>
-                </div>
-                <div id="output_container">
-
-                    <div id="output">
-                        <!-- populated by JS -->
+                    <div id="function_list">
+                        <div id="function_list_items">
+                            <!-- populated by JS -->
+                        </div>
                     </div>
                 </div>
             </div>
