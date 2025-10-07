@@ -67,7 +67,7 @@ export interface Program {
     abi: string;
     hex: string;
     json: string;
-    bytes: string;
+    bytes: Uint8Array<ArrayBuffer>;
     entries: ProgramEntry[];
 }
 

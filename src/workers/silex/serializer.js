@@ -55,10 +55,10 @@ export function serialize_program(program) {
         throw new Error("Expected a Program instance");
     }
 
-    const to_json = program.to_json();
-    const to_hex = program.to_hex();
-    const to_bytes = program.to_bytes();
-    const to_abi = program.to_abi();
+    const json = program.to_json();
+    const hex = program.to_hex();
+    const bytes = program.to_bytes();
+    const abi = program.to_abi();
 
     const entries = program.entries().map((entry) => {
         return {
@@ -75,10 +75,10 @@ export function serialize_program(program) {
     });
 
     return {
-        to_abi,
-        to_bytes,
-        to_hex,
-        to_json,
+        abi,
+        bytes,
+        hex,
+        json,
         entries
     };
 }

@@ -88,48 +88,48 @@ export class ModalExport {
     }
   }
 
-  set_export_hex() {
+  async set_export_hex() {
     this.tab_export_hex.classList.add('selected');
     this.tab_export_json.classList.remove('selected');
     this.tab_export_bytes.classList.remove('selected');
     this.tab_export_abi.classList.remove('selected');
-    const program_value = this.app.get_program().to_hex();
+    const program_value = (await this.app.get_program()).hex;
     this.export_program_value.innerText = program_value;
     this.program_blob = new Blob([program_value], { type: "text/plain" });
     this.program_filename = "xelis_program.txt";
     this.export_program_size.innerText = formatBytes(this.program_blob.size);
   }
 
-  set_export_bytes() {
+  async set_export_bytes() {
     this.tab_export_hex.classList.remove('selected');
     this.tab_export_json.classList.remove('selected');
     this.tab_export_bytes.classList.add('selected');
     this.tab_export_abi.classList.remove('selected');
-    const program_value = this.app.get_program().to_bytes();
+    const program_value = (await this.app.get_program()).bytes;
     this.export_program_value.innerText = program_value.join("");
     this.program_blob = new Blob([program_value], { type: "application/octet-stream" });
     this.program_filename = "xelis_program.bin";
     this.export_program_size.innerText = formatBytes(this.program_blob.size);
   }
 
-  set_export_json() {
+  async set_export_json() {
     this.tab_export_hex.classList.remove('selected');
     this.tab_export_bytes.classList.remove('selected');
     this.tab_export_json.classList.add('selected');
     this.tab_export_abi.classList.remove('selected');
-    const program_value = this.app.get_program().to_json()
+    const program_value = (await this.app.get_program()).json;
     this.export_program_value.innerHTML = `<pre style="color: inherit; margin: 0;">${program_value}</pre>`;
     this.program_blob = new Blob([program_value], { type: "text/plain" });
     this.program_filename = "xelis_program.json";
     this.export_program_size.innerText = formatBytes(this.program_blob.size);
   }
 
-  set_export_abi() {
+  async set_export_abi() {
     this.tab_export_hex.classList.remove('selected');
     this.tab_export_bytes.classList.remove('selected');
     this.tab_export_json.classList.remove('selected');
     this.tab_export_abi.classList.add('selected');
-    const program_value = this.app.get_program().to_abi()
+    const program_value = (await this.app.get_program()).abi;
     this.export_program_value.innerHTML = `<pre style="color: inherit; margin: 0;">${program_value}</pre>`;
     this.program_blob = new Blob([program_value], { type: "text/plain" });
     this.program_filename = "xelis_program.abi.json";
