@@ -2,9 +2,13 @@ import modify from 'rollup-plugin-modify';
 import { defineConfig } from 'vite';
 import magicalSvg from "vite-plugin-magical-svg";
 
-/** @type {import('vite').UserConfig} */
+
 export default defineConfig(({ command }) => {
+    /** @type {import('vite').UserConfig} */
     const config = {
+        worker: {
+            format: `es`
+        },
         server: {
             headers: {
                 "Cross-Origin-Opener-Policy": "same-origin",
