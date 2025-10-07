@@ -538,155 +538,153 @@ impl Silex {
     ) -> Result<ExecutionResult, String> {
         log!("Executing program with entry_id: {}, max_gas: {:?}, values: {:?}", entry_id, max_gas, values);
         let environment = self.environment.environment().clone();
-        tokio::spawn(async move {
-            log!("Building storage and chain state");
-            // Fake storage
-            // TODO: allow user to configure data in it before running the program
-            let mut storage = MockStorage {
-                data: Default::default(),
-                balances: Default::default(),
-            };
-            let transaction = Transaction::new(
-                TxVersion::V0,
-                CompressedPublicKey::new(Default::default()),
-                TransactionType::InvokeContract(InvokeContractPayload {
-                    contract: Hash::zero(),
-                    deposits: Default::default(),
-                    parameters: Vec::new(),
-                    entry_id,
-                    max_gas: max_gas.unwrap_or(0),
-                }),
-                0,
-                0,
-                0,
-                Default::default(),
-                {
-                    let proof_hex = b"cc15f1b1e654ffd25bb89f4069303245d3c477ce93abb380eb4941096c06000006141de8f618c3392c5071bc3b76467bea32bc0d8fbf9257a3c44a59b596825f9a09332365fffdb56060d4fdfba8a513cbab3f607c0812aefec7124914cf796caa1a4263cdc0d3488e3e6b5bd04d524667e2b49bb8f55cf418fd8af8cd23ef667bd574ab23bf8c71b1bf9a5f52a2ca5a9320bf43a6be8bb2cc864a6745e6de07931382c2b90873b690e7da04b6fd9ddd3f22c060aed621da691bd54e0b6e9f0b3283b6fc7bcaa4ba06a7f3151a49ba5082462b8ba76b93b2934b6c99fe9e730572e026e9a85930896d0120d06115e60cb68bc6bd18335288ca01f8591924da7e563ac102237e476357b37ecd834715272c5eb705c5bc3799602d922cfa153665565926daf7df42276e834afe1fa444fabf17e7596f09936bcc27f913053fac3906ce8a10dbe1caf1c1e02428d8f2773fc307ae7c7d2fe63102e605c89efa730a4e217dd6b2481f49803efdc44b25d80236e0c10ecab006136ba423ec75bbf7532286a1d063e16e13903104e8274666169288cb9f65a414a04e3dacb7d368931e647a149554f3c78e326e111e5da221cb4e8152d3525f0b32ff2b814b7352647674f1a36e49f8603e3d3996910f52154b871c72138e288b00b471026638646f201c0c0b358872fa6bc81a2ce1c2f068b4513828eda4def4ae1c2e9c02ef58043412dd31411c5cec7acd9bfdcf5f8ead03f13801bc4bc529726e6b25f85b80db23fc8659a09b8c590a51ec015065d437e77d84b0d3c3d529d1c6301441d2dd335042f64b1ced343c32b25416bd5d43e4ff02d4382cc18f1f5cfc0144decc51ac0d9863f1124589ec6f0fe388b464db7db4d5f16ff101da37a3efed71a4d4514915eccc94dc7832bf4c0b52165ac937e5b0dff2d0a2e7b68802a8759e4bae58815f6e2ec7683006561f27f1855ad8840036c580c81ebadf36ddfdf7470996068c05f186a67cefb751e33b5624d577357372486bae3fd509aea9b6d4c72296afdd05";
-                    RangeProof::from_bytes(&hex::decode(proof_hex).unwrap()).unwrap()
-                },
-                Reference {
-                    hash: Hash::zero(),
-                    topoheight: 0
-                },
-                None,
-                Signature::new(Default::default(), Default::default())
-            );
+        log!("Building storage and chain state");
+        // Fake storage
+        // TODO: allow user to configure data in it before running the program
+        let mut storage = MockStorage {
+            data: Default::default(),
+            balances: Default::default(),
+        };
+        let transaction = Transaction::new(
+            TxVersion::V0,
+            CompressedPublicKey::new(Default::default()),
+            TransactionType::InvokeContract(InvokeContractPayload {
+                contract: Hash::zero(),
+                deposits: Default::default(),
+                parameters: Vec::new(),
+                entry_id,
+                max_gas: max_gas.unwrap_or(0),
+            }),
+            0,
+            0,
+            0,
+            Default::default(),
+            {
+                let proof_hex = b"cc15f1b1e654ffd25bb89f4069303245d3c477ce93abb380eb4941096c06000006141de8f618c3392c5071bc3b76467bea32bc0d8fbf9257a3c44a59b596825f9a09332365fffdb56060d4fdfba8a513cbab3f607c0812aefec7124914cf796caa1a4263cdc0d3488e3e6b5bd04d524667e2b49bb8f55cf418fd8af8cd23ef667bd574ab23bf8c71b1bf9a5f52a2ca5a9320bf43a6be8bb2cc864a6745e6de07931382c2b90873b690e7da04b6fd9ddd3f22c060aed621da691bd54e0b6e9f0b3283b6fc7bcaa4ba06a7f3151a49ba5082462b8ba76b93b2934b6c99fe9e730572e026e9a85930896d0120d06115e60cb68bc6bd18335288ca01f8591924da7e563ac102237e476357b37ecd834715272c5eb705c5bc3799602d922cfa153665565926daf7df42276e834afe1fa444fabf17e7596f09936bcc27f913053fac3906ce8a10dbe1caf1c1e02428d8f2773fc307ae7c7d2fe63102e605c89efa730a4e217dd6b2481f49803efdc44b25d80236e0c10ecab006136ba423ec75bbf7532286a1d063e16e13903104e8274666169288cb9f65a414a04e3dacb7d368931e647a149554f3c78e326e111e5da221cb4e8152d3525f0b32ff2b814b7352647674f1a36e49f8603e3d3996910f52154b871c72138e288b00b471026638646f201c0c0b358872fa6bc81a2ce1c2f068b4513828eda4def4ae1c2e9c02ef58043412dd31411c5cec7acd9bfdcf5f8ead03f13801bc4bc529726e6b25f85b80db23fc8659a09b8c590a51ec015065d437e77d84b0d3c3d529d1c6301441d2dd335042f64b1ced343c32b25416bd5d43e4ff02d4382cc18f1f5cfc0144decc51ac0d9863f1124589ec6f0fe388b464db7db4d5f16ff101da37a3efed71a4d4514915eccc94dc7832bf4c0b52165ac937e5b0dff2d0a2e7b68802a8759e4bae58815f6e2ec7683006561f27f1855ad8840036c580c81ebadf36ddfdf7470996068c05f186a67cefb751e33b5624d577357372486bae3fd509aea9b6d4c72296afdd05";
+                RangeProof::from_bytes(&hex::decode(proof_hex).unwrap()).unwrap()
+            },
+            Reference {
+                hash: Hash::zero(),
+                topoheight: 0
+            },
+            None,
+            Signature::new(Default::default(), Default::default())
+        );
 
-            // TODO: configurable
-            let header = BlockHeader::new(
-                BlockVersion::V0,
-                0,
-                0,
-                Immutable::Owned(Default::default()),
-                Default::default(),
-                CompressedPublicKey::new(Default::default()),
-                Default::default()
-            );
-            let block = Block::new(header, Vec::new());
-            let zero_hash = Hash::zero();
-            let metadata = ModuleMetadata {
-                contract: zero_hash.clone(),
-                caller: None,
-                deposits: deposits.clone(),
-            };
+        // TODO: configurable
+        let header = BlockHeader::new(
+            BlockVersion::V0,
+            0,
+            0,
+            Immutable::Owned(Default::default()),
+            Default::default(),
+            CompressedPublicKey::new(Default::default()),
+            Default::default()
+        );
+        let block = Block::new(header, Vec::new());
+        let zero_hash = Hash::zero();
+        let metadata = ModuleMetadata {
+            contract: zero_hash.clone(),
+            caller: None,
+            deposits: deposits.clone(),
+        };
 
-            let mut chain_state = ChainState {
-                debug_mode: true,
-                mainnet: false,
-                block: &block,
-                entry_contract: &zero_hash,
-                block_hash: &zero_hash,
-                topoheight: 0,
-                tx_hash: Some(&zero_hash),
-                modules: HashMap::new(),
-                outputs: Vec::new(),
-                caches: HashMap::new(),
-                tracker: ContractEventTracker::default(),
-                assets: Default::default(),
-                global_caches: &Default::default(),
-                injected_gas: Default::default(),
-                delayed_executions: Default::default(),
-                planned_executions: Default::default(),
-            };
+        let mut chain_state = ChainState {
+            debug_mode: true,
+            mainnet: false,
+            block: &block,
+            entry_contract: &zero_hash,
+            block_hash: &zero_hash,
+            topoheight: 0,
+            tx_hash: Some(&zero_hash),
+            modules: HashMap::new(),
+            outputs: Vec::new(),
+            caches: HashMap::new(),
+            tracker: ContractEventTracker::default(),
+            assets: Default::default(),
+            global_caches: &Default::default(),
+            injected_gas: Default::default(),
+            delayed_executions: Default::default(),
+            planned_executions: Default::default(),
+        };
 
-            let mut logs = Vec::new();
-            let (res, elapsed_time, used_gas, used_memory) = {
-                let mut vm = VM::new(&environment);
-                vm.append_module(&program.module, &metadata)
-                    .map_err(|e| format!("Error while adding module: {}", e))?;
+        let mut logs = Vec::new();
+        let (res, elapsed_time, used_gas, used_memory) = {
+            let mut vm = VM::new(&environment);
+            vm.append_module(&program.module, &metadata)
+                .map_err(|e| format!("Error while adding module: {}", e))?;
 
-                let context = vm.context_mut();
-                context.insert(ContractProviderWrapper(&mut storage));
-                context.insert_mut(&mut chain_state);
-                context.insert_ref(&transaction);
+            let context = vm.context_mut();
+            context.insert(ContractProviderWrapper(&mut storage));
+            context.insert_mut(&mut chain_state);
+            context.insert_ref(&transaction);
 
-                if let Some(max_gas) = max_gas {
-                    context.set_gas_limit(max_gas);
-                }
-                context.set_memory_price_per_byte(1);
+            if let Some(max_gas) = max_gas {
+                context.set_gas_limit(max_gas);
+            }
+            context.set_memory_price_per_byte(1);
 
-                let constructor = vm.invoke_hook_id(0)
-                    .map_err(|err| format!("{:#}", err))?;
+            let constructor = vm.invoke_hook_id(0)
+                .map_err(|err| format!("{:#}", err))?;
 
-                let start = web_time::Instant::now();
-                if constructor {
-                    logs.push("Executing constructor..".to_owned());
-                    log!("Executing constructor..");
+            let start = web_time::Instant::now();
+            if constructor {
+                logs.push("Executing constructor..".to_owned());
+                log!("Executing constructor..");
 
-                    let res = vm.run().await
-                        .map_err(|err| format!("constructor: {:#}", err))?;
+                let res = vm.run().await
+                    .map_err(|err| format!("constructor: {:#}", err))?;
 
-                    if res != ValueCell::Default(Primitive::U64(0)) {
-                        return Err(format!("Constructor returned a non-zero exit code: {:#}", res));
-                    }
-                }
-
-                log!("Executing entry point with ID: {}", entry_id);
-                vm.invoke_entry_chunk_with_args(entry_id, values.into_iter().rev())
-                    .map_err(|err| format!("{:#}", err))?;
-
-                log!("Running VM");
-                let res = vm.run().await;
-                log!("VM executed");
-
-                let elapsed_time = start.elapsed();
-                let context = vm.context();
-                let used_gas = context.current_gas_usage();
-                let used_memory = context.current_memory_usage();
-
-                (res, elapsed_time, used_gas, used_memory as u64)
-            };
-
-            log!("Execution completed in {} ms, used gas: {}, used memory: {} bytes", elapsed_time.as_millis(), used_gas, used_memory);
-
-            // Merge chain state into mock storage
-            let mut caches = chain_state.caches;
-            if let Some(cache) = caches.remove(&zero_hash) {
-                for (k, v) in cache.storage.into_iter() {
-                    match v {
-                        Some((_, Some(v))) => {
-                            storage.data.insert(k, v);
-                        },
-                        Some((_, None)) => {
-                            storage.data.remove(&k);
-                        },
-                        None => {}, // key stored as checked but not found
-                    };
+                if res != ValueCell::Default(Primitive::U64(0)) {
+                    return Err(format!("Constructor returned a non-zero exit code: {:#}", res));
                 }
             }
 
-            match res {
-                Ok(value) => Ok(ExecutionResult {
-                    value: format!("{}", value),
-                    logs,
-                    elapsed_time: format_duration(elapsed_time).to_string(),
-                    used_gas,
-                    used_memory,
-                    storage,
-                }),
-                Err(err) => Err(format!("{:#}", err)),
+            log!("Executing entry point with ID: {}", entry_id);
+            vm.invoke_entry_chunk_with_args(entry_id, values.into_iter().rev())
+                .map_err(|err| format!("{:#}", err))?;
+
+            log!("Running VM");
+            let res = vm.run().await;
+            log!("VM executed");
+
+            let elapsed_time = start.elapsed();
+            let context = vm.context();
+            let used_gas = context.current_gas_usage();
+            let used_memory = context.current_memory_usage();
+
+            (res, elapsed_time, used_gas, used_memory as u64)
+        };
+
+        log!("Execution completed in {} ms, used gas: {}, used memory: {} bytes", elapsed_time.as_millis(), used_gas, used_memory);
+
+        // Merge chain state into mock storage
+        let mut caches = chain_state.caches;
+        if let Some(cache) = caches.remove(&zero_hash) {
+            for (k, v) in cache.storage.into_iter() {
+                match v {
+                    Some((_, Some(v))) => {
+                        storage.data.insert(k, v);
+                    },
+                    Some((_, None)) => {
+                        storage.data.remove(&k);
+                    },
+                    None => {}, // key stored as checked but not found
+                };
             }
-        }).await.map_err(|v| v.to_string())?
+        }
+
+        match res {
+            Ok(value) => Ok(ExecutionResult {
+                value: format!("{}", value),
+                logs,
+                elapsed_time: format_duration(elapsed_time).to_string(),
+                used_gas,
+                used_memory,
+                storage,
+            }),
+            Err(err) => Err(format!("{:#}", err)),
+        }
     }
 
     // Execute the program
