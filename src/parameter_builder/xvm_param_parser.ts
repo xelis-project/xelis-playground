@@ -1,4 +1,4 @@
-import { Entry } from "../../public/xelis_playground";
+import { ProgramEntry } from "../silex";
 
 export interface Parameter {
     name: string;
@@ -196,17 +196,17 @@ export class XVMParamParser {
     }
 
 
-    make_schema_from_entry(entry: Entry) {
+    make_schema_from_entry(entry: ProgramEntry) {
         let pb_obj = {
-            id: entry.id(),
-            name: entry.name(),
+            id: entry.id,
+            name: entry.name,
             parameters: [] as Parameter[]
         };
 
-        entry.parameters().forEach(p => {
-            const parameter_type = p.type_json().type;
-            const parameter_value = p.type_json().value;
-            pb_obj.parameters.push({ name: p.name(), signature: p.type_name(), type: parameter_type, value: parameter_value });
+        entry.parameters.forEach(p => {
+            const parameter_type = p.type_json.type;
+            const parameter_value = p.type_json.value;
+            pb_obj.parameters.push({ name: p.name, signature: p.type_name, type: parameter_type, value: parameter_value });
         });
 
         this.parameter_builder_data.push(pb_obj);

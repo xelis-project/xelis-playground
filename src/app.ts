@@ -2,7 +2,7 @@ import ace from 'ace-builds';
 import 'ace-builds/src-noconflict/mode-rust';
 import 'ace-builds/src-noconflict/theme-tomorrow_night_bright';
 
-import { Silex } from '../public/xelis_playground';
+import { ProgramEntry, Silex } from './silex';
 import { CustomSelect } from './custom_select';
 import { SplitLayout } from "./split_layout";
 import { TextDotLoading } from './text_dot_loading';
@@ -23,7 +23,7 @@ import { highlight } from 'ace-builds/src-noconflict/ext-static_highlight';
 type EntryCallParam = [string: string];
 
 export class App {
-    silex: any;
+    silex: Silex;
 
     modal: Modal;
     func_list: FuncList;
@@ -552,13 +552,13 @@ export class App {
 
     }
 
-    add_entry(entry: any, index: number) {
+    add_entry(entry: ProgramEntry, index: number) {
         const _thisApp = this;
 
         const link = document.createElement(`a`);
         link.classList.add(`entry-link`);
         link.setAttribute(`data-entry-index`, `${index}`);
-        link.textContent = entry.name();
+        link.textContent = entry.name;
         this.entry_menu.appendChild(link);
 
         link.addEventListener('click', (e) => {
@@ -777,7 +777,7 @@ export class App {
         return `<span class="out-success">${text}</span>`;
     }
 
-    compile_code() {
+    async compile_code() {
         try {
             this.compile_save_code();
             this.clear_program();
@@ -789,10 +789,10 @@ export class App {
             localStorage.setItem('code', code);
 
             this.output.textContent += "------- Compiling -------\n";
-            const program = this.silex.compile(code);
+            const program = await this.silex.compile(code);
 
-            const entries = program.entries();
-            entries.forEach((entry: any, index: number) => {
+            const entries = program.entries;
+            entries.forEach((entry, index: number) => {
                 this.xvm_param_parser.make_schema_from_entry(entry);
                 this.add_entry(entry, index);
 
@@ -982,35 +982,36 @@ export class App {
         const output_dot_loading = new TextDotLoading(this.output, 3);
 
         try {
-            if (this.silex.has_program_running()) {
+            const is_program_running = await this.silex.has_program_running();
+            if (is_program_running) {
                 this.output.innerHTML = this.output_error("A program is already running!\n");
                 return;
             }
 
-            const program = this.silex.compile(this.program_code);
-            const entry = program.entries()[this.program_entry_index];
-            this.output.textContent = `-------- Running (${entry.name()} at index ${entry.id()}) --------\n`;
+            const program = await this.silex.compile(this.program_code);
+            const entry = program.entries[this.program_entry_index];
+            this.output.textContent = `-------- Running (${entry.name} at index ${entry.id}) --------\n`;
             output_dot_loading.start();
 
             const params = this.get_program_params();
             this.btn_compile.setAttribute("disabled", "");
-            let result = await this.silex.execute_program(program, entry.id(), max_gas, params);
+            let result = await this.silex.execute_program(this.program_code, entry.id, max_gas, params);
             output_dot_loading.stop();
 
             this.output.textContent = "";
-            let logs = result.logs();
+            let logs = result.logs;
             if (logs.length > 0) {
                 this.output.textContent += logs.join("\n");
                 this.output.textContent += "\n";
             }
 
             this.output.textContent += `-------- Result --------\n`;
-            this.output.textContent += `Exit code: ${result.value()}\n`;
-            this.output.textContent += `Executed in: ${result.elapsed_time()}\n`;
-            this.output.textContent += `Gas usage: ${result.used_gas()} (${result.used_gas_formatted()} XEL)\n`;
-            this.output.textContent += `Memory usage: ${result.used_memory()} (${result.used_memory_formatted()})\n`;
+            this.output.textContent += `Exit code: ${result.value}\n`;
+            this.output.textContent += `Executed in: ${result.elapsed_time}\n`;
+            this.output.textContent += `Gas usage: ${result.used_gas} (${result.used_gas_formatted} XEL)\n`;
+            this.output.textContent += `Memory usage: ${result.used_memory} (${result.used_memory_formatted})\n`;
 
-            const storage = result.storage();
+            const storage = result.storage;
             console.log(storage);
             if (storage.length > 0) {
                 this.output.textContent += `-------- Storage --------\n`;

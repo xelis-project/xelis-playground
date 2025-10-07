@@ -1,4 +1,5 @@
 import { App } from "./app";
+import { ConstFunc, Func, Silex } from "./silex";
 
 export class FuncList {
   app: App;
@@ -8,8 +9,8 @@ export class FuncList {
   search_func_list: HTMLInputElement;
   is_opened: boolean;
 
-  funcs: any[];
-  const_funcs: any[];
+  funcs: Func[];
+  const_funcs: ConstFunc[];
 
   constructor(app: App) {
     this.app = app;
@@ -70,39 +71,39 @@ export class FuncList {
     let el_on_types = new Map<string, HTMLElement>();
 
     const filtered_funcs = this.funcs.filter((f) => {
-      return f.name().indexOf(this.search_func_list.value) !== -1 || f.syscall_id() == this.search_func_list.value;
+      return f.name.indexOf(this.search_func_list.value) !== -1 || f.syscall_id == this.search_func_list.value;
     });
 
     filtered_funcs.forEach((f) => {
-      let el_on_type = el_on_types.get(f.on_type());
+      let el_on_type = el_on_types.get(f.on_type);
 
       if (!el_on_type) {
         el_on_type = document.createElement(`div`);
         const title = document.createElement(`div`);
-        title.innerText = f.on_type() ? f.on_type() : `func`;
+        title.innerText = f.on_type ? f.on_type : `func`;
         el_on_type.append(title);
-        el_on_types.set(f.on_type(), el_on_type);
+        el_on_types.set(f.on_type, el_on_type);
         this.items.append(el_on_type);
       }
 
       const el_func = document.createElement(`div`);
-      if (f.return_type()) {
-        el_func.innerText = `${f.name()}(${f.params().join(", ")}) -> ${f.return_type()}`;
+      if (f.return_type) {
+        el_func.innerText = `${f.name}(${f.params.join(", ")}) -> ${f.return_type}`;
       } else {
-        el_func.innerText = `${f.name()}(${f.params().join(", ")})`;
+        el_func.innerText = `${f.name}(${f.params.join(", ")})`;
       }
 
-      el_func.setAttribute(`title`, `Syscall id: ${f.syscall_id()}`);
+      el_func.setAttribute(`title`, `Syscall id: ${f.syscall_id}`);
 
-      if (!f.is_on_instance() && f.on_type()) {
-        el_func.innerText = `${f.on_type()}::` + el_func.innerText;
+      if (!f.is_on_instance && f.on_type) {
+        el_func.innerText = `${f.on_type}::` + el_func.innerText;
       }
 
       el_on_type.append(el_func);
     });
 
     const filtered_const_funcs = this.const_funcs.filter((f) => {
-      return f.name().indexOf(this.search_func_list.value) !== -1;
+      return f.name.indexOf(this.search_func_list.value) !== -1;
     });
 
     let el_const_on_types = new Map<string, HTMLElement>();
@@ -112,26 +113,26 @@ export class FuncList {
     this.items.append(separator);
 
     filtered_const_funcs.forEach((f) => {
-      let el_on_type = el_const_on_types.get(f.for_type());
+      let el_on_type = el_const_on_types.get(f.for_type);
 
       if (!el_on_type) {
         el_on_type = document.createElement(`div`);
         const title = document.createElement(`div`);
-        title.innerText = f.for_type();
+        title.innerText = f.for_type;
         el_on_type.append(title);
-        el_const_on_types.set(f.for_type(), el_on_type);
+        el_const_on_types.set(f.for_type, el_on_type);
         this.items.append(el_on_type);
       }
 
       const el_func = document.createElement(`div`);
-      el_func.innerText = `(const) ${f.for_type()}::${f.name()}(${f.params().join(", ")}) -> ${f.for_type()}`;
+      el_func.innerText = `(const) ${f.for_type}::${f.name}(${f.params.join(", ")}) -> ${f.for_type}`;
       el_on_type.append(el_func);
     });
   }
 
-  load_funcs(silex: any) {
-    this.funcs = silex.get_env_functions();
-    this.const_funcs = silex.get_constants_functions();
+  async load_funcs(silex: Silex) {
+    this.funcs = await silex.get_env_functions();
+    this.const_funcs = await silex.get_constants_functions();
     this.load_function_list();
   }
 }
