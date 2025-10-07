@@ -1016,7 +1016,7 @@ export class App {
             if (storage.length > 0) {
                 this.output.textContent += `-------- Storage --------\n`;
                 storage.forEach((item: any) => {
-                    this.output.textContent += `${item.key()}: ${item.value()}\n`;
+                    this.output.textContent += `${item.key}: ${item.value}\n`;
                 });
             }
         } catch (e) {
