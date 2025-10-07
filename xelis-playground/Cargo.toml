@@ -28,7 +28,7 @@ human_bytes = "0.4.3"
 async-trait = "0.1"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
-tokio_with_wasm = { version = "0.7.4", features = ["rt"] }
+tokio_with_wasm = { version = "0.8.7", features = ["rt"] }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 tokio = { version = "1", features = ["rt", "macros"] }

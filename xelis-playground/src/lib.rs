@@ -633,7 +633,7 @@ impl Silex {
                     logs.push("Executing constructor..".to_owned());
                     log!("Executing constructor..");
 
-                    let res = vm.run_blocking()
+                    let res = vm.run().await
                         .map_err(|err| format!("constructor: {:#}", err))?;
 
                     if res != ValueCell::Default(Primitive::U64(0)) {
