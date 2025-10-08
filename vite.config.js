@@ -1,6 +1,7 @@
 import modify from 'rollup-plugin-modify';
 import { defineConfig } from 'vite';
 import magicalSvg from "vite-plugin-magical-svg";
+import wasm from 'vite-plugin-wasm';
 
 /** @type {import('vite').UserConfig} */
 export default defineConfig(({ command }) => {
@@ -27,6 +28,7 @@ export default defineConfig(({ command }) => {
             }
         },
         plugins: [
+            wasm(),
             magicalSvg({
                 // By default, the output will be a dom element (the <svg> you can use inside the webpage).
                 // You can also change the output to react (or any supported target) to get a component you can use.
