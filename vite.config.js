@@ -1,9 +1,8 @@
-import modify from 'rollup-plugin-modify';
 import { defineConfig } from 'vite';
 import magicalSvg from "vite-plugin-magical-svg";
 
-/** @type {import('vite').UserConfig} */
 export default defineConfig(({ command }) => {
+    /** @type {import('vite').UserConfig} */
     const config = {
         server: {
             headers: {
@@ -14,8 +13,17 @@ export default defineConfig(({ command }) => {
         build: {
             assetsInlineLimit: Number.MAX_SAFE_INTEGER,
             rollupOptions: {
-                external: ['../public/xelis_playground.js', '/xelis_playground.js'], // this has to be external (untouched) - can't run silex if it's bundled / in production
+                external: (id, p, r) => {
+                    if (id.includes(`/xelis_playground.js`)) {
+                        return true;
+                    }
+                },
                 output: {
+                    paths: (id) => {
+                        if (id.includes(`/xelis_playground.js`)) {
+                            return `/xelis_playground.js`;
+                        }
+                    },
                     manualChunks: (path) => {
                         if (path.includes("node_modules")) {
                             return 'vendor';
@@ -55,13 +63,6 @@ export default defineConfig(({ command }) => {
                 restoreMissingViewBox: true,
             }),
         ],
-    }
-
-    if (command === `build`) {
-        config.plugins.push(modify({
-            find: '../public/xelis_playground.js',
-            replace: '/xelis_playground.js'
-        }));
     }
 
     return config;
