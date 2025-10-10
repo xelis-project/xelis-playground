@@ -635,6 +635,10 @@ impl Silex {
                     if res != ValueCell::Primitive(Primitive::U64(0)) {
                         return Err(format!("Constructor returned a non-zero exit code: {:#}", res));
                     }
+
+                    // VM has consumed the module, lets re-inject it again
+                    vm.append_module(&program.module, &metadata)
+                        .map_err(|e| format!("Error while re-adding module: {}", e))?;
                 }
 
                 log!("Executing entry point with ID: {}", entry_id);
