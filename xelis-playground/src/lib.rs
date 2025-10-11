@@ -599,7 +599,6 @@ impl Silex {
                 storage.data.insert(preset.key, preset.value);
             }
 
-            let transaction = Transaction::new(
             let transaction = Arc::new(Transaction::new(
                 TxVersion::V0,
                 CompressedPublicKey::new(Default::default()),
