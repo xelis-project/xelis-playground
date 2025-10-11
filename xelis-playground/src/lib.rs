@@ -659,8 +659,8 @@ impl Silex {
                 assets: Default::default(),
                 global_caches: &Default::default(),
                 injected_gas: Default::default(),
-                scheduled_executions: Default::default(),
-                planned_executions: Default::default(),
+                executions_topoheight: Default::default(),
+                executions_block_end: Default::default(),
                 allow_executions: true,
             };
 
