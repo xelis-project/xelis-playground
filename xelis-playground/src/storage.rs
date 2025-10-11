@@ -45,7 +45,7 @@ impl ContractProvider for MockStorage {
         Ok(None)
     }
 
-    async fn has_delayed_execution_at_topoheight(&self, _: &Hash, _: TopoHeight) -> Result<bool, anyhow::Error> {
+    async fn has_scheduled_execution_at_topoheight(&self, _: &Hash, _: TopoHeight) -> Result<bool, anyhow::Error> {
         Ok(false)
     }
 

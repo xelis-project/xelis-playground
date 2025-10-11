@@ -1,10 +1,9 @@
 mod storage;
 
-use std::{collections::HashMap, sync::{
-    atomic::{AtomicBool, Ordering},
-    mpsc, Mutex,
+use std::{borrow::Cow, collections::HashMap, sync::{
+    atomic::{AtomicBool, Ordering}, mpsc, Arc, Mutex
 }};
-use anyhow::Error;
+
 use cfg_if::cfg_if;
 use human_bytes::human_bytes;
 use humantime::format_duration;
@@ -23,11 +22,7 @@ use xelis_bytecode::Module;
 use xelis_common::{
     block::{Block, BlockHeader, BlockVersion},
     contract::{
-        build_environment,
-        ChainState,
-        ContractEventTracker,
-        ContractProviderWrapper,
-        ModuleMetadata
+        build_environment, vm::ContractCaller, ChainState, ContractEventTracker, ContractProviderWrapper, ModuleMetadata
     },
     crypto::{
         elgamal::CompressedPublicKey,
@@ -543,7 +538,7 @@ impl Silex {
                     _ => return Err(JsValue::from_str(&format!("Unsupported opaque type parsing: {}", name)))
                 }
             },
-            _ => ValueCell::Default(Self::parse_js_value_to_val(value, param)?)
+            _ => ValueCell::Primitive(Self::parse_js_value_to_val(value, param)?)
         })
     }
 
@@ -605,6 +600,7 @@ impl Silex {
             }
 
             let transaction = Transaction::new(
+            let transaction = Arc::new(Transaction::new(
                 TxVersion::V0,
                 CompressedPublicKey::new(Default::default()),
                 TransactionType::InvokeContract(InvokeContractPayload {
@@ -628,7 +624,7 @@ impl Silex {
                 },
                 None,
                 Signature::new(Default::default(), Default::default())
-            );
+            ));
 
             // TODO: configurable
             let header = BlockHeader::new(
@@ -652,10 +648,11 @@ impl Silex {
                 debug_mode: true,
                 mainnet: false,
                 block: &block,
-                entry_contract: &zero_hash,
+                entry_contract: Cow::Borrowed(&zero_hash),
                 block_hash: &zero_hash,
                 topoheight: 0,
-                tx_hash: Some(&zero_hash),
+                // TODO: configurable
+                caller: ContractCaller::Transaction(&zero_hash, &transaction),
                 modules: HashMap::new(),
                 outputs: Vec::new(),
                 caches: HashMap::new(),
@@ -663,8 +660,9 @@ impl Silex {
                 assets: Default::default(),
                 global_caches: &Default::default(),
                 injected_gas: Default::default(),
-                delayed_executions: Default::default(),
+                scheduled_executions: Default::default(),
                 planned_executions: Default::default(),
+                allow_executions: true,
             };
 
             let mut logs = Vec::new();
@@ -676,7 +674,6 @@ impl Silex {
                 let context = vm.context_mut();
                 context.insert(ContractProviderWrapper(&mut storage));
                 context.insert_mut(&mut chain_state);
-                context.insert_ref(&transaction);
 
                 if let Some(max_gas) = max_gas {
                     context.set_gas_limit(max_gas);
@@ -694,9 +691,13 @@ impl Silex {
                     let res = vm.run_blocking()
                         .map_err(|err| format!("constructor: {:#}", err))?;
 
-                    if res != ValueCell::Default(Primitive::U64(0)) {
+                    if res != ValueCell::Primitive(Primitive::U64(0)) {
                         return Err(format!("Constructor returned a non-zero exit code: {:#}", res));
                     }
+
+                    // VM has consumed the module, lets re-inject it again
+                    vm.append_module(&program.module, &metadata)
+                        .map_err(|e| format!("Error while re-adding module: {}", e))?;
                 }
 
                 log!("Executing entry point with ID: {}", entry_id);
