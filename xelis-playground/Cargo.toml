@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 wasm-bindgen = "0.2.95"
+xelis_assembler = { git = "https://github.com/xelis-project/xelis-vm.git", branch = "dev", package = "xelis-assembler" }
 xelis_vm = { git = "https://github.com/xelis-project/xelis-vm.git", branch = "dev", package = "xelis-vm" }
 xelis_abi = { git = "https://github.com/xelis-project/xelis-vm.git", branch = "dev", package = "xelis-abi" }
 xelis_bytecode = { git = "https://github.com/xelis-project/xelis-vm.git", branch = "dev", package = "xelis-bytecode" }

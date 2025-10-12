@@ -17,6 +17,7 @@ use storage::MockStorage;
 use tokio_with_wasm as tokio;
 
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
+use xelis_assembler::Disassembler;
 use xelis_builder::EnvironmentBuilder;
 use xelis_bytecode::Module;
 use xelis_common::{
@@ -98,12 +99,19 @@ impl Program {
     }
 
     pub fn to_json(&self) -> String {
-        serde_json::to_string_pretty(&self.module).
-            expect("Failed to serialize module to JSON")
+        serde_json::to_string_pretty(&self.module)
+            .expect("Failed to serialize module to JSON")
     }
 
     pub fn to_abi(&self) -> String {
         self.abi.clone()
+    }
+
+    pub fn to_asm(&self) -> String {
+        let mut disassembler = Disassembler::new(&self.module);
+        disassembler.disasemble()
+            .expect("Failed to disassemble the module")
+            .to_string()
     }
 }
 

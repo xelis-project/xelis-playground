@@ -11,6 +11,7 @@ export class ModalExport {
   tab_export_bytes: HTMLElement;
   tab_export_json: HTMLElement;
   tab_export_abi: HTMLElement;
+  tab_export_asm: HTMLElement;
   export_program_value: HTMLElement;
   btn_export: HTMLElement;
   export_program_size: HTMLElement;
@@ -28,6 +29,7 @@ export class ModalExport {
     this.tab_export_bytes = document.getElementById('tab_export_bytes') as HTMLElement;
     this.tab_export_json = document.getElementById('tab_export_json') as HTMLElement;
     this.tab_export_abi = document.getElementById('tab_export_abi') as HTMLElement;
+    this.tab_export_asm = document.getElementById('tab_export_asm') as HTMLElement;
     this.export_program_value = document.getElementById('export_program_value') as HTMLElement;
     this.btn_export = document.getElementById('btn_export') as HTMLElement;
     this.export_program_size = document.getElementById('export_program_size') as HTMLElement;
@@ -37,6 +39,7 @@ export class ModalExport {
     this.tab_export_bytes.addEventListener('click', () => this.handle_tab_click('bytes'));
     this.tab_export_json.addEventListener('click', () => this.handle_tab_click('json'));
     this.tab_export_abi.addEventListener('click', () => this.handle_tab_click('abi'));
+    this.tab_export_asm.addEventListener('click', () => this.handle_tab_click('asm'));
     this.btn_export_copy.addEventListener('click', () => this.handle_copy_click());
     this.btn_export_download.addEventListener('click', () => this.handle_download_click());
   }
@@ -82,6 +85,9 @@ export class ModalExport {
       case "abi":
         this.set_export_abi();
         break;
+      case "asm":
+        this.set_export_asm();
+        break;
       default:
         console.error("Unknown export type: " + type);
         this.set_export_hex();
@@ -93,6 +99,7 @@ export class ModalExport {
     this.tab_export_json.classList.remove('selected');
     this.tab_export_bytes.classList.remove('selected');
     this.tab_export_abi.classList.remove('selected');
+    this.tab_export_asm.classList.remove('selected');
     const program_value = this.app.get_program().to_hex();
     this.export_program_value.innerText = program_value;
     this.program_blob = new Blob([program_value], { type: "text/plain" });
@@ -103,8 +110,9 @@ export class ModalExport {
   set_export_bytes() {
     this.tab_export_hex.classList.remove('selected');
     this.tab_export_json.classList.remove('selected');
-    this.tab_export_bytes.classList.add('selected');
     this.tab_export_abi.classList.remove('selected');
+    this.tab_export_asm.classList.remove('selected');
+    this.tab_export_bytes.classList.add('selected');
     const program_value = this.app.get_program().to_bytes();
     this.export_program_value.innerText = program_value.join("");
     this.program_blob = new Blob([program_value], { type: "application/octet-stream" });
@@ -115,8 +123,9 @@ export class ModalExport {
   set_export_json() {
     this.tab_export_hex.classList.remove('selected');
     this.tab_export_bytes.classList.remove('selected');
-    this.tab_export_json.classList.add('selected');
     this.tab_export_abi.classList.remove('selected');
+    this.tab_export_asm.classList.remove('selected');
+    this.tab_export_json.classList.add('selected');
     const program_value = this.app.get_program().to_json()
     this.export_program_value.innerHTML = `<pre style="color: inherit; margin: 0;">${program_value}</pre>`;
     this.program_blob = new Blob([program_value], { type: "text/plain" });
@@ -128,6 +137,7 @@ export class ModalExport {
     this.tab_export_hex.classList.remove('selected');
     this.tab_export_bytes.classList.remove('selected');
     this.tab_export_json.classList.remove('selected');
+    this.tab_export_asm.classList.remove('selected');
     this.tab_export_abi.classList.add('selected');
     const program_value = this.app.get_program().to_abi()
     this.export_program_value.innerHTML = `<pre style="color: inherit; margin: 0;">${program_value}</pre>`;
@@ -135,4 +145,18 @@ export class ModalExport {
     this.program_filename = "xelis_program.abi.json";
     this.export_program_size.innerText = formatBytes(this.program_blob.size);
   }
+
+  set_export_asm() {
+    this.tab_export_hex.classList.remove('selected');
+    this.tab_export_bytes.classList.remove('selected');
+    this.tab_export_json.classList.remove('selected');
+    this.tab_export_abi.classList.remove('selected');
+    this.tab_export_asm.classList.add('selected');
+    const program_value = this.app.get_program().to_asm();
+    this.export_program_value.innerHTML = `<pre style="color: inherit; margin: 0;">${program_value}</pre>`;
+    this.program_blob = new Blob([program_value], { type: "text/plain" });
+    this.program_filename = "xelis_program.asm";
+    this.export_program_size.innerText = formatBytes(this.program_blob.size);
+  }
+
 }
