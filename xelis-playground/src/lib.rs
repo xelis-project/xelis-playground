@@ -304,9 +304,7 @@ pub struct StoragePresetJSON {
 #[wasm_bindgen]
 #[derive(Debug, Clone)]
 pub struct StoragePreset {
-    key_type: Type,
     key: ValueCell,
-    value_type: Type,
     value: ValueCell,
 }
 
@@ -554,29 +552,22 @@ impl Silex {
         let storage_preset_json: Result<StoragePresetJSON, serde_wasm_bindgen::Error> = serde_wasm_bindgen::from_value(js_value);
         match storage_preset_json {
             Ok(sp_json) => {
-                let key_type = Type::primitive_type_from_byte(sp_json.key_type_id);
-                let value_type = Type::primitive_type_from_byte(sp_json.value_type_id);
-                if key_type.is_none() {
+                let Some(key_type) = Type::primitive_type_from_byte(sp_json.key_type_id) else {
                     return Err(JsValue::from_str("Invalid key type"));
-                }
-                if value_type.is_none() {
-                    return Err(JsValue::from_str("Invalid value type"));
-                }
+                };
 
-                let key_type = key_type.unwrap();
-                let value_type = value_type.unwrap();
+                let Some(value_type) = Type::primitive_type_from_byte(sp_json.value_type_id) else {
+                    return Err(JsValue::from_str("Invalid value type"));
+                };
 
                 let storage_key = self.parse_js_value_to_const(JsValue::from_str(sp_json.key.as_str()), &key_type)?;
                 let storage_value = self.parse_js_value_to_const(JsValue::from_str(sp_json.value.as_str()), &value_type)?;
 
                 let sp = StoragePreset {
-                    key_type,
-                    value_type,
                     key: storage_key,
                     value: storage_value,
                 };
 
-                //log!("key type: {:?}, key: {:?}", key_type, storage_key_name);
                 Ok(sp)
             }
             Err(err) => Err(JsValue::from_str(format!("Failed to parse storage preset: {}", err).as_str())),
