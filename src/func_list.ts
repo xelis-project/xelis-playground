@@ -70,7 +70,10 @@ export class FuncList {
     let el_on_types = new Map<string, HTMLElement>();
 
     const filtered_funcs = this.funcs.filter((f) => {
-      return f.name().indexOf(this.search_func_list.value) !== -1 || f.syscall_id() == this.search_func_list.value;
+      // Search by syscall, on_type, and name
+      return f.name().indexOf(this.search_func_list.value) !== -1
+        || f.syscall_id() == this.search_func_list.value
+        || (f.on_type() != null && f.on_type().toLowerCase().indexOf(this.search_func_list.value.toLowerCase()) !== -1);
     });
 
     filtered_funcs.forEach((f) => {

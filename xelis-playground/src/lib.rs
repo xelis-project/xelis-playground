@@ -18,7 +18,7 @@ use tokio_with_wasm as tokio;
 
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 use xelis_assembler::Disassembler;
-use xelis_builder::EnvironmentBuilder;
+use xelis_builder::{Builder, EnvironmentBuilder};
 use xelis_bytecode::Module;
 use xelis_common::{
     block::{Block, BlockHeader, BlockVersion},
@@ -436,6 +436,41 @@ impl Silex {
         funcs
     }
 
+    pub fn get_declared_types(&self) -> Vec<String> {
+        let mut types = Vec::new();
+        for ty in self.environment.get_struct_manager().iter() {
+            let t = ty.get_type();
+            types.push(format!("struct {} {{ {} }}", t.name(), t.fields()
+                .iter()
+                .map(|(n, ty)| format!("{}: {}", n, ty))
+                .collect::<Vec<_>>()
+                .join(", "))
+            );
+        }
+
+        for ty in self.environment.get_enum_manager().iter() {
+            let t = ty.get_type();
+            types.push(format!("enum {} {{ {} }}", t.name(), t.variants()
+                .iter()
+                .map(|(_, ty)| ty.fields()
+                    .as_ref()
+                    .iter()
+                    .map(|field| format!("{}: {}", field.0, field.1))
+                    .collect::<Vec<_>>()
+                    .join(", ")
+                )
+                .collect::<Vec<_>>()
+                .join(", "))
+            );
+        }
+
+        for ty in self.environment.get_opaque_manager().iter() {
+            types.push(format!("opaque {};", ty.name()));
+        }
+
+        types
+    }
+
     pub fn get_constants_functions(&self) -> Vec<ConstFunc> {
         let mut funcs = Vec::new();
         for (for_type, mappings) in self.environment.get_const_functions_mapper().get_mappings() {
@@ -821,7 +856,7 @@ mod tests {
         let program = silex.compile_internal(code).expect("Failed to compile the program");
         let entries = program.entries();
         let entry = entries.get(0).expect("No entry found");
-        let result = silex.execute_program_internal(program, entry.id() as u16, None, IndexMap::new(), vec![]).await
+        let result = silex.execute_program_internal(program, entry.id() as u16, None, IndexMap::new(), vec![], vec![]).await
             .expect("Failed to execute the program");
 
         assert_eq!(result.value(), "0");
