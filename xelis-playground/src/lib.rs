@@ -450,17 +450,27 @@ impl Silex {
 
         for ty in self.environment.get_enum_manager().iter() {
             let t = ty.get_type();
-            types.push(format!("enum {} {{ {} }}", t.name(), t.variants()
+            // enum Name { Variant1: { field1: Type1, field2: Type2 }, Variant2: { field1: Type1 } }
+            types.push(format!("enum {} {{\n    {}\n}}", t.name(), t.variants()
                 .iter()
-                .map(|(_, ty)| ty.fields()
-                    .as_ref()
-                    .iter()
-                    .map(|field| format!("{}: {}", field.0, field.1))
-                    .collect::<Vec<_>>()
-                    .join(", ")
-                )
+                .map(|(variant_name, ty)| {
+                    let fields = ty.fields()
+                        .as_ref()
+                        .iter()
+                        .map(|(field_name, field_type)| format!("{}: {}", field_name, field_type))
+                        .collect::<Vec<_>>()
+                        .join(",\n");
+
+                    // { field1: Type1, field2: Type2 }
+                    // if no fields, then just Variant1
+                    if fields.is_empty() {
+                        return variant_name.to_string();
+                    }
+
+                    format!("   {} {{\n    {}\n   }}", variant_name, fields)
+                })
                 .collect::<Vec<_>>()
-                .join(", "))
+                .join(",\n"))
             );
         }
 
