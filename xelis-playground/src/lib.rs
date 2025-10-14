@@ -23,7 +23,13 @@ use xelis_bytecode::Module;
 use xelis_common::{
     block::{Block, BlockHeader, BlockVersion},
     contract::{
-        build_environment, vm::ContractCaller, ChainState, ContractEventTracker, ContractProviderWrapper, ModuleMetadata
+        build_environment,
+        vm::ContractCaller,
+        ChainState,
+        ContractEventTracker,
+        ContractProviderWrapper,
+        InterContractPermission,
+        ModuleMetadata
     },
     crypto::{
         elgamal::CompressedPublicKey,
@@ -652,6 +658,7 @@ impl Silex {
                     parameters: Vec::new(),
                     entry_id,
                     max_gas: max_gas.unwrap_or(0),
+                    permission: InterContractPermission::All,
                 }),
                 0,
                 0,
@@ -706,6 +713,8 @@ impl Silex {
                 executions_topoheight: Default::default(),
                 executions_block_end: Default::default(),
                 allow_executions: true,
+                // For playground, we allow everything
+                permission: Cow::Owned(InterContractPermission::All),
             };
 
             let mut logs = Vec::new();
@@ -866,7 +875,7 @@ mod tests {
         let program = silex.compile_internal(code).expect("Failed to compile the program");
         let entries = program.entries();
         let entry = entries.get(0).expect("No entry found");
-        let result = silex.execute_program_internal(program, entry.id() as u16, None, IndexMap::new(), vec![], vec![]).await
+        let result = silex.execute_program_internal(program, entry.id() as u16, Some(50_000_000), IndexMap::new(), vec![], vec![]).await
             .expect("Failed to execute the program");
 
         assert_eq!(result.value(), "0");
