@@ -302,9 +302,9 @@ dependencies = [
 
 [[package]]
 name = "cfg-if"
-version = "1.0.3"
+version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2fd1289c04a9ea8cb22300a459a72a385d7c73d3259e2ed7dcb2af674838cfa9"
+checksum = "9330f8b2ff13f34540b44e946ef35111825727b38d33286ef986142615121801"
 
 [[package]]
 name = "chacha20"
@@ -2132,7 +2132,7 @@ dependencies = [
 [[package]]
 name = "xelis_common"
 version = "1.18.0"
-source = "git+https://github.com/xelis-project/xelis-blockchain?branch=dev#1706612e3cb2de9000f889f6129817b60a9bca7c"
+source = "git+https://github.com/xelis-project/xelis-blockchain?branch=dev#6b07b7d3d5de64504f5439fbe918433dbd8c5bc4"
 dependencies = [
  "anyhow",
  "async-trait",
