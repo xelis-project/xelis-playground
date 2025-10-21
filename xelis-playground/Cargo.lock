@@ -1597,9 +1597,9 @@ dependencies = [
 
 [[package]]
 name = "unicode-ident"
-version = "1.0.19"
+version = "1.0.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f63a545481291138910575129486daeaf8ac54aee4387fe7906919f7830c7d9d"
+checksum = "462eeb75aeb73aea900253ce739c8e18a67423fadf006037cd3ff27e82748a06"
 
 [[package]]
 name = "unicode-xid"
@@ -1941,7 +1941,7 @@ dependencies = [
 [[package]]
 name = "xelis-abi"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#fa742283f8f59ef654ffe811852e784b3863a366"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#458dc1d2c529ab3939dc9eefbd66780a9248b6ff"
 dependencies = [
  "anyhow",
  "serde_json",
@@ -1957,7 +1957,7 @@ dependencies = [
 [[package]]
 name = "xelis-assembler"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#fa742283f8f59ef654ffe811852e784b3863a366"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#458dc1d2c529ab3939dc9eefbd66780a9248b6ff"
 dependencies = [
  "log",
  "thiserror 2.0.17",
@@ -1968,7 +1968,7 @@ dependencies = [
 [[package]]
 name = "xelis-ast"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#fa742283f8f59ef654ffe811852e784b3863a366"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#458dc1d2c529ab3939dc9eefbd66780a9248b6ff"
 dependencies = [
  "indexmap",
  "xelis-types",
@@ -1977,7 +1977,7 @@ dependencies = [
 [[package]]
 name = "xelis-builder"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#fa742283f8f59ef654ffe811852e784b3863a366"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#458dc1d2c529ab3939dc9eefbd66780a9248b6ff"
 dependencies = [
  "anyhow",
  "hex",
@@ -1992,7 +1992,7 @@ dependencies = [
 [[package]]
 name = "xelis-bytecode"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#fa742283f8f59ef654ffe811852e784b3863a366"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#458dc1d2c529ab3939dc9eefbd66780a9248b6ff"
 dependencies = [
  "hex",
  "indexmap",
@@ -2004,7 +2004,7 @@ dependencies = [
 [[package]]
 name = "xelis-compiler"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#fa742283f8f59ef654ffe811852e784b3863a366"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#458dc1d2c529ab3939dc9eefbd66780a9248b6ff"
 dependencies = [
  "log",
  "thiserror 2.0.17",
@@ -2017,7 +2017,7 @@ dependencies = [
 [[package]]
 name = "xelis-environment"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#fa742283f8f59ef654ffe811852e784b3863a366"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#458dc1d2c529ab3939dc9eefbd66780a9248b6ff"
 dependencies = [
  "anyhow",
  "better_any",
@@ -2045,7 +2045,7 @@ dependencies = [
 [[package]]
 name = "xelis-lexer"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#fa742283f8f59ef654ffe811852e784b3863a366"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#458dc1d2c529ab3939dc9eefbd66780a9248b6ff"
 dependencies = [
  "log",
  "thiserror 2.0.17",
@@ -2056,7 +2056,7 @@ dependencies = [
 [[package]]
 name = "xelis-parser"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#fa742283f8f59ef654ffe811852e784b3863a366"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#458dc1d2c529ab3939dc9eefbd66780a9248b6ff"
 dependencies = [
  "anyhow",
  "indexmap",
@@ -2102,7 +2102,7 @@ dependencies = [
 [[package]]
 name = "xelis-types"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#fa742283f8f59ef654ffe811852e784b3863a366"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#458dc1d2c529ab3939dc9eefbd66780a9248b6ff"
 dependencies = [
  "anyhow",
  "hex",
@@ -2117,7 +2117,7 @@ dependencies = [
 [[package]]
 name = "xelis-vm"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#fa742283f8f59ef654ffe811852e784b3863a366"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#458dc1d2c529ab3939dc9eefbd66780a9248b6ff"
 dependencies = [
  "anyhow",
  "futures",
@@ -2132,7 +2132,7 @@ dependencies = [
 [[package]]
 name = "xelis_common"
 version = "1.19.0"
-source = "git+https://github.com/xelis-project/xelis-blockchain?branch=dev#9721dcf605f5e4045958c818caeaa7e497cdda04"
+source = "git+https://github.com/xelis-project/xelis-blockchain?branch=dev#053e69784cd7cd9e9504b0757213e8888f8c84a7"
 dependencies = [
  "anyhow",
  "async-trait",
