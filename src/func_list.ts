@@ -68,6 +68,13 @@ export class FuncList {
     this.items.innerHTML = ``;
   }
 
+  escapeHtml(str: string): string {
+    return str
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
   load_function_list() {
       const _thisFuncList = this;
 
@@ -116,18 +123,25 @@ export class FuncList {
 
       const el_func = document.createElement(`div`);
       el_func.classList.add(`func-item`);
+
+      const name = this.escapeHtml(f.name());
+      const params = f.params().map(this.escapeHtml).join(", ");
+      const retType = f.return_type() ? this.escapeHtml(f.return_type()) : "";
+      const onType = f.on_type() ? this.escapeHtml(f.on_type()) : "";
+
       if (f.return_type()) {
-        el_func.innerHTML = `<function>${f.name()}</function><parameter>(${f.params().join(", ")})</parameter> <arrow>⟶</arrow> <ret_type>${f.return_type()}</ret_type>`;
+        el_func.innerHTML = `<function>${name}</function><parameter>(${params})</parameter> <arrow>⟶</arrow> <ret_type>${retType}</ret_type>`;
       } else {
-        el_func.innerHTML = `<function>${f.name()}</function><parameter>(${f.params().join(", ")})</parameter>`;
+        el_func.innerHTML = `<function>${name}</function><parameter>(${params})</parameter>`;
       }
 
-      el_func.setAttribute(`title`, `Syscall id: ${f.syscall_id()}`);
+      el_func.setAttribute("title", `Syscall id: ${f.syscall_id()}`);
 
       if (!f.is_on_instance() && f.on_type()) {
-        el_func.innerHTML = `<ret_type>${f.on_type()}</ret_type>::` + el_func.innerHTML;
+        el_func.innerHTML = `<ret_type>${onType}</ret_type>::` + el_func.innerHTML;
       }
-        method_container.append(el_func);
+
+      method_container.append(el_func);
     });
 
     const filtered_const_funcs = this.const_funcs.filter((f) => {
