@@ -150,7 +150,7 @@ export class FuncList {
       }
 
       el_func.classList.add(`with-tooltip`);
-      el_func.setAttribute("data-tooltip", `Syscall id: ${f.syscall_id()}`);
+      el_func.setAttribute("data-tooltip", `Syscall id: ${f.syscall_id()}, gas cost: ${f.gas_cost_formatted()}`);
 
       if (!f.is_on_instance() && f.on_type()) {
         el_func.innerHTML = `<ret_type>${onType}</ret_type>::` + el_func.innerHTML;

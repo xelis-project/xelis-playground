@@ -245,6 +245,7 @@ pub struct Func {
     return_type: Option<String>,
     params: Vec<String>,
     syscall_id: u16,
+    cost: u64,
 }
 
 #[wasm_bindgen]
@@ -271,6 +272,10 @@ impl Func {
 
     pub fn syscall_id(&self) -> u16 {
         self.syscall_id
+    }
+
+    pub fn gas_cost_formatted(&self) -> String {
+        format_xelis(self.cost)
     }
 }
 
@@ -434,7 +439,8 @@ impl Silex {
                     on_instance: f.require_instance && f.on_type.is_some(),
                     return_type: f.return_type.as_ref().map(Type::to_string),
                     params,
-                    syscall_id
+                    syscall_id,
+                    cost: f.cost
                 });
             }
         }
