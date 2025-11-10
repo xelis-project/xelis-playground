@@ -23,20 +23,21 @@ use xelis_bytecode::Module;
 use xelis_common::{
     block::{Block, BlockHeader, BlockVersion},
     contract::{
-        build_environment,
-        vm::ContractCaller,
         ChainState,
         ContractEventTracker,
+        ContractMetadata,
         ContractProviderWrapper,
         InterContractPermission,
-        ModuleMetadata
+        ModuleMetadata,
+        build_environment,
+        vm::ContractCaller
     },
     crypto::{
-        elgamal::CompressedPublicKey,
-        proofs::RangeProof,
         Address,
         Hash,
-        Signature
+        Signature,
+        elgamal::CompressedPublicKey,
+        proofs::RangeProof
     },
     immutable::Immutable,
     serializer::Serializer,
@@ -54,7 +55,7 @@ use xelis_compiler::Compiler;
 use xelis_lexer::Lexer;
 use xelis_parser::Parser;
 use xelis_types::Type;
-use xelis_vm::{Primitive, SysCallResult, FnInstance, FnParams, FnReturnType, FunctionHandler, Context, ValueCell, VM};
+use xelis_vm::{Context, FnInstance, FnParams, FnReturnType, FunctionHandler, Primitive, SysCallResult, VM, ValueCell};
 use serde::Deserialize;
 
 #[wasm_bindgen]
@@ -77,7 +78,7 @@ macro_rules! log {
 
 #[wasm_bindgen]
 pub struct Silex {
-    environment: EnvironmentBuilder<'static, ModuleMetadata>,
+    environment: EnvironmentBuilder<'static, ContractMetadata>,
     logs_receiver: mpsc::Receiver<String>,
     is_running: AtomicBool,
 }
@@ -342,7 +343,7 @@ impl Silex {
         }
     }
 
-    fn println_fn(_: FnInstance, params: FnParams, _: &ModuleMetadata, _: &mut Context) -> FnReturnType<ModuleMetadata> {
+    fn println_fn(_: FnInstance, params: FnParams, _: &ModuleMetadata, _: &mut Context) -> FnReturnType<ContractMetadata> {
         let param = &params[0];
         cfg_if! {
             if #[cfg(target_arch = "wasm32")] {
@@ -694,9 +695,9 @@ impl Silex {
             );
             let block = Block::new(header, Vec::new());
             let zero_hash = Hash::zero();
-            let metadata = ModuleMetadata {
-                contract: zero_hash.clone(),
-                caller: None,
+            let metadata = ContractMetadata {
+                contract_executor: zero_hash.clone(),
+                contract_caller: None,
                 deposits: deposits.clone(),
             };
 
@@ -725,9 +726,12 @@ impl Silex {
 
             let mut logs = Vec::new();
             let (res, elapsed_time, used_gas, used_memory) = {
-                let mut vm = VM::new(&environment);
-                vm.append_module(&program.module, &metadata)
-                    .map_err(|e| format!("Error while adding module: {}", e))?;
+                let mut vm = VM::default();
+                vm.append_module(ModuleMetadata {
+                    module: (&program.module).into(),
+                    environment: (&environment).into(),
+                    metadata: (&metadata).into(),
+                }).map_err(|e| format!("Error while adding module: {}", e))?;
 
                 let context = vm.context_mut();
                 context.insert(ContractProviderWrapper(&mut storage));
@@ -754,8 +758,11 @@ impl Silex {
                     }
 
                     // VM has consumed the module, lets re-inject it again
-                    vm.append_module(&program.module, &metadata)
-                        .map_err(|e| format!("Error while re-adding module: {}", e))?;
+                    vm.append_module(ModuleMetadata {
+                        module: (&program.module).into(),
+                        environment: (&environment).into(),
+                        metadata: (&metadata).into(),
+                    }).map_err(|e| format!("Error while re-adding module: {}", e))?;
                 }
 
                 log!("Executing entry point with ID: {}", entry_id);

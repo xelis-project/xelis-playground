@@ -1,13 +1,13 @@
-use std::{collections::HashMap, sync::Arc};
+use std::collections::HashMap;
 
 use xelis_common::{
+    account::CiphertextCache,
     asset::AssetData,
     block::TopoHeight,
-    contract::{ContractProvider, ContractStorage},
-    crypto::{Hash, PublicKey},
-    account::CiphertextCache,
+    contract::{ContractModule, ContractProvider, ContractStorage},
+    crypto::{Hash, PublicKey}
 };
-use xelis_vm::{Module, ValueCell};
+use xelis_vm::ValueCell;
 use async_trait::async_trait;
 
 pub struct MockStorage {
@@ -68,7 +68,7 @@ impl ContractProvider for MockStorage {
         Ok(false)
     }
 
-    async fn load_contract_module(&self, _: &Hash, _: TopoHeight) -> Result<Option<Arc<Module>>, anyhow::Error> {
+    async fn load_contract_module(&self, _: &Hash, _: TopoHeight) -> Result<Option<ContractModule>, anyhow::Error> {
         Ok(None)
     }
 }
