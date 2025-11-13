@@ -369,12 +369,7 @@ impl Silex {
         let parser = Parser::with(tokens.into_iter(), &self.environment);
         let (program, mapper) = match parser.parse() {
             Ok(res) => res,
-            Err(mut err) => {
-                // Adjust to editor coordinates (1-based)
-                err.line += 1;
-                err.column_start += 1;
-                err.column_end += 1;
-
+            Err(err) => {
                 log!("Parser error: {:#}", err);
                 return Err(anyhow::anyhow!("{:#}", err));
             }
