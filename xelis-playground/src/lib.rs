@@ -367,7 +367,18 @@ impl Silex {
             .collect::<Result<Vec<_>, _>>()?;
 
         let parser = Parser::with(tokens.into_iter(), &self.environment);
-        let (program, mapper) = parser.parse().map_err(|err| anyhow::anyhow!("{:#}", err))?;
+        let (program, mapper) = match parser.parse() {
+            Ok(res) => res,
+            Err(mut err) => {
+                // Adjust to editor coordinates (1-based)
+                err.line += 1;
+                err.column_start += 1;
+                err.column_end += 1;
+
+                log!("Parser error: {:#}", err);
+                return Err(anyhow::anyhow!("{:#}", err));
+            }
+        };
 
         // Collect all the available entry functions
         let mut entries = Vec::new();
