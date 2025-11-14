@@ -38,9 +38,6 @@ export class SplitLayout {
 
     update_split() {
         let elements = [this.left_screen, this.right_screen];
-        if (this.app.func_list.is_opened) {
-            elements.unshift(this.app.func_list.element);
-        }
 
         if (this.split) this.split.destroy();
         this.split = Split(

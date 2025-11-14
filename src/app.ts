@@ -408,9 +408,8 @@ export class App {
 
         this.modal = new Modal();
 
-        this.func_list = new FuncList(this);
+        this.func_list = new FuncList(this.silex);
         this.split_layout = new SplitLayout(this);
-        this.func_list.load_funcs(this.silex);
         this.custom_select = new CustomSelect();
         this.modal_export = new ModalExport(this);
 
@@ -1006,7 +1005,7 @@ export class App {
             this.output.textContent += `-------- Result --------\n`;
             this.output.textContent += `Exit code: ${result.value()}\n`;
             this.output.textContent += `Executed in: ${result.elapsed_time()}\n`;
-            this.output.textContent += `Gas usage: ${result.used_gas()} (${result.used_gas_formatted()} XEL)\n`;
+            this.output.textContent += `Gas usage: ${result.used_gas()} lex (${result.used_gas_formatted()} XEL)\n`;
             this.output.textContent += `Memory usage: ${result.used_memory()} (${result.used_memory_formatted()})\n`;
 
             const storage = result.storage();
