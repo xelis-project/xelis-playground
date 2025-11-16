@@ -11,14 +11,17 @@ use xelis_vm::ValueCell;
 use async_trait::async_trait;
 
 pub struct MockStorage {
-    pub data: HashMap<ValueCell, ValueCell>,
+    pub data: HashMap<Hash, HashMap<ValueCell, ValueCell>>,
     pub balances: HashMap<Hash, HashMap<Hash, u64>>,
 }
 
 #[async_trait]
 impl ContractStorage for MockStorage {
-    async fn load_data(&self, _: &Hash, key: &ValueCell, topoheight: TopoHeight) -> Result<Option<(TopoHeight, Option<ValueCell>)>, anyhow::Error> {
-        Ok(Some((topoheight, self.data.get(key).cloned())))
+    async fn load_data(&self, contract: &Hash, key: &ValueCell, topoheight: TopoHeight) -> Result<Option<(TopoHeight, Option<ValueCell>)>, anyhow::Error> {
+        let cache = self.data.get(contract)
+            .map(|m| m.get(key).cloned())
+            .flatten();
+        Ok(Some((topoheight, cache)))
     }
 
     async fn load_data_latest_topoheight(&self, _: &Hash, _: &ValueCell, topoheight: TopoHeight) -> Result<Option<TopoHeight>, anyhow::Error> {

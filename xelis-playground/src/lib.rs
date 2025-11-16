@@ -22,6 +22,7 @@ use xelis_builder::{Builder, EnvironmentBuilder};
 use xelis_bytecode::Module;
 use xelis_common::{
     block::{Block, BlockHeader, BlockVersion},
+    context::NoOpBuildHasher,
     contract::{
         ChainState,
         ContractEventTracker,
@@ -171,12 +172,39 @@ impl Entry {
 
 #[wasm_bindgen]
 pub struct StorageEntry {
+    contract: String,
     key: String,
     value: String,
 }
 
 #[wasm_bindgen]
+pub struct EventEntry {
+    contract: String,
+    event_id: u64,
+    event: String,
+}
+
+#[wasm_bindgen]
+impl EventEntry {
+    pub fn contract(&self) -> String {
+        self.contract.clone()
+    }
+
+    pub fn event_id(&self) -> u64 {
+        self.event_id
+    }
+
+    pub fn event(&self) -> String {
+        self.event.clone()
+    }
+}
+
+#[wasm_bindgen]
 impl StorageEntry {
+    pub fn contract(&self) -> String {
+        self.contract.clone()
+    }
+
     pub fn key(&self) -> String {
         self.key.clone()
     }
@@ -194,6 +222,8 @@ pub struct ExecutionResult {
     used_gas: u64,
     used_memory: u64,
     storage: MockStorage,
+    // events per contract
+    events: HashMap<Hash, HashMap<u64, Vec<ValueCell>, NoOpBuildHasher>>
 }
 
 #[wasm_bindgen]
@@ -230,11 +260,31 @@ impl ExecutionResult {
         self.storage
             .data
             .iter()
-            .map(|(k, v)| StorageEntry {
+            .map(|(contract, data)| data.iter().map(move |(k, v)| StorageEntry {
+                contract: contract.to_hex(),
                 key: format!("{}", k),
                 value: format!("{}", v),
-            })
+            }))
+            .flatten()
             .collect()
+    }
+
+    pub fn events(&self) -> Vec<EventEntry> {
+        let mut event_entries = Vec::new();
+
+        for (contract, events_map) in &self.events {
+            for (event_id, events) in events_map {
+                for event in events {
+                    event_entries.push(EventEntry {
+                        contract: contract.to_hex(),
+                        event_id: *event_id,
+                        event: format!("{}", event),
+                    });
+                }
+            }
+        }
+
+        event_entries
     }
 }
 
@@ -658,8 +708,10 @@ impl Silex {
                 balances: Default::default(),
             };
 
+            let zero_hash = Hash::zero();
+            let contract_cache = storage.data.entry(zero_hash.clone()).or_default();
             for preset in sp_list {
-                storage.data.insert(preset.key, preset.value);
+                contract_cache.insert(preset.key, preset.value);
             }
 
             let transaction = Arc::new(Transaction::new(
@@ -700,7 +752,6 @@ impl Silex {
                 Default::default()
             );
             let block = Block::new(header, Vec::new());
-            let zero_hash = Hash::zero();
             let metadata = ContractMetadata {
                 contract_executor: zero_hash.clone(),
                 contract_caller: None,
@@ -790,21 +841,25 @@ impl Silex {
             log!("Execution completed in {} ms, used gas: {}, used memory: {} bytes", elapsed_time.as_millis(), used_gas, used_memory);
 
             // Merge chain state into mock storage
-            let mut caches = chain_state.caches;
-            if let Some(cache) = caches.remove(&zero_hash) {
+            let caches = chain_state.caches;
+            let mut events = HashMap::new();
+
+            for (contract, cache) in caches.into_iter() {
+                let contract_cache = storage.data.entry(contract.clone()).or_default();
                 for (k, v) in cache.storage.into_iter() {
                     match v {
                         Some((_, Some(v))) => {
-                            storage.data.insert(k, v);
+                            contract_cache.insert(k, v);
                         },
                         Some((_, None)) => {
-                            storage.data.remove(&k);
+                            contract_cache.remove(&k);
                         },
                         None => {}, // key stored as checked but not found
                     };
                 }
-            }
 
+                events.insert(contract, cache.events);
+            }
             match res {
                 Ok(value) => Ok(ExecutionResult {
                     value: format!("{}", value),
@@ -813,6 +868,7 @@ impl Silex {
                     used_gas,
                     used_memory,
                     storage,
+                    events,
                 }),
                 Err(err) => Err(format!("{:#}", err)),
             }

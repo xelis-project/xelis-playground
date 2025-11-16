@@ -993,6 +993,14 @@ export class App {
                     this.output.textContent += `${item.key()}: ${item.value()}\n`;
                 });
             }
+
+            const events = result.events();
+            if (events.length > 0) {
+                this.output.textContent += `-------- Events --------\n`;
+                events.forEach((event: any) => {
+                    this.output.textContent += `${event.contract()} #${event.event_id()}: ${event.event()}\n`;
+                });
+            }
         } catch (e) {
             output_dot_loading.stop();
             this.output.innerHTML += this.output_error("Error: " + e + "\n");
