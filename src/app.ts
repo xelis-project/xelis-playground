@@ -22,7 +22,10 @@ import { highlight } from 'ace-builds/src-noconflict/ext-static_highlight';
 import {StorageEditor} from "./StorageEditor";
 import { RightPanelModes } from './RightPanelModes';
 
-type EntryCallParam = [string: string];
+type EntryCallParam = [string, string];
+type EntryCallParameterList = EntryCallParam[];
+const DATA_TYPE = 0;
+const DATA_TYPE_VALUE = 1;
 
 export class App {
     silex: any;
@@ -85,7 +88,7 @@ export class App {
     project_manager: ProjectManager;
     btn_close_arg_editor: HTMLElement;
 
-    call_history: Record<string, string>[] = [];
+    call_history: EntryCallParameterList[] = [];
     prefs_CALL_HISTORY_MAX = 10;
     prefs_REUSE_ENTRY_CALLS = true;
     did_run_program = false;
@@ -168,7 +171,7 @@ export class App {
         _thisApp.btn_call_history.innerHTML =  Utils.convertSvgElementToHtml(HistoryIcon) as string;
         // const call_history_container = document.createElement(`div`);
         // call_history_container.classList.add("call-history-container");
-        // call_history_container.textContent = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+        // call_history_container.textContent = "";
         // this.btn_call_history.appendChild(call_history_container);
 
         this.btn_reuse_entry_calls = document.querySelector(`#btn-reuse-last-call`) as HTMLButtonElement;
@@ -634,19 +637,19 @@ export class App {
                 let ch_match = false;
 
                 for(let i = _thisApp.call_history.length - 1; i >= 0; --i) {
-                    let current_call_history_params: Record<string, string> = _thisApp.call_history[i];
+                    let current_call_history_params: EntryCallParameterList = _thisApp.call_history[i];
                     const param_containers = document.querySelectorAll(`#pb_entry_container_${this.program_entry_index} > .pb-input-scrollbox > .pb-input-container > .param-container`) as NodeListOf<HTMLElement>;
-                    const lechp_keys = Object.keys(current_call_history_params);
+                    //const last_entered_call_history = Object.keys(current_call_history_params);
 
-                    if(Object.keys(lechp_keys).length === params.length
+                    if(current_call_history_params.length === params.length
                         && param_containers.length === params.length) {
 
-                        // TODO allow unsigned int parameters to change (u.includes(lechp_keys[j]))
+                        // TODO allow unsigned int parameters to change (u.includes(last_entered_call_history[j]))
                         // let unsigned_ints = ["u8", "u16", "u32", "u64", "u128", "u256", "u512"];
                         // check if the corresponding param keys match the current entry call history params.
                         let match_found = true;
                         for(let j = 0; j < params.length; j++) {
-                            if(lechp_keys[j] !== params[j].signature.toLowerCase()) {
+                            if(current_call_history_params[j][0] !== params[j].signature.toLowerCase()) {
                                 match_found = false;
                                 break;
                             }
@@ -655,13 +658,13 @@ export class App {
                         if(match_found) {
                             ch_match = true;
                             for(let j = 0; j < params.length; j++) {
-                                //console.log(`lechp_keys[${j}] = ${lechp_keys[j]} params sig: ${params[j].signature} `);
-                                if(lechp_keys[j] === params[j].signature.toLowerCase()) {
+                                //console.log(`last_entered_call_history[${j}] = ${last_entered_call_history[j]} params sig: ${params[j].signature} `);
+                                if(current_call_history_params[j][0] === params[j].signature.toLowerCase()) {
                                     const param_container = param_containers[j];
 
-                                    //populate_inputs(param_container, lechp_keys[j], current_call_history_params[lechp_keys[j]]);
+                                    //populate_inputs(param_container, last_entered_call_history[j], current_call_history_params[last_entered_call_history[j]]);
 
-                                    switch(lechp_keys[j]) {
+                                    switch(current_call_history_params[j][0]) {
                                         case "u8":
                                         case "u16":
                                         case "u32":
@@ -670,8 +673,8 @@ export class App {
                                         case "u256":
                                         case "u512":
                                         case "string": {
-                                            const p_input = param_container.querySelector(`.input-container[data-type="${lechp_keys[j]}"] input`) as HTMLInputElement;
-                                            p_input.value = current_call_history_params[lechp_keys[j]];
+                                            const p_input = param_container.querySelector(`.input-container[data-type="${current_call_history_params[j][0]}"] input`) as HTMLInputElement;
+                                            p_input.value = current_call_history_params[j][1];
                                             p_input.dispatchEvent(new Event('change'));
                                             break;
                                         }
@@ -679,14 +682,14 @@ export class App {
                                         case "address":
                                         case "hash": {
                                             const p_input = param_container.querySelector(`.type-container > textarea`) as HTMLInputElement;
-                                            p_input.value = current_call_history_params[lechp_keys[j]];
+                                            p_input.value = current_call_history_params[j][1];
                                             p_input.dispatchEvent(new Event('change'));
                                             break;
                                         }
 
                                         case "bool": {
                                             const p_input = param_container.querySelector(`.input-container[data-type="bool"] input`) as HTMLInputElement;
-                                            p_input.checked = current_call_history_params[lechp_keys[j]] === "true";
+                                            p_input.checked = current_call_history_params[j][1] === "true";
                                             p_input.dispatchEvent(new Event('change'));
                                             break;
                                         }
@@ -704,7 +707,7 @@ export class App {
                                             break;
                                         }
                                         default:
-                                            console.error(`Complex type ${lechp_keys[j]}. TODO.`);
+                                            console.error(`Complex type ${current_call_history_params[j][1]}. TODO.`);
                                             break;
 
                                     }
@@ -891,9 +894,8 @@ export class App {
             return content;
         }
 
-
         const params = [] as string[];
-        const call_hist_params: Record<string, string> = {};
+        const call_hist_params: EntryCallParam[] = [];
 
         const pbe_params_elems = document.querySelectorAll(`#pb_entry_container_${this.program_entry_index} > div.pb-arguments-container > pre`);
         pbe_params_elems.forEach((pbe, index) => {
@@ -903,7 +905,6 @@ export class App {
             let ch_type_name = type_name;
 
             let content: string | null | undefined;
-            //const call_hist_params_content = {} as Record<string, string>;
 
             ['quote'].forEach(c => {
                 const brace_children = copy_pbe.querySelectorAll(c);
@@ -915,11 +916,12 @@ export class App {
             content = process_params(type_name, ch_type_name, copy_pbe);
 
             params.push(`${content}`);
-            call_hist_params[ch_type_name] = `${content}`;
+            call_hist_params.push([ch_type_name, `${content}`]);
         });
 
         console.log("GET_PARAMS OUTPUT");
         console.log(params);
+        console.log(call_hist_params);
 
         this.call_history_add(call_hist_params);
 
@@ -1134,7 +1136,7 @@ export class App {
         document.dispatchEvent(screen_right_reset);
     }
 
-    private call_history_add(params: Record<string, string>) {
+    private call_history_add(entry_params: EntryCallParameterList) {
         const _thisApp = this;
 
         // if there are no history entries, we should add the first entry.
@@ -1142,27 +1144,27 @@ export class App {
         // of the current entry and remove it.
         let should_add = this.call_history.length === 0;
 
+        // being a little too clever here. It's possible that we will have to add a new entry
+        // after checking that it shouldn't be added.
         if(!should_add) {  // confirm it shouldn't be added or remove a copy'
 
             let found_match = false;
 
             for(let i = _thisApp.call_history.length - 1; i >= 0; --i) {
-                let call_hist_entry: Record<string, string> = _thisApp.call_history[i];
+                let call_hist_item = _thisApp.call_history[i];
 
-                if(Object.keys(call_hist_entry).length === Object.keys(params).length) {
-                    const le_keys = Object.keys(call_hist_entry);
-                    const pe_keys = Object.keys(params);
+                let local_match = true;
 
-                    let local_match = true;
-
-                    for(let j = 0; j < le_keys.length; j++) {
-                        if(le_keys[j] !== pe_keys[j]) {
-                            local_match = false
+                if(call_hist_item.length === entry_params.length) {
+                    // compare each parameter in the call history entry with the entry params.
+                    for(let j = 0; j < call_hist_item.length; ++j) {
+                        if(call_hist_item[j][0] !== entry_params[j][0]) {
+                            local_match = false;
                             break;
                         }
 
-                        if(call_hist_entry[le_keys[j]] !== params[le_keys[j]]) {
-                            local_match = false
+                        if(call_hist_item[j][1] !== entry_params[j][1]) {
+                            local_match = false;
                             break;
                         }
                     }
@@ -1190,11 +1192,12 @@ export class App {
             }
         }
 
+        // definitely must add the new entry.
         if (should_add) {
             if(_thisApp.call_history.length >= _thisApp.prefs_CALL_HISTORY_MAX) {
                 _thisApp.call_history.shift();
             }
-            _thisApp.call_history.push(params);
+            _thisApp.call_history.push(entry_params);
 
             localStorage.setItem('call_history', JSON.stringify(_thisApp.call_history));
         }
