@@ -95,6 +95,8 @@ export class App {
 
     storage_editor: StorageEditor;
 
+    contract_mode_elems: HTMLElement[] = [];
+
     constructor(silex: Silex) {
         const _thisApp = this;
 
@@ -142,8 +144,16 @@ export class App {
         this.btn_close_arg_editor = document.querySelector(`#btn_close_arg_editor`) as HTMLElement;
         /* end Argument Editor (Parameter Builder)*/
 
+        this.contract_mode_elems = [
+            document.getElementById('program-spec') as HTMLElement,
+            document.getElementById('output_container') as HTMLElement,
+            document.querySelector(`.output-header`) as HTMLElement
+        ];
+
         /* Storage Editor*/
-        this.storage_editor = StorageEditor.default();
+        this.storage_editor = StorageEditor.default(() => {
+            this.contract_mode_elems.forEach(e => e.classList.add("hide"));
+        });
         /* Storage Editor*/
 
         /* editor Project panel */
@@ -202,6 +212,7 @@ export class App {
         this.btn_close_arg_editor.addEventListener("click", () => {
             const after_close = () => {
                 this.editor.focus();
+                this.contract_mode_elems.forEach(e => e.classList.remove("hide"));
             }
 
             UIContainers.panel_close(UIContainers.panel_options({initiator: this.btn_close_arg_editor, after_close: after_close} as PanelOptions));
@@ -210,6 +221,7 @@ export class App {
         this.storage_editor.btn_close().addEventListener("click", () => {
             const after_close = () => {
                 this.editor.focus();
+                this.contract_mode_elems.forEach(e => e.classList.remove("hide"));
             }
 
             UIContainers.panel_close(UIContainers.panel_options({initiator: this.storage_editor.btn_close(), after_close: after_close} as PanelOptions));
@@ -829,6 +841,8 @@ export class App {
             this.program_code = code;
             this.output.innerHTML += this.output_success("Compiled successfully!\n");
 
+            this.contract_mode_elems.forEach(e => e.classList.remove("hide"));
+
             this.btn_reuse_entry_calls.removeAttribute('disabled');
             //this.btn_call_history.removeAttribute('disabled');
             this.btn_export.removeAttribute('disabled');
@@ -1084,6 +1098,8 @@ export class App {
                 pbe.classList.add('hide');
             }
         }
+
+        this.contract_mode_elems.forEach(e => e.classList.add('hide'));
     }
 
     output_panel_toggle(should_shrink: boolean | undefined) {

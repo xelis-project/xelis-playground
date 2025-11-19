@@ -588,25 +588,11 @@ div.pb-arguments-container.readonly > pre {
     white-space: nowrap;
 }
 
-#program-spec {
-    margin: 15px;
-    display: flex;
-    flex-direction: column;
-    row-gap: 20px;
-}
+
 
 #parameter-display .title1 {
     padding: 0;
     margin-bottom: 10px;
-}
-
-#output_container {
-    background: none;
-    border: none;
-    border-top: 1px solid #299def24;
-    border-bottom-width: 0;
-    margin: 1rem 1rem 0 1rem;
-
 }
 
 #signature-container > parameter label {

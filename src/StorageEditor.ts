@@ -131,6 +131,9 @@ export class StorageEditor {
     private map_desc_input: HTMLInputElement;
     private btn_update: HTMLElement;
 
+    // may need to do things in app before the StorageEditor ui window is opened.
+    ui_application_init_before_open: (() => void) = () => {};
+
     current_storage_map_uuid: MapUUID  = DEFAULT_STRING;
 
     private constructor() {
@@ -339,12 +342,14 @@ export class StorageEditor {
         })
     }
 
-    static default() {
+    static default(ui_before_open: (() => void)) {
         if(StorageEditor._storage_editor !== undefined) {
             return StorageEditor._storage_editor;
         }
 
         StorageEditor._storage_editor = new StorageEditor();
+
+        this._storage_editor.ui_application_init_before_open = ui_before_open;
 
         let storage_editor_data = localStorage.getItem("storage_editor");
         if(storage_editor_data !== null) {
@@ -353,7 +358,6 @@ export class StorageEditor {
             StorageEditor._storage_editor.storage_preset_maps = se.storage_preset_maps;
             StorageEditor._storage_editor.enable_storage_presets = se.enable_storage_presets;
             StorageEditor._storage_editor.current_storage_map_uuid = se.current_storage_map_uuid;
-
         }
 
         StorageEditor._storage_editor.render_storage_editor_inputs();
@@ -385,6 +389,8 @@ export class StorageEditor {
             console.log("Error opening storage editor");
             return
         }
+
+        this.ui_application_init_before_open();
 
         this.ui_render_sp_menus();
 
