@@ -935,6 +935,8 @@ impl Silex {
 
 #[cfg(test)]
 mod tests {
+    use xelis_common::config::MAX_GAS_USAGE_PER_TX;
+
     use super::*;
 
     #[tokio::test]
@@ -950,7 +952,7 @@ mod tests {
         let program = silex.compile_internal(code).expect("Failed to compile the program");
         let entries = program.entries();
         let entry = entries.get(0).expect("No entry found");
-        let result = silex.execute_program_internal(program, entry.id() as u16, Some(50_000_000), IndexMap::new(), vec![], vec![]).await
+        let result = silex.execute_program_internal(program, entry.id() as u16, Some(MAX_GAS_USAGE_PER_TX), IndexMap::new(), vec![], vec![]).await
             .expect("Failed to execute the program");
 
         assert_eq!(result.value(), "0");
