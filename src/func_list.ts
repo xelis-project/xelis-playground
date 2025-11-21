@@ -220,8 +220,8 @@ export class FuncList {
   load_funcs(silex: any) {
     this.funcs = silex.get_env_functions();
     this.const_funcs = silex.get_constants_functions();
-    console.log(this.funcs);
-    console.log(this.const_funcs);
+    // console.log(this.funcs);
+    // console.log(this.const_funcs);
     this.load_function_list();
   }
 }

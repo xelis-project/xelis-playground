@@ -57,12 +57,12 @@
     width: .4rem;
 }
 
-.data-table-container.scrollable::-webkit-scrollbar-thumb {
+.data-table-container.scrollable::-webkit-scrollbar-thumb, .rpc_query::-webkit-scrollbar-thumb {
     background: #00734e;
     border-radius: .5em;
 }
 
-.data-table-container.scrollable::-webkit-scrollbar-thumb:hover {
+.data-table-container.scrollable::-webkit-scrollbar-thumb:hover, .rpc_query::-webkit-scrollbar-thumb:hover {
     background: rgb(122 250 211);
 }
 

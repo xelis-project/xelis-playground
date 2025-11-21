@@ -140,6 +140,7 @@
                     <div class="mode-panel-controls">
                         <button id="btn_mode_contract" class="opt-btn icon-green" data-panel-id="contract_container" disabled>Contract</button>
                         <button id="btn_mode_documentation" class="opt-btn icon-green" data-panel-id="contract_container">Library</button>
+                        <button id="btn_mode_rpcinspector" class="opt-btn icon-green" data-panel-id="contract_container">RPC</button>
                     </div>
                 </div>
                 <div id="contract_container">
@@ -324,7 +325,7 @@
                         </div>
                     </div>
                 </div>
-                <div id="documentation_container" style="display: none;">
+                <div id="documentation_container" class="rpm-hide">
                     <div class="function-list-header">
                         <div class="search-container">
                             <input id="search_func_list" type="text" placeholder="Search" class="large-input" />
@@ -334,6 +335,18 @@
                         <div id="function_list_items">
                             <!-- populated by JS -->
                         </div>
+                    </div>
+                </div>
+
+                <div id="rpcinspector_container" class="rpm-hide">
+                    <div class="static-top">
+                        <div class="rpc-selector-container"></div>
+                        <div id="st-rpc-container"></div>
+                    </div>
+
+                    <div class="flex-bottom dual">
+                        <div class="rpc_api_list_container"></div>
+                        <div class="rpc-inspector-response-section"></div>
                     </div>
                 </div>
             </div>

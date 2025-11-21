@@ -7,7 +7,8 @@ pre, pre *
 , .pb-arguments-container > pre *
 , textarea, input, select, option, #output_container
 , #signature-container > parameter *
-, #export_program_value {
+, #export_program_value
+{
     font-family: 'Source Code Pro', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace !important;
 }
 
@@ -174,7 +175,7 @@ input[type="number"] {
     font-size: 0.6rem;
 }
 
-.select-selected, .btn {
+.select-selected {
     border-radius: 0;
     background: #00ffac12;
     color: #00ffebb5 !important
@@ -310,45 +311,6 @@ input[type="number"] {
     gap: 0.25em;
     flex-wrap: wrap;
     align-items: center;
-}
-
-.pb-arg-btns > .left-icons {
-    flex-direction: row;
-    justify-content: flex-start;
-    gap: 0.3em;
-}
-
-.left-icons button {
-    position: relative;
-}
-
-.left-icons button .icon {
-    position: relative;
-    top: 3px;
-}
-
-.left-icons button .icon.recycle-icon {
-    top: 4px;
-}
-
-button[data-toggle='on'] {
-    
-}
-
-button[data-toggle='off'] {
-    opacity: 0.4;
-}
-
-button[data-toggle='off']:hover {
-    opacity: 0.4;
-}
-
-button[data-toggle='off']:hover:disabled {
-    opacity: 0.4;
-}
-
-button[data-toggle='off']:hover:not(:disabled) {
-    opacity: 1;
 }
 
 .pb-arg-btns .opt-btn {

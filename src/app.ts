@@ -2,25 +2,25 @@ import ace from 'ace-builds';
 import 'ace-builds/src-noconflict/mode-rust';
 import 'ace-builds/src-noconflict/theme-tomorrow_night_bright';
 
-import { Silex } from '../public/xelis_playground';
-import { CustomSelect } from './custom_select';
-import { SplitLayout } from "./split_layout";
-import { TextDotLoading } from './text_dot_loading';
-import { ModalExport } from "./model_export";
-import { FuncList } from './func_list';
-import { Modal } from './modal';
-import {FileMetaData, Project, ProjectManager} from './project';
-import { XVMParamParser } from './parameter_builder/xvm_param_parser';
-import { ParameterBuilder } from './parameter_builder/parameter_builder';
+import {Silex} from '../public/xelis_playground';
+import {CustomSelect} from './custom_select';
+import {SplitLayout} from "./split_layout";
+import {TextDotLoading} from './text_dot_loading';
+import {ModalExport} from "./model_export";
+import {FuncList} from './func_list';
+import {Modal} from './modal';
+import {ProjectManager} from './project';
+import {XVMParamParser} from './parameter_builder/xvm_param_parser';
+import {ParameterBuilder} from './parameter_builder/parameter_builder';
 import {PanelOptions, UIContainers} from "./UIContainers";
 
 import HistoryIcon from "./resources/icons/history-icon.svg";
 import ReuseIcon from "./resources/icons/recycle-icon.svg";
 
 import {Utils} from "./Utils";
-import { highlight } from 'ace-builds/src-noconflict/ext-static_highlight';
 import {StorageEditor} from "./StorageEditor";
-import { RightPanelModes } from './RightPanelModes';
+import {RightPanelModes} from './RightPanelModes';
+import {DaemonEndpoint, RPCInspector, WalletEndpoint} from './RPCInspector';
 
 type EntryCallParam = [string, string];
 type EntryCallParameterList = EntryCallParam[];
@@ -94,6 +94,8 @@ export class App {
     did_run_program = false;
 
     storage_editor: StorageEditor;
+    rpc_inspector_daemon: RPCInspector;
+    rpc_inspector_wallet: RPCInspector;
 
     contract_mode_elems: HTMLElement[] = [];
 
@@ -155,6 +157,12 @@ export class App {
             this.contract_mode_elems.forEach(e => e.classList.add("hide"));
         });
         /* Storage Editor*/
+
+        /* RPC Inspectors */
+        this.rpc_inspector_daemon = new RPCInspector(DaemonEndpoint, "Daemon");
+        this.rpc_inspector_wallet = new RPCInspector(WalletEndpoint, "Wallet");
+        RPCInspector.switch_inspector_view(this.rpc_inspector_daemon);
+        /* end RPC Inspectors */
 
         /* editor Project panel */
         this.btn_project_panel = document.querySelector(`#btn_editor_project`) as HTMLElement;
@@ -355,7 +363,7 @@ export class App {
             //console.log("Argument editor reset - did screen-right-reset.");
             UIContainers.panel_close(UIContainers.panel_options({initiator: this.btn_close_arg_editor} as PanelOptions));
             UIContainers.panel_close(UIContainers.panel_options({initiator: this.storage_editor.btn_close()} as PanelOptions));
-            this.right_panel_modes.contract_mode();
+            this.right_panel_modes.btn_mode_contract.dispatchEvent(new Event("click"));
         });
 
         /* Project Manager */
