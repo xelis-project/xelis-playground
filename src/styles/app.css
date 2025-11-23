@@ -416,6 +416,10 @@ font-size: .8rem;
     overflow: auto;
 }
 
+#function_list_items {
+    padding-bottom: 4rem;
+}
+
 @media screen and (min-width: 768px) {
     #function_list {
         border-bottom: none;
