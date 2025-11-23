@@ -281,9 +281,9 @@ checksum = "1fd0f2584146f6f2ef48085050886acf353beff7305ebd1ae69500e27c67f64b"
 
 [[package]]
 name = "cc"
-version = "1.2.46"
+version = "1.2.47"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b97463e1064cb1b1c1384ad0a0b9c8abd0988e2a91f52606c80ef14aadb63e36"
+checksum = "cd405d82c84ff7f35739f175f67d8b9fb7687a0e84ccdc78bd3568839827cf07"
 dependencies = [
  "find-msvc-tools",
  "jobserver",
@@ -767,9 +767,9 @@ dependencies = [
 
 [[package]]
 name = "hashbrown"
-version = "0.16.0"
+version = "0.16.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5419bdc4f6a9207fbeba6d11b604d481addf78ecd10c11ad51e76c2f6482748d"
+checksum = "841d1cc9bed7f9236f321df977030373f4a4163ae1a7dbfe1a51a2c1a51d9100"
 
 [[package]]
 name = "hex"
@@ -865,12 +865,12 @@ dependencies = [
 
 [[package]]
 name = "indexmap"
-version = "2.12.0"
+version = "2.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6717a8d2a5a929a1a2eb43a12812498ed141a0bcfb7e8f7844fbdbe4303bba9f"
+checksum = "0ad4bb2b565bca0645f4d68c5c9af97fba094e9791da685bf83cb5f3ce74acf2"
 dependencies = [
  "equivalent",
- "hashbrown 0.16.0",
+ "hashbrown 0.16.1",
  "serde",
  "serde_core",
 ]
@@ -1492,9 +1492,9 @@ checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
 
 [[package]]
 name = "syn"
-version = "2.0.110"
+version = "2.0.111"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a99801b5bd34ede4cf3fc688c5919368fea4e4814a4664359503e6015b280aea"
+checksum = "390cc9a294ab71bdb1aa2e99d13be9c753cd2d7bd6560c77118597410c4d2e87"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1981,7 +1981,7 @@ dependencies = [
 [[package]]
 name = "xelis-abi"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#0330bfd81d80edce907e69e8404712e22323884e"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#e93073c850d5c89c64a6f1227bf1e93922aa48c1"
 dependencies = [
  "anyhow",
  "serde_json",
@@ -1997,7 +1997,7 @@ dependencies = [
 [[package]]
 name = "xelis-assembler"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#0330bfd81d80edce907e69e8404712e22323884e"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#e93073c850d5c89c64a6f1227bf1e93922aa48c1"
 dependencies = [
  "log",
  "thiserror 2.0.17",
@@ -2008,7 +2008,7 @@ dependencies = [
 [[package]]
 name = "xelis-ast"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#0330bfd81d80edce907e69e8404712e22323884e"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#e93073c850d5c89c64a6f1227bf1e93922aa48c1"
 dependencies = [
  "indexmap",
  "xelis-types",
@@ -2017,7 +2017,7 @@ dependencies = [
 [[package]]
 name = "xelis-builder"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#0330bfd81d80edce907e69e8404712e22323884e"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#e93073c850d5c89c64a6f1227bf1e93922aa48c1"
 dependencies = [
  "anyhow",
  "hex",
@@ -2032,7 +2032,7 @@ dependencies = [
 [[package]]
 name = "xelis-bytecode"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#0330bfd81d80edce907e69e8404712e22323884e"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#e93073c850d5c89c64a6f1227bf1e93922aa48c1"
 dependencies = [
  "hex",
  "indexmap",
@@ -2045,7 +2045,7 @@ dependencies = [
 [[package]]
 name = "xelis-compiler"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#0330bfd81d80edce907e69e8404712e22323884e"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#e93073c850d5c89c64a6f1227bf1e93922aa48c1"
 dependencies = [
  "log",
  "thiserror 2.0.17",
@@ -2058,7 +2058,7 @@ dependencies = [
 [[package]]
 name = "xelis-environment"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#0330bfd81d80edce907e69e8404712e22323884e"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#e93073c850d5c89c64a6f1227bf1e93922aa48c1"
 dependencies = [
  "anyhow",
  "better_any",
@@ -2086,7 +2086,7 @@ dependencies = [
 [[package]]
 name = "xelis-lexer"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#0330bfd81d80edce907e69e8404712e22323884e"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#e93073c850d5c89c64a6f1227bf1e93922aa48c1"
 dependencies = [
  "log",
  "thiserror 2.0.17",
@@ -2097,7 +2097,7 @@ dependencies = [
 [[package]]
 name = "xelis-parser"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#0330bfd81d80edce907e69e8404712e22323884e"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#e93073c850d5c89c64a6f1227bf1e93922aa48c1"
 dependencies = [
  "anyhow",
  "indexmap",
@@ -2143,7 +2143,7 @@ dependencies = [
 [[package]]
 name = "xelis-types"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#0330bfd81d80edce907e69e8404712e22323884e"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#e93073c850d5c89c64a6f1227bf1e93922aa48c1"
 dependencies = [
  "anyhow",
  "hex",
@@ -2159,7 +2159,7 @@ dependencies = [
 [[package]]
 name = "xelis-vm"
 version = "0.1.0"
-source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#0330bfd81d80edce907e69e8404712e22323884e"
+source = "git+https://github.com/xelis-project/xelis-vm.git?branch=dev#e93073c850d5c89c64a6f1227bf1e93922aa48c1"
 dependencies = [
  "anyhow",
  "futures",
@@ -2174,7 +2174,7 @@ dependencies = [
 [[package]]
 name = "xelis_common"
 version = "1.19.0"
-source = "git+https://github.com/xelis-project/xelis-blockchain?branch=dev#04d9167bb01f4c6ac30f831a02cb6dd99017cf9d"
+source = "git+https://github.com/xelis-project/xelis-blockchain?branch=dev#5b89dbeae2a0efa30007327c7791bb64081f001b"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -2216,18 +2216,18 @@ dependencies = [
 
 [[package]]
 name = "zerocopy"
-version = "0.8.27"
+version = "0.8.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0894878a5fa3edfd6da3f88c4805f4c8558e2b996227a3d864f47fe11e38282c"
+checksum = "43fa6694ed34d6e57407afbccdeecfa268c470a7d2a5b0cf49ce9fcc345afb90"
 dependencies = [
  "zerocopy-derive",
 ]
 
 [[package]]
 name = "zerocopy-derive"
-version = "0.8.27"
+version = "0.8.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "88d2b8d9c68ad2b9e4340d7832716a4d21a22a1154777ad56ea55c51a9cf3831"
+checksum = "c640b22cd9817fae95be82f0d2f90b11f7605f6c319d16705c459b27ac2cbc26"
 dependencies = [
  "proc-macro2",
  "quote",
