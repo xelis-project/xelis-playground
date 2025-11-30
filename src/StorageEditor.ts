@@ -379,6 +379,34 @@ export class StorageEditor {
         let presets = Object.values(this.storage_preset_maps[uuid].presets);
         console.log("------------------------   presets:  ------------------------");
         console.log(presets);
+
+        // ignore unfilled preset values
+        presets.forEach(preset => {
+            if(preset.key_type_id !== SILEX_TYPE_IDS["string"] && preset.key === "") {
+                console.log("Incomplete storage map key. Using default key for preset: ", preset);
+                switch (preset.key_type_id) {
+                    case SILEX_TYPE_IDS["bool"]:
+                        preset.key = "false";
+                        break;
+                    default:
+                        preset.key = "0";
+                }
+            }
+
+            if(preset.value_type_id !== SILEX_TYPE_IDS["string"] && preset.value === "") {
+                console.log("Incomplete storage map value. Using default key for preset: ", preset);
+                switch (preset.value_type_id) {
+                    case SILEX_TYPE_IDS["bool"]:
+                        preset.value = "false";
+                        break;
+                    default:
+                        preset.value = "0";
+                }
+            }
+        });
+
+        console.log(presets)
+
         return this.enable_storage_presets ? presets : [];
     }
 

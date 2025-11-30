@@ -1126,7 +1126,7 @@ button[data-toggle='off']:hover:not(:disabled) {
     color: rgb(25, 185, 255) !important;
     background-color: #041018;
     padding: 0.5rem;
-    font-family: "Michroma", "Nimbus-ExtLight", sans-serif !important;
+    /*font-family: "Michroma", "Nimbus-ExtLight", sans-serif !important;*/
 }
 
 #rpcinspector_container input::placeholder {
