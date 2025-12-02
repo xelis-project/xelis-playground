@@ -778,6 +778,8 @@ impl Silex {
                 allow_executions: true,
                 // For playground, we allow everything
                 permission: Cow::Owned(InterContractPermission::All),
+                gas_fee: 0,
+                gas_fee_allowance: 0,
             };
 
             let mut logs = Vec::new();
