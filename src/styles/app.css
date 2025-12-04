@@ -720,6 +720,15 @@ justify-content: center;
     min-height: unset;
 }
 
+#alert_container_left {
+    position: static;
+}
+
+#alert_container_left .panel_body {
+    position: absolute;
+    top: 200px;
+}
+
 .message.dialog-btn-container {
     justify-content: space-between;
     align-items: center;
