@@ -424,12 +424,20 @@ position: relative;
 top: .4rem;
 }
 
+.out-err > * {
+    display: inherit
+}
+
 .out-success {
 background-color: #02ffcf;
 padding: .1rem .25rem;
 position: relative;
 top: .4rem;
 color: black;
+}
+
+.out-success > * {
+    display: inherit;
 }
 
 .export-program-buttons {
