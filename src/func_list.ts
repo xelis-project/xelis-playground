@@ -255,7 +255,6 @@ export class FuncList {
                         FuncList.live_docs.set(doc_obj.name, doc_obj.functions);
                     });
 
-                }).then(() => {
                     localStorage.setItem(`list-functions-docs`, JSON.stringify(FuncList.live_docs));
                 });
         } catch (e) {
