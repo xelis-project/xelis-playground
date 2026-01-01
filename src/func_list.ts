@@ -289,8 +289,7 @@ export class FuncList {
     static get_live_documentation_for(category: string, signature: string) {
         let ordered_cat_name = StdLibDocObject.std_function_order.get(category) || category;
         ordered_cat_name = ordered_cat_name === "" ? category : ordered_cat_name;
-
-        return FuncList.live_docs.get(ordered_cat_name)?.find((doc) => doc.signature === signature);
+        return FuncList.live_docs.size > 0 ? FuncList.live_docs.get(ordered_cat_name)?.find((doc) => doc.signature === signature) : undefined;
     }
 
     handle_search_input(e: Event) {
