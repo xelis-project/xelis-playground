@@ -28,6 +28,9 @@ use xelis_common::{
         ContractEventTracker,
         ContractMetadata,
         ContractProviderWrapper,
+        ContractVersion,
+        ExecutionsChanges,
+        ExecutionsManager,
         InterContractPermission,
         ModuleMetadata,
         build_environment,
@@ -375,7 +378,8 @@ impl Silex {
     #[wasm_bindgen(constructor)]
     pub fn new() -> Self {
         log!("Initializing Silex...");
-        let mut environment = build_environment::<MockStorage>();
+        // TODO: configurable environment version
+        let mut environment = build_environment::<MockStorage>(ContractVersion::V1);
         // Patch the environment to include a println function that sends logs to the receiver
         let (sender, receiver) = mpsc::channel();
 
@@ -385,6 +389,10 @@ impl Silex {
         environment
             .get_mut_function("println", None)
             .set_on_call(FunctionHandler::Sync(Self::println_fn));
+
+        environment
+            .get_mut_function("debug", None)
+            .set_on_call(FunctionHandler::Sync(Self::debug_fn));
 
         Self {
             environment,
@@ -404,6 +412,23 @@ impl Silex {
                     .unwrap();
             } else {
                 println!("{}", param.as_ref());
+            }
+        }
+
+        Ok(SysCallResult::None)
+    }
+
+    fn debug_fn(_: FnInstance, params: FnParams, _: &ModuleMetadata, _: &mut Context) -> FnReturnType<ContractMetadata> {
+        let param = &params[0];
+        cfg_if! {
+            if #[cfg(target_arch = "wasm32")] {
+                let lock = LOGS_SENDER.lock().unwrap();
+                let sender = lock.as_ref().unwrap();
+                sender
+                    .send(format!("{:?}", param.as_ref()))
+                    .unwrap();
+            } else {
+                println!("DEBUG: {}", param.as_ref());
             }
         }
 
@@ -699,6 +724,10 @@ impl Silex {
     ) -> Result<ExecutionResult, String> {
         log!("Executing program with entry_id: {}, max_gas: {:?}, values: {:?}", entry_id, max_gas, values);
         let environment = self.environment.environment().clone();
+        let environments = [(ContractVersion::V1, Arc::new(environment.clone()))]
+            .into_iter()
+            .collect::<HashMap<_, _>>();
+
         tokio::task::spawn_blocking(move || {
             log!("Building storage and chain state");
             // Fake storage
@@ -714,8 +743,9 @@ impl Silex {
                 contract_cache.insert(preset.key, preset.value);
             }
 
+            let global_executions = HashMap::new();
             let transaction = Arc::new(Transaction::new(
-                TxVersion::V0,
+                TxVersion::V2,
                 CompressedPublicKey::new(Default::default()),
                 TransactionType::InvokeContract(InvokeContractPayload {
                     contract: Hash::zero(),
@@ -756,6 +786,7 @@ impl Silex {
                 contract_executor: zero_hash.clone(),
                 contract_caller: None,
                 deposits: deposits.clone(),
+                contract_version: ContractVersion::V1,
             };
 
             let mut chain_state = ChainState {
@@ -765,6 +796,7 @@ impl Silex {
                 entry_contract: Cow::Borrowed(&zero_hash),
                 block_hash: &zero_hash,
                 topoheight: 0,
+                environments: Cow::Borrowed(&environments),
                 // TODO: configurable
                 caller: ContractCaller::Transaction(&zero_hash, &transaction),
                 modules: HashMap::new(),
@@ -774,8 +806,11 @@ impl Silex {
                 assets: Default::default(),
                 global_caches: &Default::default(),
                 injected_gas: Default::default(),
-                scheduled_executions: Default::default(),
-                allow_executions: true,
+                executions: ExecutionsManager {
+                    allow_executions: true,
+                    global_executions: &global_executions,
+                    changes: ExecutionsChanges::default(),
+                },
                 // For playground, we allow everything
                 permission: Cow::Owned(InterContractPermission::All),
                 gas_fee: 0,
