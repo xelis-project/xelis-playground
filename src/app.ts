@@ -1035,7 +1035,11 @@ export class App {
             }
 
             this.output.textContent += `-------- Result --------\n`;
-            this.output.textContent += `Exit code: ${result.value()}\n`;
+            if (result.is_error()) {
+                this.output.textContent += `Error raised: ${result.value()}\n`;
+            } else {
+                this.output.textContent += `Exit value: ${result.value()}\n`;
+            }
             this.output.textContent += `Executed in: ${result.elapsed_time()}\n`;
             this.output.textContent += `Gas usage: ${result.used_gas()} lex (${result.used_gas_formatted()} XEL)\n`;
             this.output.textContent += `Memory usage: ${result.used_memory()} (${result.used_memory_formatted()})\n`;

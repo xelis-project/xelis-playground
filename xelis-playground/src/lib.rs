@@ -221,7 +221,7 @@ impl StorageEntry {
 
 #[wasm_bindgen]
 pub struct ExecutionResult {
-    value: String,
+    value: Result<ValueCell, String>,
     logs: Vec<String>,
     elapsed_time: String,
     used_gas: u64,
@@ -234,7 +234,14 @@ pub struct ExecutionResult {
 #[wasm_bindgen]
 impl ExecutionResult {
     pub fn value(&self) -> String {
-        self.value.clone()
+        match &self.value {
+            Ok(v) => format!("{}", v),
+            Err(e) => e.clone(),
+        }
+    }
+
+    pub fn is_error(&self) -> bool {
+        self.value.is_err()
     }
 
     pub fn logs(&self) -> Vec<String> {
@@ -912,18 +919,21 @@ impl Silex {
 
                 events.insert(contract, cache.events);
             }
-            match res {
-                Ok(value) => Ok(ExecutionResult {
-                    value: format!("{}", value),
-                    logs,
-                    elapsed_time: format_duration(elapsed_time).to_string(),
-                    used_gas,
-                    used_memory,
-                    storage,
-                    events,
-                }),
-                Err(err) => Err(format!("{:#}", err)),
-            }
+
+            let res = ExecutionResult {
+                value: match res {
+                    Ok(value) => Ok(value),
+                    Err(err) => Err(format!("{:#}", err)),
+                },
+                logs,
+                elapsed_time: format_duration(elapsed_time).to_string(),
+                used_gas,
+                used_memory,
+                storage,
+                events,
+            };
+
+            Ok(res)
         }).await.map_err(|v| v.to_string())?
     }
 
@@ -991,7 +1001,7 @@ impl Silex {
 
         // collect all logs
         let logs: Vec<String> = self.logs_receiver.try_iter().collect();
-
+        
         match handle {
             Ok(mut result) => {
                 result.logs.extend(logs);
