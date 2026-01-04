@@ -13,6 +13,7 @@ use async_trait::async_trait;
 pub struct MockStorage {
     pub data: HashMap<Hash, HashMap<ValueCell, ValueCell>>,
     pub balances: HashMap<Hash, HashMap<Hash, u64>>,
+    pub assets: HashMap<Hash, (AssetData, u64)>,
 }
 
 #[async_trait]
@@ -52,19 +53,19 @@ impl ContractProvider for MockStorage {
         Ok(false)
     }
 
-
-    async fn asset_exists(&self, _: &Hash, _: TopoHeight) -> Result<bool, anyhow::Error> {
-        Ok(false)
+    async fn asset_exists(&self, asset: &Hash, _: TopoHeight) -> Result<bool, anyhow::Error> {
+        Ok(self.assets.contains_key(asset))
     }
 
-    async fn load_asset_data(&self, _: &Hash, _: TopoHeight) -> Result<Option<(TopoHeight, AssetData)>, anyhow::Error> {
-        Ok(None)
+    async fn load_asset_data(&self, asset: &Hash, _: TopoHeight) -> Result<Option<(TopoHeight, AssetData)>, anyhow::Error> {
+        Ok(self.assets.get(asset).cloned().map(|data| (0, data.0)))
     }
 
     // Load the asset supply
     // Supply is the current circulating supply
-    async fn load_asset_circulating_supply(&self, _: &Hash, topoheight: TopoHeight) -> Result<(TopoHeight, u64), anyhow::Error> {
-        Ok((topoheight, 0))
+    async fn load_asset_circulating_supply(&self, hash: &Hash, topoheight: TopoHeight) -> Result<(TopoHeight, u64), anyhow::Error> {
+        let supply = self.assets.get(hash).map(|a| a.1).unwrap_or(0);
+        Ok((topoheight, supply))
     }
 
     async fn account_exists(&self, _: &PublicKey, _: TopoHeight) -> Result<bool, anyhow::Error> {

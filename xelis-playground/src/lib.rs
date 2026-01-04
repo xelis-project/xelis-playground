@@ -21,7 +21,9 @@ use xelis_assembler::Disassembler;
 use xelis_builder::{Builder, EnvironmentBuilder};
 use xelis_bytecode::Module;
 use xelis_common::{
+    asset::{AssetData, AssetOwner, MaxSupplyMode},
     block::{Block, BlockHeader, BlockVersion},
+    config::{COIN_VALUE, MAXIMUM_SUPPLY, XELIS_ASSET},
     context::NoOpBuildHasher,
     contract::{
         ChainState,
@@ -735,7 +737,21 @@ impl Silex {
             let mut storage = MockStorage {
                 data: Default::default(),
                 balances: Default::default(),
+                assets: [
+                    (XELIS_ASSET, (AssetData::new(8, "XELIS".to_owned(), "XEL".to_owned(), MaxSupplyMode::Fixed(MAXIMUM_SUPPLY), AssetOwner::None), 4_000_000 * COIN_VALUE))
+                ]
+                    .into_iter()
+                    .collect(),
             };
+
+            for (hash, amount) in deposits.iter() {
+                storage.balances.entry(hash.clone())
+                    .or_default()
+                    .insert(Hash::zero(), match amount {
+                        ContractDeposit::Public(v) => *v,
+                        ContractDeposit::Private { .. } => 0,
+                    });
+            }
 
             let zero_hash = Hash::zero();
             let contract_cache = storage.data.entry(zero_hash.clone()).or_default();
