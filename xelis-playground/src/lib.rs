@@ -935,6 +935,7 @@ impl Silex {
         max_gas: Option<u64>,
         params: Vec<JsValue>,
         storage_presets: Vec<JsValue>,
+        deposits_js: JsValue,
     ) -> Result<ExecutionResult, JsValue> {
         if self.has_program_running() {
             return Err(JsValue::from_str("A program is already running"));
@@ -961,12 +962,28 @@ impl Silex {
             sp_list.push(self.js_to_storage_preset(preset)?);
         }
 
+        // Parse deposits from JavaScript object
+        let mut deposits: IndexMap<Hash, ContractDeposit> = IndexMap::new();
+        if !deposits_js.is_null() && !deposits_js.is_undefined() {
+            // Deserialize the JS object as a HashMap
+            let deposits_map: HashMap<String, String> = serde_wasm_bindgen::from_value(deposits_js)
+                .map_err(|e| JsValue::from_str(&format!("Failed to parse deposits: {:?}", e)))?;
+            
+            for (hash_str, amount_str) in deposits_map {
+                let hash = Hash::from_hex(&hash_str)
+                    .map_err(|e| JsValue::from_str(&format!("Invalid hash format: {}", e)))?;
+                let amount = amount_str.parse::<u64>()
+                    .map_err(|e| JsValue::from_str(&format!("Invalid amount: {}", e)))?;
+                
+                deposits.insert(hash, ContractDeposit::Public(amount));
+            }
+        }
+
         // Mark it as running
         self.is_running.store(true, Ordering::Relaxed);
 
         let chunk_id = entry.chunk_id;
-        // TODO: support deposits configuration
-        let handle = self.execute_program_internal(program, chunk_id, max_gas, Default::default(), values, sp_list).await
+        let handle = self.execute_program_internal(program, chunk_id, max_gas, deposits, values, sp_list).await
             .map_err(|err| JsValue::from_str(&format!("{:#}", err)));
 
         // Mark it as not running

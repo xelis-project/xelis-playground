@@ -239,6 +239,7 @@
                                         </div>
                                     </div>
                                     <div class="info-block-button-container">
+                                        <button class="opt-btn icon-green right" id="btn_configure_deposits" title="Configure Deposits">DEPOSITS</button>
                                         <button class="opt-btn icon-green right" disabled id="btn_run" >RUN</button>
                                         <button class="opt-btn icon-green right" disabled id="btn_export">EXPORT</button>
                                     </div>
@@ -396,6 +397,30 @@
                 </svg>
                 Download
               </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="modal_deposits" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-frame">
+          <div class="modal-title">Configure Deposits</div>
+          <div class="modal-content">
+            <div id="deposits_list_container">
+              <div style="margin-bottom: 0.5rem; color: #aaa; font-size: 0.9rem;">
+                Configure assets and amounts to deposit when running the entry point.
+              </div>
+              <div id="deposits_list"></div>
+            </div>
+            <button id="btn_add_deposit" class="btn" style="width: 100%;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 1.2rem; height: 1.2rem; vertical-align: middle;">
+                <path d="M12 5V19M5 12H19" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Add Deposit
+            </button>
+            <div class="flex-row" style="gap: 0.5rem; margin-top: 1rem;">
+              <button id="btn_deposits_clear" class="btn" style="flex: 1;">Clear All</button>
+              <button id="btn_deposits_close" class="btn" style="flex: 1;">Close</button>
             </div>
           </div>
         </div>

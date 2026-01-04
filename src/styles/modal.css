@@ -59,3 +59,28 @@
   gap: 1rem;
   flex-direction: column;
 }
+
+/* Deposits Modal Styles */
+#deposits_list_container {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+#deposits_list input {
+  font-family: 'Source Code Pro', monospace;
+}
+
+#deposits_list input:focus {
+  outline: none;
+  border-color: #2fdcb0;
+  box-shadow: 0 0 0 2px rgba(47, 220, 176, 0.2);
+}
+
+#deposits_list button:hover {
+  opacity: 0.9;
+  transform: scale(1.05);
+}
+
+#deposits_list button:active {
+  transform: scale(0.95);
+}

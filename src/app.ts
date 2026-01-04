@@ -99,6 +99,16 @@ export class App {
 
     contract_mode_elems: HTMLElement[] = [];
 
+    /* Deposits Configuration */
+    btn_configure_deposits: HTMLElement;
+    modal_deposits: HTMLElement;
+    deposits_list: HTMLElement;
+    btn_add_deposit: HTMLElement;
+    btn_deposits_clear: HTMLElement;
+    btn_deposits_close: HTMLElement;
+    deposits: Array<{hash: string, amount: string, depositType: 'public'}> = [];
+    /* end Deposits Configuration */
+
     constructor(silex: Silex) {
         const _thisApp = this;
 
@@ -175,10 +185,24 @@ export class App {
         this.btn_editor_save_code = document.querySelector(`#btn_editor_save_code`) as HTMLElement;
         /* end editor options panel*/
 
+        /* Deposits modal */
+        this.btn_configure_deposits = document.getElementById('btn_configure_deposits') as HTMLElement;
+        this.modal_deposits = document.getElementById('modal_deposits') as HTMLElement;
+        this.deposits_list = document.getElementById('deposits_list') as HTMLElement;
+        this.btn_add_deposit = document.getElementById('btn_add_deposit') as HTMLElement;
+        this.btn_deposits_clear = document.getElementById('btn_deposits_clear') as HTMLElement;
+        this.btn_deposits_close = document.getElementById('btn_deposits_close') as HTMLElement;
+        /* end Deposits modal */
+
         this.btn_export.addEventListener('click', () => this.open_modal_export());
         this.btn_compile.addEventListener('click', () => this.compile_code());
         this.btn_copy.addEventListener('click', () => this.copy_text_to_clipboard(this.entry_call_container.textContent || ""));
         this.btn_run.addEventListener('click', async () => await this.run_program());
+        
+        this.btn_configure_deposits.addEventListener('click', () => this.open_deposits_modal());
+        this.btn_add_deposit.addEventListener('click', () => this.add_deposit_field());
+        this.btn_deposits_clear.addEventListener('click', () => this.clear_all_deposits());
+        this.btn_deposits_close.addEventListener('click', () => this.close_deposits_modal());
         this.btn_output_clear.addEventListener('click', () => this.clear_output());
 
         this.btn_output_copy.addEventListener('click', () => this.copy_text_to_clipboard(this.output.textContent || ""));
@@ -992,7 +1016,15 @@ export class App {
             const params = this.get_program_params();
             this.btn_compile.setAttribute("disabled", "");
 
-            let result = await this.silex.execute_program(program, entry.id(), max_gas, params, this.storage_editor.get_storage_presets_with_map_id(this.storage_editor.current_storage_map_uuid));
+            const deposits = this.get_deposits_for_execution();
+            let result = await this.silex.execute_program(
+                program, 
+                entry.id(), 
+                max_gas, 
+                params, 
+                this.storage_editor.get_storage_presets_with_map_id(this.storage_editor.current_storage_map_uuid),
+                deposits
+            );
             output_dot_loading.stop();
 
             this.output.textContent = "";
@@ -1227,4 +1259,105 @@ export class App {
 
         //console.log(_thisApp.call_history);
     }
+
+    /* Deposits Modal Methods */
+    open_deposits_modal() {
+        this.render_deposits_list();
+        this.modal.open(this.modal_deposits);
+    }
+
+    close_deposits_modal() {
+        this.modal_deposits.classList.add('hidden');
+    }
+
+    add_deposit_field(hash: string = '', amount: string = '') {
+        const deposit = {
+            hash: hash,
+            amount: amount,
+            depositType: 'public' as const
+        };
+        this.deposits.push(deposit);
+        this.render_deposits_list();
+    }
+
+    remove_deposit(index: number) {
+        this.deposits.splice(index, 1);
+        this.render_deposits_list();
+    }
+
+    clear_all_deposits() {
+        this.deposits = [];
+        this.render_deposits_list();
+    }
+
+    render_deposits_list() {
+        this.deposits_list.innerHTML = '';
+        
+        if (this.deposits.length === 0) {
+            this.deposits_list.innerHTML = '<div style="padding: 1rem; text-align: center; color: #888;">No deposits configured</div>';
+            return;
+        }
+
+        this.deposits.forEach((deposit, index) => {
+            const depositItem = document.createElement('div');
+            depositItem.style.cssText = 'display: flex; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center;';
+            
+            const hashInput = document.createElement('input');
+            hashInput.type = 'text';
+            hashInput.placeholder = 'Asset Hash (64 hex chars)';
+            hashInput.value = deposit.hash;
+            hashInput.style.cssText = 'flex: 2; padding: 0.5rem; background: #1a1a1a; border: 1px solid #2fdcb0; color: white; border-radius: 4px;';
+            hashInput.addEventListener('input', (e) => {
+                this.deposits[index].hash = (e.target as HTMLInputElement).value;
+            });
+
+            const amountInput = document.createElement('input');
+            amountInput.type = 'text';
+            amountInput.placeholder = 'Amount (in atomic units)';
+            amountInput.value = deposit.amount;
+            amountInput.style.cssText = 'flex: 1; padding: 0.5rem; background: #1a1a1a; border: 1px solid #2fdcb0; color: white; border-radius: 4px;';
+            amountInput.addEventListener('input', (e) => {
+                this.deposits[index].amount = (e.target as HTMLInputElement).value;
+            });
+
+            const removeBtn = document.createElement('button');
+            removeBtn.innerHTML = '×';
+            removeBtn.style.cssText = 'width: 2rem; height: 2rem; background: #d32f2f; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1.5rem; line-height: 1;';
+            removeBtn.addEventListener('click', () => this.remove_deposit(index));
+
+            depositItem.appendChild(hashInput);
+            depositItem.appendChild(amountInput);
+            depositItem.appendChild(removeBtn);
+            
+            this.deposits_list.appendChild(depositItem);
+        });
+    }
+
+    get_deposits_for_execution() {
+        const depositsMap: any = {};
+        
+        for (const deposit of this.deposits) {
+            if (deposit.hash && deposit.amount) {
+                try {
+                    // Validate hash format (should be 64 hex characters)
+                    if (!/^[0-9a-fA-F]{64}$/.test(deposit.hash)) {
+                        throw new Error(`Invalid hash format: ${deposit.hash}`);
+                    }
+                    
+                    const amount = BigInt(deposit.amount);
+                    if (amount < 0n) {
+                        throw new Error('Amount must be non-negative');
+                    }
+                    
+                    depositsMap[deposit.hash] = amount.toString();
+                } catch (e) {
+                    console.error('Error processing deposit:', e);
+                    throw new Error(`Invalid deposit configuration: ${e}`);
+                }
+            }
+        }
+        
+        return depositsMap;
+    }
+    /* End Deposits Modal Methods */
 }
