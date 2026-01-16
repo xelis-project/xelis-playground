@@ -75,4 +75,8 @@ impl ContractProvider for MockStorage {
     async fn load_contract_module(&self, _: &Hash, _: TopoHeight) -> Result<Option<ContractModule>, anyhow::Error> {
         Ok(None)
     }
+
+    async fn has_contract_callback_for_event(&self, _: &Hash, _: u64, _: &Hash, _: TopoHeight) -> Result<bool, anyhow::Error> {
+        Ok(false)
+    }
 }

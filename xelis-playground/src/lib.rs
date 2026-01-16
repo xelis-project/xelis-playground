@@ -834,6 +834,8 @@ impl Silex {
                     global_executions: &global_executions,
                     changes: ExecutionsChanges::default(),
                 },
+                events: Default::default(),
+                events_listeners: Default::default(),
                 // For playground, we allow everything
                 permission: Cow::Owned(InterContractPermission::All),
                 gas_fee: 0,
