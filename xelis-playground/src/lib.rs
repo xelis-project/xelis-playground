@@ -84,9 +84,10 @@ macro_rules! log {
 
 #[wasm_bindgen]
 pub struct Silex {
-    environment: EnvironmentBuilder<'static, ContractMetadata>,
+    environments: HashMap<ContractVersion, EnvironmentBuilder<'static, ContractMetadata>>,
     logs_receiver: mpsc::Receiver<String>,
     is_running: AtomicBool,
+    selected_version: ContractVersion,
 }
 
 #[wasm_bindgen]
@@ -384,17 +385,10 @@ pub struct StoragePreset {
 
 #[wasm_bindgen]
 impl Silex {
-    #[wasm_bindgen(constructor)]
-    pub fn new() -> Self {
-        log!("Initializing Silex...");
-        // TODO: configurable environment version
-        let mut environment = build_environment::<MockStorage>(ContractVersion::V0);
-        // Patch the environment to include a println function that sends logs to the receiver
-        let (sender, receiver) = mpsc::channel();
+    fn create_environment(version: ContractVersion) -> EnvironmentBuilder<'static, ContractMetadata> {
+        log!("Creating environment for version: {:?}", version);
+        let mut environment = build_environment::<MockStorage>(version);
 
-        *LOGS_SENDER.lock().unwrap() = Some(sender);
-
-        log!("Setting up environment functions...");
         environment
             .get_mut_function("println", None)
             .set_on_call(FunctionHandler::Sync(Self::println_fn));
@@ -403,10 +397,27 @@ impl Silex {
             .get_mut_function("debug", None)
             .set_on_call(FunctionHandler::Sync(Self::debug_fn));
 
+        environment
+    }
+
+    #[wasm_bindgen(constructor)]
+    pub fn new() -> Self {
+        log!("Initializing Silex...");
+        // Patch the environment to include a println function that sends logs to the receiver
+        let (sender, receiver) = mpsc::channel();
+
+        *LOGS_SENDER.lock().unwrap() = Some(sender);
+
+        log!("Setting up environment...");
+
         Self {
-            environment,
+            environments: ContractVersion::variants()
+                .into_iter()
+                .map(|version| (version, Self::create_environment(version)))
+                .collect(),
             logs_receiver: receiver,
             is_running: AtomicBool::new(false),
+            selected_version: ContractVersion::V0,
         }
     }
 
@@ -450,7 +461,8 @@ impl Silex {
             .into_iter()
             .collect::<Result<Vec<_>, _>>()?;
 
-        let parser = Parser::with(tokens.into_iter(), &self.environment);
+        let environment = &self.environments[&self.selected_version];
+        let parser = Parser::with(tokens.into_iter(), &environment);
         let (program, mapper) = match parser.parse() {
             Ok(res) => res,
             Err(err) => {
@@ -461,7 +473,7 @@ impl Silex {
 
         // Collect all the available entry functions
         let mut entries = Vec::new();
-        let env_offset = self.environment.get_functions().len() as u16;
+        let env_offset = environment.get_functions().len() as u16;
         for (i, func) in program.functions().iter().enumerate() {
             if func.is_entry() {
                 let mapping = mapper
@@ -487,11 +499,11 @@ impl Silex {
         }
 
         log!("Found {} entry points", entries.len());
-        let compiler = Compiler::new(&program, self.environment.environment());
+        let compiler = Compiler::new(&program, environment.environment());
         let module = compiler.compile()?;
 
         log!("Compiled module");
-        let abi = xelis_abi::abi_from_parse(&program, &mapper, &self.environment)
+        let abi = xelis_abi::abi_from_parse(&program, &mapper, &environment)
           .unwrap_or_else(|err| format!("{{\"error\": \"{}\"}}", err));
 
         Ok(Program {
@@ -509,13 +521,33 @@ impl Silex {
         }
     }
 
+    // Set the contract version
+    pub fn set_contract_version(&mut self, version: u8) -> Result<(), JsValue> {
+        let contract_version = ContractVersion::from_bytes(&[version])
+            .map_err(|_| JsValue::from_str("Invalid contract version"))?;
+
+        self.selected_version = contract_version;
+        Ok(())
+    }
+
+    pub fn get_contract_version(&self) -> u8 {
+        self.selected_version as u8
+    }
+
+    pub fn available_contract_versions(&self) -> Vec<u8> {
+        ContractVersion::variants()
+            .into_iter()
+            .map(|v| v as u8)
+            .collect()
+    }
+
     // Check if a program is running
     pub fn has_program_running(&self) -> bool {
         self.is_running.load(Ordering::Relaxed)
     }
 
     pub fn get_env_functions(&self) -> Vec<Func> {
-        let mapper = self.environment.get_functions_mapper();
+        let mapper = self.environments[&self.selected_version].get_functions_mapper();
         let mut funcs = Vec::new();
 
         for (_t, list) in mapper.get_declared_functions() {
@@ -540,8 +572,9 @@ impl Silex {
     }
 
     pub fn get_declared_types(&self) -> Vec<String> {
+        let environment = &self.environments[&self.selected_version];
         let mut types = Vec::new();
-        for ty in self.environment.get_struct_manager().iter() {
+        for ty in environment.get_struct_manager().iter() {
             let t = ty.get_type();
             types.push(format!("struct {} {{ {} }}", t.name(), t.fields()
                 .iter()
@@ -551,7 +584,7 @@ impl Silex {
             );
         }
 
-        for ty in self.environment.get_enum_manager().iter() {
+        for ty in environment.get_enum_manager().iter() {
             let t = ty.get_type();
             // enum Name { Variant1: { field1: Type1, field2: Type2 }, Variant2: { field1: Type1 } }
             types.push(format!("enum {} {{\n    {}\n}}", t.name(), t.variants()
@@ -577,7 +610,7 @@ impl Silex {
             );
         }
 
-        for ty in self.environment.get_opaque_manager().iter() {
+        for ty in environment.get_opaque_manager().iter() {
             types.push(format!("opaque {};", ty.name()));
         }
 
@@ -585,8 +618,9 @@ impl Silex {
     }
 
     pub fn get_constants_functions(&self) -> Vec<ConstFunc> {
+        let environment = &self.environments[&self.selected_version];
         let mut funcs = Vec::new();
-        for (for_type, mappings) in self.environment.get_const_functions_mapper().get_mappings() {
+        for (for_type, mappings) in environment.get_const_functions_mapper().get_mappings() {
             for (name, const_fn) in mappings.iter() {
                 let params: Vec<String> = const_fn.parameters.iter().map(|(name, ty)| 
                     format!("{}: {}", name, ty)
@@ -668,7 +702,8 @@ impl Silex {
                 ValueCell::Bytes(bytes)
             },
             Type::Opaque(ty) => {
-                let name = self.environment.get_opaque_name(ty)
+                let environment = &self.environments[&self.selected_version];
+                let name = environment.get_opaque_name(ty)
                     .ok_or_else(|| JsValue::from_str("Failed to get opaque name"))?;
 
                 match name {
@@ -732,11 +767,13 @@ impl Silex {
         sp_list: Vec<StoragePreset>,
     ) -> Result<ExecutionResult, String> {
         log!("Executing program with entry_id: {}, max_gas: {:?}, values: {:?}", entry_id, max_gas, values);
-        let environment = self.environment.environment().clone();
-        let environments = [(ContractVersion::V0, Arc::new(environment.clone()))]
-            .into_iter()
+
+        let environments = self.environments
+            .iter()
+            .map(|(version, env)| (*version, Arc::new(env.environment().clone())))
             .collect::<HashMap<_, _>>();
 
+        let selected_version = self.selected_version;
         tokio::task::spawn_blocking(move || {
             log!("Building storage and chain state");
             // Fake storage
@@ -842,12 +879,13 @@ impl Silex {
                 gas_fee_allowance: 0,
             };
 
+            let environment = &environments[&selected_version];
             let mut logs = Vec::new();
             let (res, elapsed_time, used_gas, used_memory) = {
                 let mut vm = VM::default();
                 vm.append_module(ModuleMetadata {
                     module: (&program.module).into(),
-                    environment: (&environment).into(),
+                    environment: environment.clone().into(),
                     metadata: (&metadata).into(),
                 }).map_err(|e| format!("Error while adding module: {}", e))?;
 
@@ -878,7 +916,7 @@ impl Silex {
                     // VM has consumed the module, lets re-inject it again
                     vm.append_module(ModuleMetadata {
                         module: (&program.module).into(),
-                        environment: (&environment).into(),
+                        environment: environment.clone().into(),
                         metadata: (&metadata).into(),
                     }).map_err(|e| format!("Error while re-adding module: {}", e))?;
                 }

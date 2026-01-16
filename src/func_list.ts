@@ -214,31 +214,36 @@ export class FuncList {
 
     funcs: any[] = [];
     const_funcs: any[] = [];
-    private documentation_map: StdLibDocObject;
-    private search_results_std_funcs: StdLibDocMap;
-    private search_results_const_funcs: StdLibDocMap;
+    private documentation_map!: StdLibDocObject;
+    private search_results_std_funcs!: StdLibDocMap;
+    private search_results_const_funcs!: StdLibDocMap;
 
     static live_docs: Map<string, DocObject[]> = new Map();
 
     constructor(silex: any) {
 
+        this.reload(silex, false);
+        this.main_container = document.getElementById('function_list') as HTMLElement;
+        this.fl_container = document.getElementById('function_list_items') as HTMLElement;
+
+        this.search_func_list = document.getElementById('search_func_list') as HTMLInputElement;
+        this.search_func_list.addEventListener("input", (e) => this.handle_search_input(e));
+        this.search_func_list.value = localStorage.getItem(`list-functions-search`) || ``;
+    }
+
+    // Reload functions from silex (e.g., when contract version changes)
+    reload(silex: any, reload: boolean = true) {
         this.funcs = silex.get_env_functions();
         this.const_funcs = silex.get_constants_functions();
         this.documentation_map = new StdLibDocObject(this.funcs, this.const_funcs);
         this.search_results_std_funcs = this.documentation_map.methods_by_category_syscall_map;
         this.search_results_const_funcs = this.documentation_map.const_functions_by_category_syscall_map;
 
-        this.main_container = document.getElementById('function_list') as HTMLElement;
-        this.fl_container = document.getElementById('function_list_items') as HTMLElement;
-
-        this.search_func_list = document.getElementById('search_func_list') as HTMLInputElement;
-
-
-        this.search_func_list.addEventListener("input", (e) => this.handle_search_input(e));
-        this.search_func_list.value = localStorage.getItem(`list-functions-search`) || ``;
-
-        // load documentation from doc_out.json,
+        // Reload documentation
         this.load_documentation();
+        if (reload) {
+            this.render_functions_ui();
+        }
     }
 
     /* 
@@ -338,11 +343,7 @@ export class FuncList {
 
     render_functions_ui() {
         const _thisFuncList = this;
-
         this.fl_container.innerHTML = "";
-
-        let type_container_map = new Map<string, HTMLElement>();
-
         let method_container: HTMLElement;
 
         const separator = document.createElement(`div`);

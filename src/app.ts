@@ -45,6 +45,7 @@ export class App {
     //program_entry_params: HTMLElement;
     btn_run: HTMLElement;
     btn_compile: HTMLElement;
+    contract_version_select: HTMLSelectElement;
     input_max_gas: HTMLInputElement;
     btn_output_clear: HTMLElement;
     btn_output_copy: HTMLElement;
@@ -128,7 +129,37 @@ export class App {
         this.btn_export.setAttribute("disabled", "");
 
         this.btn_compile = document.getElementById('btn_editor_compile') as HTMLElement;
+        this.contract_version_select = document.getElementById('contract_version_select') as HTMLSelectElement;
         this.input_max_gas = document.getElementById('input_max_gas') as HTMLInputElement;
+
+        // Populate contract version select with available versions
+        const available_versions = this.silex.available_contract_versions();
+        this.contract_version_select.innerHTML = '';
+        available_versions.forEach((version: number) => {
+            const option = document.createElement('option');
+            option.value = version.toString();
+            option.textContent = `V${version}`;
+            this.contract_version_select.appendChild(option);
+        });
+
+        // Set initial version
+        const current_version = this.silex.get_contract_version();
+        this.contract_version_select.value = current_version.toString();
+
+        // Add change listener
+        this.contract_version_select.addEventListener('change', () => {
+            const version = parseInt(this.contract_version_select.value);
+            try {
+                this.silex.set_contract_version(version);
+                this.output.textContent = `Contract version set to V${version}\n`;
+                // Reload functions/library for the new version
+                this.func_list.reload(this.silex);
+            } catch (e) {
+                this.output.innerHTML = this.output_error(`Failed to set contract version: ${e}\n`);
+                // Revert to previous version
+                this.contract_version_select.value = this.silex.get_contract_version().toString();
+            }
+        });
 
         this.btn_output_clear = document.getElementById('btn_output_clear') as HTMLElement;
         this.btn_output_copy = document.getElementById('btn_output_copy') as HTMLElement;
@@ -339,6 +370,24 @@ export class App {
             }
             UIContainers.panel_toggle(UIContainers.panel_options({initiator: this.btn_editor_options, after_open: after_open, after_close: after_close} as PanelOptions));
         });
+
+        // Close options modal when clicking on backdrop
+        const options_backdrop = document.querySelector('#editor_options_container .panel_backdrop') as HTMLElement;
+        if (options_backdrop) {
+            options_backdrop.addEventListener('click', () => {
+                const panel_body = document.querySelector('#editor_options_container .panel_body') as HTMLElement;
+                if (panel_body && !panel_body.classList.contains('hide')) {
+                    UIContainers.panel_close(UIContainers.panel_options({
+                        initiator: this.btn_editor_options,
+                        after_close: () => {
+                            [this.btn_editor_save_code, this.btn_project_panel,
+                                this.btn_compile].forEach(b => b.removeAttribute("disabled"));
+                            this.editor.focus();
+                        }
+                    } as PanelOptions));
+                }
+            });
+        }
 
         this.tabsize_select.addEventListener('change', (e) => this.handle_tabsize_change(e));
 
@@ -809,6 +858,13 @@ export class App {
             localStorage.setItem('code', code);
 
             this.output.textContent += "------- Compiling -------\n";
+            const version = parseInt(this.contract_version_select.value);
+            try {
+                this.silex.set_contract_version(version);
+            } catch (e) {
+                this.output.innerHTML = this.output_error(`Failed to set contract version: ${e}\n`);
+                return;
+            }
             const program = this.silex.compile(code);
 
             const entries = program.entries();
@@ -1008,6 +1064,14 @@ export class App {
                 return;
             }
 
+            const version = parseInt(this.contract_version_select.value);
+            try {
+                this.silex.set_contract_version(version);
+            } catch (e) {
+                this.output.innerHTML = this.output_error(`Failed to set contract version: ${e}\n`);
+                return;
+            }
+
             const program = this.silex.compile(this.program_code);
             const entry = program.entries()[this.program_entry_index];
             this.output.textContent = `-------- Running (${entry.name()} at index ${entry.id()}) --------\n`;
@@ -1104,6 +1168,8 @@ export class App {
     }
 
     get_program() {
+        const version = parseInt(this.contract_version_select.value);
+        this.silex.set_contract_version(version);
         return this.silex.compile(this.program_code);
     }
 
