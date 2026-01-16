@@ -388,7 +388,7 @@ impl Silex {
     pub fn new() -> Self {
         log!("Initializing Silex...");
         // TODO: configurable environment version
-        let mut environment = build_environment::<MockStorage>(ContractVersion::V1);
+        let mut environment = build_environment::<MockStorage>(ContractVersion::V0);
         // Patch the environment to include a println function that sends logs to the receiver
         let (sender, receiver) = mpsc::channel();
 
@@ -733,7 +733,7 @@ impl Silex {
     ) -> Result<ExecutionResult, String> {
         log!("Executing program with entry_id: {}, max_gas: {:?}, values: {:?}", entry_id, max_gas, values);
         let environment = self.environment.environment().clone();
-        let environments = [(ContractVersion::V1, Arc::new(environment.clone()))]
+        let environments = [(ContractVersion::V0, Arc::new(environment.clone()))]
             .into_iter()
             .collect::<HashMap<_, _>>();
 
@@ -809,7 +809,7 @@ impl Silex {
                 contract_executor: zero_hash.clone(),
                 contract_caller: None,
                 deposits: deposits.clone(),
-                contract_version: ContractVersion::V1,
+                contract_version: ContractVersion::V0,
             };
 
             let mut chain_state = ChainState {
