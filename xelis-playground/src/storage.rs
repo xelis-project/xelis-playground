@@ -72,7 +72,7 @@ impl ContractProvider for MockStorage {
         Ok(false)
     }
 
-    async fn load_contract_module(&self, _: &Hash, _: TopoHeight) -> Result<Option<ContractModule>, anyhow::Error> {
+    async fn load_contract_module(&self, _: &Hash, _: TopoHeight) -> Result<Option<(TopoHeight, Option<ContractModule>)>, anyhow::Error> {
         Ok(None)
     }
 
