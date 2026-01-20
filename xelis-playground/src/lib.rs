@@ -27,7 +27,6 @@ use xelis_common::{
     context::NoOpBuildHasher,
     contract::{
         ChainState,
-        ContractEventTracker,
         ContractMetadata,
         ContractProviderWrapper,
         ContractVersion,
@@ -848,8 +847,10 @@ impl Silex {
                 deposits: deposits.clone(),
                 contract_version: ContractVersion::V0,
             };
+            let global_modules = HashMap::new();
 
             let mut chain_state = ChainState {
+                global_modules: &global_modules,
                 debug_mode: true,
                 mainnet: false,
                 block: &block,
@@ -859,11 +860,6 @@ impl Silex {
                 environments: Cow::Borrowed(&environments),
                 // TODO: configurable
                 caller: ContractCaller::Transaction(&zero_hash, &transaction),
-                modules: HashMap::new(),
-                outputs: Vec::new(),
-                caches: HashMap::new(),
-                tracker: ContractEventTracker::default(),
-                assets: Default::default(),
                 global_caches: &Default::default(),
                 injected_gas: Default::default(),
                 executions: ExecutionsManager {
@@ -871,11 +867,11 @@ impl Silex {
                     global_executions: &global_executions,
                     changes: ExecutionsChanges::default(),
                 },
-                events: Default::default(),
-                events_listeners: Default::default(),
+                changes: Default::default(),
+                logs: Default::default(),
+                loaded_modules: Default::default(),
                 // For playground, we allow everything
                 permission: Cow::Owned(InterContractPermission::All),
-                gas_fee: 0,
                 gas_fee_allowance: 0,
             };
 
@@ -940,7 +936,7 @@ impl Silex {
             log!("Execution completed in {} ms, used gas: {}, used memory: {} bytes", elapsed_time.as_millis(), used_gas, used_memory);
 
             // Merge chain state into mock storage
-            let caches = chain_state.caches;
+            let caches = chain_state.changes.caches;
             let mut events = HashMap::new();
 
             for (contract, cache) in caches.into_iter() {
