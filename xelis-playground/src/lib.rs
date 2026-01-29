@@ -60,7 +60,7 @@ use xelis_compiler::Compiler;
 use xelis_lexer::Lexer;
 use xelis_parser::Parser;
 use xelis_types::Type;
-use xelis_vm::{Context, FnInstance, FnParams, FnReturnType, FunctionHandler, Primitive, SysCallResult, VM, ValueCell};
+use xelis_vm::{FnInstance, FnParams, FnReturnType, FunctionHandler, Primitive, SysCallResult, VM, VMContext, ValueCell};
 use serde::Deserialize;
 
 #[wasm_bindgen]
@@ -420,7 +420,7 @@ impl Silex {
         }
     }
 
-    fn println_fn(_: FnInstance, params: FnParams, _: &ModuleMetadata, _: &mut Context) -> FnReturnType<ContractMetadata> {
+    fn println_fn(_: FnInstance, params: FnParams, _: &ModuleMetadata, _: &mut VMContext) -> FnReturnType<ContractMetadata> {
         let param = &params[0];
         cfg_if! {
             if #[cfg(target_arch = "wasm32")] {
@@ -437,7 +437,7 @@ impl Silex {
         Ok(SysCallResult::None)
     }
 
-    fn debug_fn(_: FnInstance, params: FnParams, _: &ModuleMetadata, _: &mut Context) -> FnReturnType<ContractMetadata> {
+    fn debug_fn(_: FnInstance, params: FnParams, _: &ModuleMetadata, _: &mut VMContext) -> FnReturnType<ContractMetadata> {
         let param = &params[0];
         cfg_if! {
             if #[cfg(target_arch = "wasm32")] {
