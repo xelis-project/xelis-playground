@@ -918,7 +918,7 @@ impl Silex {
                 }
 
                 log!("Executing entry point with ID: {}", entry_id);
-                vm.invoke_entry_chunk_with_args(entry_id, values.into_iter().rev())
+                vm.invoke_chunk_with_args(entry_id, values.into_iter().rev())
                     .map_err(|err| format!("{:#}", err))?;
 
                 log!("Running VM");
