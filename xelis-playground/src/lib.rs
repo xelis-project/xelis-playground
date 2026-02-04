@@ -498,7 +498,11 @@ impl Silex {
         }
 
         log!("Found {} entry points", entries.len());
-        let compiler = Compiler::new(&program, environment.environment());
+        let mut compiler = Compiler::new(&program, environment.environment());
+        if self.selected_version >= ContractVersion::V1 {
+            compiler = compiler.with_enforce_public_parameters(true);
+        }
+
         let module = compiler.compile()?;
 
         log!("Compiled module");
@@ -918,7 +922,7 @@ impl Silex {
                 }
 
                 log!("Executing entry point with ID: {}", entry_id);
-                vm.invoke_chunk_with_args(entry_id, values.into_iter().rev())
+                vm.invoke_chunk_with_args(entry_id, values.into_iter())
                     .map_err(|err| format!("{:#}", err))?;
 
                 log!("Running VM");
@@ -1057,8 +1061,10 @@ mod tests {
     #[tokio::test]
     async fn test_hello_world() {
         let code = r#"
-            entry hello_world() {
-                println("Hello, world!");
+            entry hello_world(a: string, b: string) {
+                assert(a == "Hello");
+                assert(b == "world");
+                println(a + ", " + b + "!");
                 return 0;
             }
         "#;
@@ -1067,8 +1073,14 @@ mod tests {
         let program = silex.compile_internal(code).expect("Failed to compile the program");
         let entries = program.entries();
         let entry = entries.get(0).expect("No entry found");
-        let result = silex.execute_program_internal(program, entry.id() as u16, Some(MAX_GAS_USAGE_PER_TX), IndexMap::new(), vec![], vec![]).await
-            .expect("Failed to execute the program");
+        let result = silex.execute_program_internal(
+            program,
+            entry.id() as u16,
+            Some(MAX_GAS_USAGE_PER_TX),
+            IndexMap::new(),
+            vec![Primitive::String("Hello".to_string()).into(), Primitive::String("world".to_string()).into()],
+            vec![]
+        ).await.expect("Failed to execute the program");
 
         assert_eq!(result.value(), "0");
     }
