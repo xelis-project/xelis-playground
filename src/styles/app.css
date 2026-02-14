@@ -1493,6 +1493,69 @@ button[data-toggle='off']:hover:not(:disabled) {
     display: none;
 }
 
+/** Dropdown **/
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #11242a;
+    width: auto;
+    /* min-width: 260px; */
+    box-shadow: 0 10px 20px 0 rgba(0,0,0,0.2);
+    z-index: 10;
+    min-width: fit-content;
+    padding-top: 0.51rem;
+    margin-left: -0.75rem;
+    max-height: 400px;
+    overflow-y: scroll;
+}
+
+.dropdown-content::-webkit-scrollbar {
+    display: none;
+    width: 0.3rem;
+}
+
+.dropdown-content::-webkit-scrollbar-track {
+    background: #00000000;
+}
+
+.dropdown-content::-webkit-scrollbar-thumb {
+    background: rgba(0, 56, 64, 0.74);
+    border-radius: 0.3rem;
+}
+
+.dropdown-content a {
+    padding: 0.75rem 4rem 0.75rem 0.75rem;
+    text-decoration: none;
+    display: block;
+    white-space: nowrap;
+    /* font-size: smaller; */
+}
+
+/* Change color of dropdown links on hover */
+.dropdown-content a:hover {
+    background-color: #041018;
+    cursor: pointer;
+}
+
+.menu-stat-ro:hover {
+    cursor: pointer;
+}
+
+/* Show the dropdown menu on hover */
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* Change the background color of the dropdown button when the dropdown content is shown */
+.dropdown:hover .dropbtn {
+    /* background-color: #3e8e41; */
+}
+
 
 
 @keyframes panel-anim {
