@@ -877,6 +877,7 @@ impl Silex {
                 // For playground, we allow everything
                 permission: Cow::Owned(InterContractPermission::All),
                 gas_fee_allowance: 0,
+                cache_clone_refs: selected_version == ContractVersion::V0,
             };
 
             let environment = &environments[&selected_version];
