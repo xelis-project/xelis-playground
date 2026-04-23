@@ -126,6 +126,11 @@ impl Program {
             .expect("Failed to disassemble the module")
             .to_string()
     }
+
+    // Check if the program has a constructor (hook id 0)
+    pub fn has_constructor(&self) -> bool {
+        self.module.get_chunk_id_of_hook(0).is_some()
+    }
 }
 
 #[wasm_bindgen]
@@ -768,6 +773,7 @@ impl Silex {
         deposits: IndexMap<Hash, ContractDeposit>,
         values: Vec<ValueCell>,
         sp_list: Vec<StoragePreset>,
+        run_constructor: bool,
     ) -> Result<ExecutionResult, String> {
         log!("Executing program with entry_id: {}, max_gas: {:?}, values: {:?}", entry_id, max_gas, values);
 
@@ -899,8 +905,12 @@ impl Silex {
                 }
                 context.set_memory_price_per_byte(1);
 
-                let constructor = vm.invoke_hook_id(0)
-                    .map_err(|err| format!("{:#}", err))?;
+                let constructor = if run_constructor {
+                    vm.invoke_hook_id(0)
+                        .map_err(|err| format!("{:#}", err))?
+                } else {
+                    false
+                };
 
                 let start = web_time::Instant::now();
                 if constructor {
@@ -987,6 +997,7 @@ impl Silex {
         params: Vec<JsValue>,
         storage_presets: Vec<JsValue>,
         deposits_js: JsValue,
+        run_constructor: bool,
     ) -> Result<ExecutionResult, JsValue> {
         if self.has_program_running() {
             return Err(JsValue::from_str("A program is already running"));
@@ -1034,7 +1045,7 @@ impl Silex {
         self.is_running.store(true, Ordering::Relaxed);
 
         let chunk_id = entry.chunk_id;
-        let handle = self.execute_program_internal(program, chunk_id, max_gas, deposits, values, sp_list).await
+        let handle = self.execute_program_internal(program, chunk_id, max_gas, deposits, values, sp_list, run_constructor).await
             .map_err(|err| JsValue::from_str(&format!("{:#}", err)));
 
         // Mark it as not running
@@ -1080,7 +1091,8 @@ mod tests {
             Some(MAX_GAS_USAGE_PER_TX),
             IndexMap::new(),
             vec![Primitive::String("Hello".to_string()).into(), Primitive::String("world".to_string()).into()],
-            vec![]
+            vec![],
+            true,
         ).await.expect("Failed to execute the program");
 
         assert_eq!(result.value(), "0");

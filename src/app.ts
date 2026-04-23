@@ -100,6 +100,9 @@ export class App {
 
     contract_mode_elems: HTMLElement[] = [];
 
+    btn_run_constructor: HTMLElement;
+    run_constructor: boolean = true;
+
     /* Deposits Configuration */
     btn_configure_deposits: HTMLElement;
     modal_deposits: HTMLElement;
@@ -215,6 +218,13 @@ export class App {
         this.btn_editor_load_file = document.querySelector(`#btn_editor_load_file`) as HTMLElement;
         this.btn_editor_save_code = document.querySelector(`#btn_editor_save_code`) as HTMLElement;
         /* end editor options panel*/
+
+        this.btn_run_constructor = document.getElementById('btn_run_constructor') as HTMLElement;
+        this.btn_run_constructor.addEventListener('click', () => {
+            this.run_constructor = !this.run_constructor;
+            this.btn_run_constructor.setAttribute('data-toggle', this.run_constructor ? 'on' : 'off');
+            this.btn_run_constructor.textContent = this.run_constructor ? 'Constructor ✓' : 'Constructor ✗';
+        });
 
         /* Deposits modal */
         this.btn_configure_deposits = document.getElementById('btn_configure_deposits') as HTMLElement;
@@ -928,6 +938,13 @@ export class App {
             this.program_code = code;
             this.output.innerHTML += this.output_success("Compiled successfully!\n");
 
+            // Show/hide constructor button based on whether the program has a constructor
+            if (program.has_constructor()) {
+                this.btn_run_constructor.classList.remove('hide');
+            } else {
+                this.btn_run_constructor.classList.add('hide');
+            }
+
             this.contract_mode_elems.forEach(e => e.classList.remove("hide"));
 
             this.btn_reuse_entry_calls.removeAttribute('disabled');
@@ -1087,7 +1104,8 @@ export class App {
                 max_gas, 
                 params, 
                 this.storage_editor.get_storage_presets_with_map_id(this.storage_editor.current_storage_map_uuid),
-                deposits
+                deposits,
+                this.run_constructor
             );
             output_dot_loading.stop();
 

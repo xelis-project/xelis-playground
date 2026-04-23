@@ -85,10 +85,6 @@ h2 {
     margin-top: 0;
 }
 
-.param-container > .type-container {
-    /* padding-left: 20px; */
-}
-
 .parameter-header {
     margin-top: 0;
     text-transform: uppercase;
@@ -352,13 +348,6 @@ input[type="number"] {
     display: inline-grid;
 }
 
-.kv-container {
-    /* margin: 15px 0; */
-    /* padding: 20px; */
-    /* border: 2px solid #00e7ff59; */
-}
-
-
 #arguments-container, .pb-arguments-container {
     padding: 15px;
     margin: 0 0 1rem 0;
@@ -521,13 +510,6 @@ div.pb-arguments-container.readonly > pre {
 #parameter_builder_container .po-selection {
   margin-top: 1rem;
 }
-
-
-/* pb_ui_button */
-#pb_ui_btn {
-    /* margin-bottom: 30px ; */
-}
-
 
 #entry-call-container {
     max-height: 150px;

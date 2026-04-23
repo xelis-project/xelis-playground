@@ -898,6 +898,11 @@ arrow {
     flex-grow: 1;
     justify-content: right;
     flex-wrap: wrap;
+    align-items: center;
+}
+
+#btn_run_constructor[data-toggle="off"] {
+    opacity: 0.5;
 }
 
 #project-details-container .info-block {
