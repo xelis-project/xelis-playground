@@ -2,25 +2,26 @@ import ace from 'ace-builds';
 import 'ace-builds/src-noconflict/mode-rust';
 import 'ace-builds/src-noconflict/theme-tomorrow_night_bright';
 
-import {Silex} from '../public/xelis_playground';
-import {CustomSelect} from './custom_select';
-import {SplitLayout} from "./split_layout";
-import {TextDotLoading} from './text_dot_loading';
-import {ModalExport} from "./model_export";
-import {FuncList} from './func_list';
-import {Modal} from './modal';
-import {ProjectManager} from './project';
-import {XVMParamParser} from './parameter_builder/xvm_param_parser';
-import {ParameterBuilder} from './parameter_builder/parameter_builder';
-import {PanelOptions, UIContainers} from "./UIContainers";
+import { Silex } from '../public/xelis_playground';
+import { CustomSelect } from './custom_select';
+import { SplitLayout } from "./split_layout";
+import { TextDotLoading } from './text_dot_loading';
+import { ModalExport } from "./model_export";
+import { FuncList } from './func_list';
+import { Modal } from './modal';
+import { ProjectManager } from './project';
+import { XVMParamParser } from './parameter_builder/xvm_param_parser';
+import { ParameterBuilder } from './parameter_builder/parameter_builder';
+import { PanelOptions, UIContainers } from "./UIContainers";
 
 import HistoryIcon from "./resources/icons/history-icon.svg";
 import ReuseIcon from "./resources/icons/recycle-icon.svg";
+import ConstructorIcon from "./resources/icons/constructor-icon.svg";
 
-import {Utils} from "./Utils";
-import {StorageEditor} from "./StorageEditor";
-import {RightPanelModes} from './RightPanelModes';
-import {DaemonEndpoint, RPCInspector, WalletEndpoint} from './RPCInspector';
+import { Utils } from "./Utils";
+import { StorageEditor } from "./StorageEditor";
+import { RightPanelModes } from './RightPanelModes';
+import { DaemonEndpoint, RPCInspector, WalletEndpoint } from './RPCInspector';
 
 type EntryCallParam = [string, string];
 type EntryCallParameterList = EntryCallParam[];
@@ -110,7 +111,7 @@ export class App {
     btn_add_deposit: HTMLElement;
     btn_deposits_clear: HTMLElement;
     btn_deposits_close: HTMLElement;
-    deposits: Array<{hash: string, amount: string, depositType: 'public'}> = [];
+    deposits: Array<{ hash: string, amount: string, depositType: 'public' }> = [];
     /* end Deposits Configuration */
 
     constructor(silex: Silex) {
@@ -219,13 +220,6 @@ export class App {
         this.btn_editor_save_code = document.querySelector(`#btn_editor_save_code`) as HTMLElement;
         /* end editor options panel*/
 
-        this.btn_run_constructor = document.getElementById('btn_run_constructor') as HTMLElement;
-        this.btn_run_constructor.addEventListener('click', () => {
-            this.run_constructor = !this.run_constructor;
-            this.btn_run_constructor.setAttribute('data-toggle', this.run_constructor ? 'on' : 'off');
-            this.btn_run_constructor.textContent = this.run_constructor ? 'Constructor ✓' : 'Constructor ✗';
-        });
-
         /* Deposits modal */
         this.btn_configure_deposits = document.getElementById('btn_configure_deposits') as HTMLElement;
         this.modal_deposits = document.getElementById('modal_deposits') as HTMLElement;
@@ -239,7 +233,7 @@ export class App {
         this.btn_compile.addEventListener('click', () => this.compile_code());
         this.btn_copy.addEventListener('click', () => this.copy_text_to_clipboard(this.entry_call_container.textContent || ""));
         this.btn_run.addEventListener('click', async () => await this.run_program());
-        
+
         this.btn_configure_deposits.addEventListener('click', () => this.open_deposits_modal());
         this.btn_add_deposit.addEventListener('click', () => this.add_deposit_field());
         this.btn_deposits_clear.addEventListener('click', () => this.clear_all_deposits());
@@ -251,19 +245,27 @@ export class App {
 
         this.btn_call_history = document.querySelector(`#btn-call-history`) as HTMLButtonElement;
         HistoryIcon.classList.add("icon", "history-icon");
-        _thisApp.btn_call_history.innerHTML =  Utils.convertSvgElementToHtml(HistoryIcon) as string;
+        _thisApp.btn_call_history.innerHTML = Utils.convertSvgElementToHtml(HistoryIcon) as string;
         // const call_history_container = document.createElement(`div`);
         // call_history_container.classList.add("call-history-container");
         // call_history_container.textContent = "";
         // this.btn_call_history.appendChild(call_history_container);
+        this.btn_run_constructor = document.querySelector(`#btn_run_constructor`) as HTMLButtonElement;
+        ConstructorIcon.classList.add("icon", "constructor-icon");
+        _thisApp.btn_run_constructor.innerHTML = Utils.convertSvgElementToHtml(ConstructorIcon) as string;
+
+        _thisApp.btn_run_constructor.addEventListener('click', () => {
+            this.run_constructor = !this.run_constructor;
+            this.btn_run_constructor.setAttribute('data-toggle', this.run_constructor ? 'on' : 'off')
+        });
 
         this.btn_reuse_entry_calls = document.querySelector(`#btn-reuse-last-call`) as HTMLButtonElement;
         ReuseIcon.classList.add("icon", "recycle-icon");
-        _thisApp.btn_reuse_entry_calls.innerHTML =  Utils.convertSvgElementToHtml(ReuseIcon) as string;
+        _thisApp.btn_reuse_entry_calls.innerHTML = Utils.convertSvgElementToHtml(ReuseIcon) as string;
         _thisApp.btn_reuse_entry_calls.addEventListener("click", e => {
             const data_toggle = _thisApp.btn_reuse_entry_calls.getAttribute("data-toggle");
-            if(data_toggle !== undefined && data_toggle !== null) {
-                if(data_toggle === "on") {
+            if (data_toggle !== undefined && data_toggle !== null) {
+                if (data_toggle === "on") {
                     _thisApp.prefs_REUSE_ENTRY_CALLS = false;
                     _thisApp.btn_reuse_entry_calls.setAttribute("data-tooltip", "Enable call reuse");
                     _thisApp.btn_reuse_entry_calls.setAttribute("data-toggle", "off");
@@ -273,10 +275,9 @@ export class App {
                     _thisApp.btn_reuse_entry_calls.setAttribute("data-toggle", "on");
                 }
 
-                if(!this.did_run_program) {
+                if (!this.did_run_program) {
                     _thisApp.compile_code();
                 }
-
             }
 
             localStorage.setItem('reuse_entry_calls', JSON.stringify(_thisApp.prefs_REUSE_ENTRY_CALLS));
@@ -288,7 +289,7 @@ export class App {
                 this.contract_mode_elems.forEach(e => e.classList.remove("hide"));
             }
 
-            UIContainers.panel_close(UIContainers.panel_options({initiator: this.btn_close_arg_editor, after_close: after_close} as PanelOptions));
+            UIContainers.panel_close(UIContainers.panel_options({ initiator: this.btn_close_arg_editor, after_close: after_close } as PanelOptions));
         });
 
         this.storage_editor.btn_close().addEventListener("click", () => {
@@ -297,31 +298,31 @@ export class App {
                 this.contract_mode_elems.forEach(e => e.classList.remove("hide"));
             }
 
-            UIContainers.panel_close(UIContainers.panel_options({initiator: this.storage_editor.btn_close(), after_close: after_close} as PanelOptions));
+            UIContainers.panel_close(UIContainers.panel_options({ initiator: this.storage_editor.btn_close(), after_close: after_close } as PanelOptions));
         });
 
         this.btn_editor_save_code.addEventListener('click', (_) => {
 
             const after_close = () => {
                 [this.btn_project_panel, this.btn_editor_options,
-                    this.btn_compile].forEach(b => b.removeAttribute("disabled"));
+                this.btn_compile].forEach(b => b.removeAttribute("disabled"));
 
                 this.editor.focus();
             }
 
             const after_open = () => {
                 [this.btn_project_panel, this.btn_editor_options,
-                    this.btn_compile].forEach(b => b.setAttribute("disabled", ""));
-                this.project_manager.ui_save_code_to_project(UIContainers.panel_options({initiator: this.btn_editor_save_code, after_close: after_close} as PanelOptions));
+                this.btn_compile].forEach(b => b.setAttribute("disabled", ""));
+                this.project_manager.ui_save_code_to_project(UIContainers.panel_options({ initiator: this.btn_editor_save_code, after_close: after_close } as PanelOptions));
             }
 
-            UIContainers.panel_toggle(UIContainers.panel_options({initiator: this.btn_editor_save_code, after_open: after_open, after_close: after_close} as PanelOptions));
+            UIContainers.panel_toggle(UIContainers.panel_options({ initiator: this.btn_editor_save_code, after_open: after_open, after_close: after_close } as PanelOptions));
         });
 
         this.btn_project_panel.addEventListener('click', (evt) => {
             const project_panel_open = () => {
                 [this.btn_editor_save_code, this.btn_editor_options,
-                    this.btn_compile].forEach(b => b.setAttribute("disabled", ""));
+                this.btn_compile].forEach(b => b.setAttribute("disabled", ""));
 
 
                 document.dispatchEvent(new CustomEvent("project-container-external-open", {
@@ -343,7 +344,7 @@ export class App {
             }
 
             const panel_container_id = this.btn_project_panel.getAttribute("data-panel-id");
-            if(panel_container_id === null) {
+            if (panel_container_id === null) {
                 console.error("btn_editor_project has no data-panel-id");
                 return;
             }
@@ -369,16 +370,16 @@ export class App {
         this.btn_editor_options.addEventListener('click', () => {
             const after_open = () => {
                 [this.btn_editor_save_code, this.btn_project_panel,
-                    this.btn_compile].forEach(b => b.setAttribute("disabled", ""));
+                this.btn_compile].forEach(b => b.setAttribute("disabled", ""));
             }
 
             const after_close = () => {
                 [this.btn_editor_save_code, this.btn_project_panel,
-                    this.btn_compile].forEach(b => b.removeAttribute("disabled"));
+                this.btn_compile].forEach(b => b.removeAttribute("disabled"));
 
                 this.editor.focus();
             }
-            UIContainers.panel_toggle(UIContainers.panel_options({initiator: this.btn_editor_options, after_open: after_open, after_close: after_close} as PanelOptions));
+            UIContainers.panel_toggle(UIContainers.panel_options({ initiator: this.btn_editor_options, after_open: after_open, after_close: after_close } as PanelOptions));
         });
 
         // Close options modal when clicking on backdrop
@@ -391,7 +392,7 @@ export class App {
                         initiator: this.btn_editor_options,
                         after_close: () => {
                             [this.btn_editor_save_code, this.btn_project_panel,
-                                this.btn_compile].forEach(b => b.removeAttribute("disabled"));
+                            this.btn_compile].forEach(b => b.removeAttribute("disabled"));
                             this.editor.focus();
                         }
                     } as PanelOptions));
@@ -435,41 +436,41 @@ export class App {
             console.log("Argument editor reset - did screen-left-reset. restoring buttons");
 
             [this.btn_project_panel,
-                this.btn_editor_save_code,
-                this.btn_editor_options,
-                this.btn_compile].forEach(b => b.removeAttribute("disabled"));
+            this.btn_editor_save_code,
+            this.btn_editor_options,
+            this.btn_compile].forEach(b => b.removeAttribute("disabled"));
 
             this.editor.focus();
         });
 
         document.addEventListener("screen-right-reset", () => {
             //console.log("Argument editor reset - did screen-right-reset.");
-            UIContainers.panel_close(UIContainers.panel_options({initiator: this.btn_close_arg_editor} as PanelOptions));
-            UIContainers.panel_close(UIContainers.panel_options({initiator: this.storage_editor.btn_close()} as PanelOptions));
+            UIContainers.panel_close(UIContainers.panel_options({ initiator: this.btn_close_arg_editor } as PanelOptions));
+            UIContainers.panel_close(UIContainers.panel_options({ initiator: this.storage_editor.btn_close() } as PanelOptions));
             this.right_panel_modes.btn_mode_contract.dispatchEvent(new Event("click"));
         });
 
         /* Project Manager */
         this.project_manager = new ProjectManager();
-        this.project_manager.buffer_needs_saving = () => {return this.editor_has_unsaved_changes};
+        this.project_manager.buffer_needs_saving = () => { return this.editor_has_unsaved_changes };
 
         document.addEventListener("project-changed", (e) => {
 
             let current_project = this.project_manager.get_current_project();
 
-            if(current_project === null) {
+            if (current_project === null) {
                 console.error("current_project cannot be null.");
                 return;
             }
 
-            if(current_project?.last_used_file_metadata === null
+            if (current_project?.last_used_file_metadata === null
                 || current_project.last_used_file_metadata === undefined) {
                 localStorage.setItem('last_file_used_data', "");
             }
 
             // Wait a for a second, then read the value?
             setTimeout(() => {
-                _thisApp.project_manager.worker_last_file_used_poll.postMessage({command: "poll_with_current_project", cmd_opts: {project: current_project}});
+                _thisApp.project_manager.worker_last_file_used_poll.postMessage({ command: "poll_with_current_project", cmd_opts: { project: current_project } });
             }, 250);
 
             this.update_info_display();
@@ -525,7 +526,7 @@ export class App {
         window.addEventListener('storage', (event) => {
             switch (event.key) {
                 case 'code':
-                break;
+                    break;
                 case 'current_project':
                     const project = JSON.parse(event.newValue as string);
                     // reload all the projects
@@ -552,15 +553,15 @@ export class App {
         const _thisApp = this;
         // get saved call history
         const saved_call_history = localStorage.getItem('call_history');
-        if(saved_call_history !== null) {
+        if (saved_call_history !== null) {
             _thisApp.call_history = JSON.parse(saved_call_history);
         }
 
-        if(_thisApp.prefs_CALL_HISTORY_MAX <= 0) {
+        if (_thisApp.prefs_CALL_HISTORY_MAX <= 0) {
             _thisApp.call_history = [];
         }
 
-        if(_thisApp.prefs_CALL_HISTORY_MAX >= 0 && _thisApp.call_history.length > _thisApp.prefs_CALL_HISTORY_MAX) {
+        if (_thisApp.prefs_CALL_HISTORY_MAX >= 0 && _thisApp.call_history.length > _thisApp.prefs_CALL_HISTORY_MAX) {
             _thisApp.call_history.splice(0, _thisApp.call_history.length - _thisApp.prefs_CALL_HISTORY_MAX);
         }
 
@@ -571,11 +572,11 @@ export class App {
         const _thisApp = this;
         // get saved call history
         const reuse_last_call = localStorage.getItem('reuse_entry_calls');
-        if(reuse_last_call !== null) {
+        if (reuse_last_call !== null) {
             _thisApp.prefs_REUSE_ENTRY_CALLS = JSON.parse(reuse_last_call);
         }
 
-        if(_thisApp.prefs_REUSE_ENTRY_CALLS) {
+        if (_thisApp.prefs_REUSE_ENTRY_CALLS) {
             _thisApp.prefs_REUSE_ENTRY_CALLS = true;
             _thisApp.btn_reuse_entry_calls.setAttribute("data-tooltip", "Disable call reuse");
             _thisApp.btn_reuse_entry_calls.setAttribute("data-toggle", "on");
@@ -599,7 +600,7 @@ export class App {
 
         const editor_buffer_info = document.getElementById("editor-buffer-info") as HTMLElement;
         const last_file_used_data = localStorage.getItem('last_file_used_data') ?? "";
-        if(_thisApp.editor.getValue() === last_file_used_data) {
+        if (_thisApp.editor.getValue() === last_file_used_data) {
             _thisApp.editor_has_unsaved_changes = false;
             editor_buffer_info.classList.remove('unsaved');
             editor_buffer_info.textContent = last_file_used_name;
@@ -611,7 +612,7 @@ export class App {
 
         const current_file_info = document.getElementById("current-file") as HTMLElement;
 
-        if(this.project_manager.get_current_project()?.last_used_file_metadata !== null) {
+        if (this.project_manager.get_current_project()?.last_used_file_metadata !== null) {
             current_file_info.textContent = last_file_used_name;
         } else {
             current_file_info.textContent = "-";
@@ -675,6 +676,7 @@ export class App {
         this.btn_export.setAttribute("disabled", "");
         this.btn_reuse_entry_calls.setAttribute('disabled', '');
         this.btn_call_history.setAttribute('disabled', '');
+        this.btn_run_constructor.setAttribute('disabled', '');
         this.btn_edit_params.setAttribute('disabled', '');
         this.btn_entry_call.setAttribute('disabled', '');
         this.btn_signature.setAttribute('disabled', '');
@@ -734,39 +736,39 @@ export class App {
             }, 500);
 
             // reuse call history
-            if(_thisApp.prefs_REUSE_ENTRY_CALLS && _thisApp.call_history.length > 0) {
+            if (_thisApp.prefs_REUSE_ENTRY_CALLS && _thisApp.call_history.length > 0) {
 
                 let ch_match = false;
 
-                for(let i = _thisApp.call_history.length - 1; i >= 0; --i) {
+                for (let i = _thisApp.call_history.length - 1; i >= 0; --i) {
                     let current_call_history_params: EntryCallParameterList = _thisApp.call_history[i];
                     const param_containers = document.querySelectorAll(`#pb_entry_container_${this.program_entry_index} > .pb-input-scrollbox > .pb-input-container > .param-container`) as NodeListOf<HTMLElement>;
                     //const last_entered_call_history = Object.keys(current_call_history_params);
 
-                    if(current_call_history_params.length === params.length
+                    if (current_call_history_params.length === params.length
                         && param_containers.length === params.length) {
 
                         // TODO allow unsigned int parameters to change (u.includes(last_entered_call_history[j]))
                         // let unsigned_ints = ["u8", "u16", "u32", "u64", "u128", "u256", "u512"];
                         // check if the corresponding param keys match the current entry call history params.
                         let match_found = true;
-                        for(let j = 0; j < params.length; j++) {
-                            if(current_call_history_params[j][0] !== params[j].signature.toLowerCase()) {
+                        for (let j = 0; j < params.length; j++) {
+                            if (current_call_history_params[j][0] !== params[j].signature.toLowerCase()) {
                                 match_found = false;
                                 break;
                             }
                         }
 
-                        if(match_found) {
+                        if (match_found) {
                             ch_match = true;
-                            for(let j = 0; j < params.length; j++) {
+                            for (let j = 0; j < params.length; j++) {
                                 //console.log(`last_entered_call_history[${j}] = ${last_entered_call_history[j]} params sig: ${params[j].signature} `);
-                                if(current_call_history_params[j][0] === params[j].signature.toLowerCase()) {
+                                if (current_call_history_params[j][0] === params[j].signature.toLowerCase()) {
                                     const param_container = param_containers[j];
 
                                     //populate_inputs(param_container, last_entered_call_history[j], current_call_history_params[last_entered_call_history[j]]);
 
-                                    switch(current_call_history_params[j][0]) {
+                                    switch (current_call_history_params[j][0]) {
                                         case "u8":
                                         case "u16":
                                         case "u32":
@@ -818,7 +820,7 @@ export class App {
                         }
                     }
 
-                    if(ch_match) {
+                    if (ch_match) {
                         break;
                     }
                 }
@@ -949,6 +951,8 @@ export class App {
 
             this.btn_reuse_entry_calls.removeAttribute('disabled');
             //this.btn_call_history.removeAttribute('disabled');
+            this.btn_run_constructor.removeAttribute('disabled');
+
             this.btn_export.removeAttribute('disabled');
             this.btn_entry_call.removeAttribute('disabled');
             this.btn_entry_call.classList.add('selected');
@@ -973,7 +977,7 @@ export class App {
                     //content =`{type: "${ot_name}", value: ${opaque_type?.textContent}}`
                     content = opaque_type?.textContent ?? "";
 
-                    if(opaque_type !== null && opaque_type !== undefined) {
+                    if (opaque_type !== null && opaque_type !== undefined) {
                         ch_type_name = opaque_type?.nodeName.toLowerCase();
                     }
                     break;
@@ -982,17 +986,17 @@ export class App {
                     let array_content = "";
                     const array_type_content = pbe.firstChild?.childNodes[1];
 
-                    if(array_type_content !== null && array_type_content !== undefined && array_type_content.childNodes.length > 0) {   // not empty array
+                    if (array_type_content !== null && array_type_content !== undefined && array_type_content.childNodes.length > 0) {   // not empty array
                         console.log('DEBUG ARRAY PARAM');
                         console.log(pbe.firstChild?.childNodes[1]);
 
-                        for(let i = 0; i < array_type_content.childNodes.length; i++) {
+                        for (let i = 0; i < array_type_content.childNodes.length; i++) {
                             const array_type_content_child = array_type_content.childNodes[i];
                             // get type
                             const array_type_name = array_type_content.childNodes[i].nodeName.toLowerCase();
                             console.log(array_type_name);
 
-                            if(array_type_name === 'comma') {
+                            if (array_type_name === 'comma') {
                                 array_content += ", ";
                             } else {
                                 array_content += array_type_content_child.textContent;
@@ -1099,10 +1103,10 @@ export class App {
 
             const deposits = this.get_deposits_for_execution();
             let result = await this.silex.execute_program(
-                program, 
-                entry.id(), 
-                max_gas, 
-                params, 
+                program,
+                entry.id(),
+                max_gas,
+                params,
                 this.storage_editor.get_storage_presets_with_map_id(this.storage_editor.current_storage_map_uuid),
                 deposits,
                 this.run_constructor
@@ -1202,9 +1206,9 @@ export class App {
      * TODO: Best to move this into the program window, and get rid of the modal.
      * */
     ui_open_argument_editor() {
-        const arg_editor = UIContainers.panel_open(UIContainers.panel_options({initiator: this.btn_edit_params} as PanelOptions))
+        const arg_editor = UIContainers.panel_open(UIContainers.panel_options({ initiator: this.btn_edit_params } as PanelOptions))
 
-        if(arg_editor === null) {
+        if (arg_editor === null) {
             console.log("Error opening argument editor");
         }
 
@@ -1235,7 +1239,7 @@ export class App {
         const btn_output_panel_shrink = document.querySelector(`#btn_output_panel_shrink`) as HTMLButtonElement;
         const gas_limit_display = document.querySelector(`#gas_limit_display`) as HTMLElement;
 
-        if(this.output_panel_expanded) {
+        if (this.output_panel_expanded) {
             console.log("Shrink output window");
             btn_output_panel_expand.classList.remove('hide');
             btn_output_panel_shrink.classList.add('hide');
@@ -1289,32 +1293,32 @@ export class App {
 
         // being a little too clever here. It's possible that we will have to add a new entry
         // after checking that it shouldn't be added.
-        if(!should_add) {  // confirm it shouldn't be added or remove a copy'
+        if (!should_add) {  // confirm it shouldn't be added or remove a copy'
 
             let found_match = false;
 
-            for(let i = _thisApp.call_history.length - 1; i >= 0; --i) {
+            for (let i = _thisApp.call_history.length - 1; i >= 0; --i) {
                 let call_hist_item = _thisApp.call_history[i];
 
                 let local_match = true;
 
-                if(call_hist_item.length === entry_params.length) {
+                if (call_hist_item.length === entry_params.length) {
                     // compare each parameter in the call history entry with the entry params.
-                    for(let j = 0; j < call_hist_item.length; ++j) {
-                        if(call_hist_item[j][0] !== entry_params[j][0]) {
+                    for (let j = 0; j < call_hist_item.length; ++j) {
+                        if (call_hist_item[j][0] !== entry_params[j][0]) {
                             local_match = false;
                             break;
                         }
 
-                        if(call_hist_item[j][1] !== entry_params[j][1]) {
+                        if (call_hist_item[j][1] !== entry_params[j][1]) {
                             local_match = false;
                             break;
                         }
                     }
 
-                    if(local_match) {
+                    if (local_match) {
                         found_match = true;
-                        if(i === _thisApp.call_history.length - 1) {
+                        if (i === _thisApp.call_history.length - 1) {
                             break;
                         } else {
                             // splice out the entry
@@ -1325,19 +1329,19 @@ export class App {
                     }
                 }
 
-                if(found_match) {
+                if (found_match) {
                     break;
                 }
             }
 
-            if(!found_match) {
+            if (!found_match) {
                 should_add = true;
             }
         }
 
         // definitely must add the new entry.
         if (should_add) {
-            if(_thisApp.call_history.length >= _thisApp.prefs_CALL_HISTORY_MAX) {
+            if (_thisApp.call_history.length >= _thisApp.prefs_CALL_HISTORY_MAX) {
                 _thisApp.call_history.shift();
             }
             _thisApp.call_history.push(entry_params);
@@ -1380,7 +1384,7 @@ export class App {
 
     render_deposits_list() {
         this.deposits_list.innerHTML = '';
-        
+
         if (this.deposits.length === 0) {
             this.deposits_list.innerHTML = '<div style="padding: 1rem; text-align: center; color: #888;">No deposits configured</div>';
             return;
@@ -1389,7 +1393,7 @@ export class App {
         this.deposits.forEach((deposit, index) => {
             const depositItem = document.createElement('div');
             depositItem.style.cssText = 'display: flex; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center;';
-            
+
             const hashInput = document.createElement('input');
             hashInput.type = 'text';
             hashInput.placeholder = 'Asset Hash (64 hex chars)';
@@ -1416,14 +1420,14 @@ export class App {
             depositItem.appendChild(hashInput);
             depositItem.appendChild(amountInput);
             depositItem.appendChild(removeBtn);
-            
+
             this.deposits_list.appendChild(depositItem);
         });
     }
 
     get_deposits_for_execution() {
         const depositsMap: any = {};
-        
+
         for (const deposit of this.deposits) {
             if (deposit.hash && deposit.amount) {
                 try {
@@ -1431,12 +1435,12 @@ export class App {
                     if (!/^[0-9a-fA-F]{64}$/.test(deposit.hash)) {
                         throw new Error(`Invalid hash format: ${deposit.hash}`);
                     }
-                    
+
                     const amount = BigInt(deposit.amount);
                     if (amount < 0n) {
                         throw new Error('Amount must be non-negative');
                     }
-                    
+
                     depositsMap[deposit.hash] = amount.toString();
                 } catch (e) {
                     console.error('Error processing deposit:', e);
@@ -1444,7 +1448,7 @@ export class App {
                 }
             }
         }
-        
+
         return depositsMap;
     }
     /* End Deposits Modal Methods */

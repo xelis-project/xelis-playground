@@ -17,8 +17,7 @@
 }
 
 .modal-frame {
-    background: #00090ef7
-    ;
+  background: #00090ef7;
   color: white;
   margin: 2rem;
   z-index: 3;
@@ -27,11 +26,13 @@
   border-radius: .5em;
   box-shadow: 0 0 50px rgb(31, 31, 31);
   max-width: 400px;
+  width: 100%;
 }
 
 @media screen and (min-width: 992px) {
   .modal-frame {
     max-width: 600px;
+    width: 100%;
   }
 }
 
