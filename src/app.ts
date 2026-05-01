@@ -147,7 +147,14 @@ export class App {
         });
 
         // Set initial version
-        const current_version = this.silex.get_contract_version();
+        let current_version = this.silex.get_contract_version();
+
+        // get contract version from local storage
+        const stored_version = localStorage.getItem('contract_version');
+        if (stored_version) {
+            current_version = parseInt(stored_version);
+        }
+
         this.contract_version_select.value = current_version.toString();
 
         // Add change listener
@@ -156,6 +163,7 @@ export class App {
             try {
                 this.silex.set_contract_version(version);
                 this.output.textContent = `Contract version set to V${version}\n`;
+                localStorage.setItem('contract_version', version.toString());
                 // Reload functions/library for the new version
                 this.func_list.reload(this.silex);
             } catch (e) {
