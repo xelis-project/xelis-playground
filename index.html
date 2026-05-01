@@ -101,20 +101,34 @@
         <div id="editor_options_container" class="panel_container">
           <div class="panel_backdrop hide"></div>
           <div class="panel_body hide">
-            <h5 style="margin-top: 0;">Editor Options</h5>
+            <h5 style="margin-top: 0;">Playground Options</h5>
             <div class="panel-options-container">
               <div class="po-btns">
-                <div class="custom-select">
-                  <select id="tabsize_select">
-                    <option>Tab Size</option>
-                    <option value="2">Tab Size: 2</option>
-                    <option value="4">Tab Size: 4</option>
-                  </select>
+                <div class="info-block">
+                  <div id="editor-tabsize-menu" class="dropdown-menu">
+                    <key>Tab Size</key>
+                    <div class="dropdown menu-centered">
+                      <div class="menu-stat-ro">
+                        <span class="menu-item-name menu-selection" data-selection-value="4">4</span>
+                      </div>
+                      <div class="dropdown-content">
+                        <a class="menu-option" data-menu-value="2">2</a>
+                        <a class="menu-option" data-menu-value="4">4</a>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div class="custom-select">
-                  <select id="contract_version_select">
-                    <option value="0">V0</option>
-                  </select>
+                <div class="info-block">
+                  <div id="contract-version-menu" class="dropdown-menu">
+                    <key>Contract Version</key>
+                    <div class="dropdown menu-centered">
+                      <div class="menu-stat-ro">
+                        <span class="menu-item-name menu-selection" data-selection-value=""
+                          style="visibility: visible;">--</span>
+                      </div>
+                      <div class="dropdown-content"></div>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div class="po-selection"></div>

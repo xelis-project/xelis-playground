@@ -46,14 +46,15 @@ export class App {
     //program_entry_params: HTMLElement;
     btn_run: HTMLElement;
     btn_compile: HTMLElement;
-    contract_version_select: HTMLSelectElement;
+    cvMenuSelection: HTMLElement;
+    contract_version: number = 0;
     input_max_gas: HTMLInputElement;
     btn_output_clear: HTMLElement;
     btn_output_copy: HTMLElement;
     btn_output_panel_toggle: HTMLElement;
     editor_lines: HTMLElement;
     btn_export: HTMLElement;
-    tabsize_select: HTMLSelectElement;
+    editor_tabsize_selection: HTMLElement;
 
     btn_edit_params: HTMLElement;
     //pb_ui: HTMLElement;
@@ -133,44 +134,65 @@ export class App {
         this.btn_export.setAttribute("disabled", "");
 
         this.btn_compile = document.getElementById('btn_editor_compile') as HTMLElement;
-        this.contract_version_select = document.getElementById('contract_version_select') as HTMLSelectElement;
         this.input_max_gas = document.getElementById('input_max_gas') as HTMLInputElement;
 
         // Populate contract version select with available versions
         const available_versions = this.silex.available_contract_versions();
-        this.contract_version_select.innerHTML = '';
-        available_versions.forEach((version: number) => {
-            const option = document.createElement('option');
-            option.value = version.toString();
-            option.textContent = `V${version}`;
-            this.contract_version_select.appendChild(option);
-        });
+
+        // TODO: Extract and make this menu code more generic
+        const cv_menu = document.getElementById('contract-version-menu') as HTMLElement;
+        const cvMenuOptionsContainer = cv_menu.querySelector('.dropdown-content') as HTMLElement;
+        this.cvMenuSelection = cv_menu.querySelector('.menu-selection') as HTMLElement;
 
         // Set initial version
         let current_version = this.silex.get_contract_version();
 
         // get contract version from local storage
         const stored_version = localStorage.getItem('contract_version');
-        if (stored_version) {
+        if (stored_version && available_versions.includes(parseInt(stored_version))) {
             current_version = parseInt(stored_version);
+            this.silex.set_contract_version(current_version);
         }
 
-        this.contract_version_select.value = current_version.toString();
+        this.cvMenuSelection.textContent = `V${current_version}`;
+        this.cvMenuSelection.dataset.selectionValue = current_version.toString();
 
-        // Add change listener
-        this.contract_version_select.addEventListener('change', () => {
-            const version = parseInt(this.contract_version_select.value);
-            try {
-                this.silex.set_contract_version(version);
-                this.output.textContent = `Contract version set to V${version}\n`;
-                localStorage.setItem('contract_version', version.toString());
-                // Reload functions/library for the new version
-                this.func_list.reload(this.silex);
-            } catch (e) {
-                this.output.innerHTML = this.output_error(`Failed to set contract version: ${e}\n`);
-                // Revert to previous version
-                this.contract_version_select.value = this.silex.get_contract_version().toString();
-            }
+        available_versions.forEach((version: number) => {
+
+            // Create menu option
+            const menu_option = document.createElement('a');
+            menu_option.classList.add('menu-option');
+            menu_option.dataset.menuValue = version.toString();
+            menu_option.textContent = `V${version}`;
+            cvMenuOptionsContainer.appendChild(menu_option);
+
+            menu_option.addEventListener('click', () => {
+                const version = parseInt(menu_option.dataset.menuValue as string);
+
+                cvMenuOptionsContainer.style.display = 'none';
+                cvMenuOptionsContainer.classList.remove('dropdown-content');
+
+                setTimeout(() => {
+                    cvMenuOptionsContainer.style.display = '';
+                    cvMenuOptionsContainer.classList.add('dropdown-content');
+                }, 500);
+
+                try {
+                    _thisApp.silex.set_contract_version(version);
+                    _thisApp.output.textContent = `Contract version set to V${version}\n`;
+                    // Reload functions/library for the new version
+                    _thisApp.func_list.reload(_thisApp.silex);
+
+                    _thisApp.cvMenuSelection.textContent = `V${version}`;
+                    _thisApp.cvMenuSelection.dataset.selectionValue = version.toString();
+                } catch (e) {
+                    _thisApp.output.innerHTML = _thisApp.output_error(`Failed to set contract version: ${e}\n`);
+                    // Revert to previous version
+                    _thisApp.cvMenuSelection.textContent = `V${_thisApp.silex.get_contract_version()}`;
+                    _thisApp.cvMenuSelection.dataset.selectionValue = _thisApp.silex.get_contract_version().toString();
+                }
+
+            });
         });
 
         this.btn_output_clear = document.getElementById('btn_output_clear') as HTMLElement;
@@ -178,7 +200,7 @@ export class App {
         this.btn_output_panel_toggle = document.getElementById('btn_output_panel_toggle') as HTMLElement;
         this.editor_lines = document.getElementById('editor_lines') as HTMLElement;
 
-        this.tabsize_select = document.getElementById('tabsize_select') as HTMLSelectElement;
+        this.editor_tabsize_selection = document.querySelector('#editor-tabsize-menu .menu-selection') as HTMLElement;
 
         this.btn_edit_params = document.getElementById('edit-entry-params-btn') as HTMLButtonElement;
         this.btn_entry_call = document.querySelector(`#entry-call-btn`) as HTMLButtonElement;
@@ -408,7 +430,25 @@ export class App {
             });
         }
 
-        this.tabsize_select.addEventListener('change', (e) => this.handle_tabsize_change(e));
+        const editor_tabsize_menu_container = document.querySelector('#editor-tabsize-menu .dropdown-content') as HTMLDivElement;
+        editor_tabsize_menu_container.querySelectorAll(".menu-option").forEach((tab_option: Element) => {
+            tab_option.addEventListener("click", () => {
+                const menu_value = (tab_option as HTMLElement).dataset.menuValue as string;
+                this.editor_tabsize_selection.dataset.selectionValue = menu_value;
+                this.editor_tabsize_selection.textContent = menu_value;
+
+                editor_tabsize_menu_container.style.display = 'none';
+                editor_tabsize_menu_container.classList.remove('dropdown-content');
+
+                setTimeout(() => {
+                    editor_tabsize_menu_container.style.display = '';
+                    editor_tabsize_menu_container.classList.add('dropdown-content');
+                }, 500);
+
+                this.set_tabsize(menu_value);
+                this.save_tabsize();
+            });
+        });
 
         this.btn_entry_call.addEventListener('click', () => {
             this.signature_container.classList.add('hide');
@@ -640,8 +680,9 @@ export class App {
     }
 
     set_tabsize(tabsize: string) {
-        this.tabsize_select.value = tabsize;
         this.editor.setOption("tabSize", parseInt(tabsize));
+        this.editor_tabsize_selection.dataset.selectionValue = tabsize;
+        this.editor_tabsize_selection.textContent = tabsize;
     }
 
     set_editor_code(code: string) {
@@ -878,7 +919,7 @@ export class App {
             localStorage.setItem('code', code);
 
             this.output.textContent += "------- Compiling -------\n";
-            const version = parseInt(this.contract_version_select.value);
+            const version = parseInt(this.cvMenuSelection.dataset.selectionValue as string);
             try {
                 this.silex.set_contract_version(version);
             } catch (e) {
@@ -1093,7 +1134,7 @@ export class App {
                 return;
             }
 
-            const version = parseInt(this.contract_version_select.value);
+            const version = parseInt(this.cvMenuSelection.dataset.selectionValue as string);
             try {
                 this.silex.set_contract_version(version);
             } catch (e) {
@@ -1180,14 +1221,9 @@ export class App {
     }
 
     save_tabsize() {
-        localStorage.setItem("tabsize", this.tabsize_select.value);
+        localStorage.setItem("tabsize", this.editor_tabsize_selection.dataset.selectionValue || "4");
     }
 
-    handle_tabsize_change(e: Event) {
-        const target = e.target as HTMLSelectElement;
-        this.set_tabsize(target.value);
-        this.save_tabsize();
-    }
 
     handle_input_change(e: Event) {
         this.program_changed();
@@ -1198,7 +1234,7 @@ export class App {
     }
 
     get_program() {
-        const version = parseInt(this.contract_version_select.value);
+        const version = parseInt(this.cvMenuSelection.dataset.selectionValue as string);
         this.silex.set_contract_version(version);
         return this.silex.compile(this.program_code);
     }
