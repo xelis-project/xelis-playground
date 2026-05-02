@@ -3,7 +3,6 @@ import 'ace-builds/src-noconflict/mode-rust';
 import 'ace-builds/src-noconflict/theme-tomorrow_night_bright';
 
 import { Silex } from '../public/xelis_playground';
-import { CustomSelect } from './custom_select';
 import { SplitLayout } from "./split_layout";
 import { TextDotLoading } from './text_dot_loading';
 import { ModalExport } from "./model_export";
@@ -35,7 +34,6 @@ export class App {
     func_list: FuncList;
     modal_export: ModalExport;
     split_layout: SplitLayout;
-    custom_select: CustomSelect;
 
     right_panel_modes: RightPanelModes = new RightPanelModes();
 
@@ -542,7 +540,6 @@ export class App {
 
         this.func_list = new FuncList(this.silex);
         this.split_layout = new SplitLayout(this);
-        this.custom_select = new CustomSelect();
         this.modal_export = new ModalExport(this);
 
         const editor_element = document.getElementById('input_editor') as HTMLPreElement;
@@ -586,9 +583,6 @@ export class App {
                 default:
                     break;
             }
-        });
-        document.addEventListener("project-manager-loaded", (e) => {
-            this.custom_select.build_selects();
         });
 
         _thisApp.call_history_init();
