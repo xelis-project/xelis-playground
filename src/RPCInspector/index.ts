@@ -1,9 +1,9 @@
-import {rpc_api_data, RPCMethod, RPCParams} from "./rpc_api_data";
-import {uuidv7} from "uuidv7";
+import { rpc_api_data, RPCMethod, RPCParams } from "./rpc_api_data";
+import { uuidv7 } from "uuidv7";
 import SearchIcon from "../resources/icons/search-icon.svg";
 import LogIcon from "../resources/icons/log-icon.svg";
 import DeleteIcon from "../resources/icons/trash-icon.svg";
-import {Utils} from "../Utils";
+import { Utils } from "../Utils";
 import ReuseIcon from "../resources/icons/recycle-icon.svg";
 
 //const xelis_io_rpc_url = 'wss://node.xelis.io/json_rpc';
@@ -42,7 +42,7 @@ export class RPCInspector {
     rpc_response_out: HTMLElement;
     btn_rpc_connect: HTMLElement;
     btn_rpc_send: HTMLElement;
-    rpc_header_section:  HTMLDivElement;
+    rpc_header_section: HTMLDivElement;
     api_list_item_container: HTMLDivElement;
     rpc_query: string = "";
     rpc_ready: boolean = false;
@@ -57,7 +57,7 @@ export class RPCInspector {
     ui_comman_mode_pinned: boolean = false;
     static rpc_api_list_container: HTMLElement = document.querySelector(`.rpc_api_list_container`) as HTMLElement;
     static rpc_inspector_response_section: HTMLElement = document.querySelector(`.rpc-inspector-response-section`) as HTMLElement;
-    static all_rpc_inspectors: Map<string, RPCInspector>  = new Map<string, RPCInspector>();
+    static all_rpc_inspectors: Map<string, RPCInspector> = new Map<string, RPCInspector>();
     private btn_log_history: HTMLButtonElement;
 
     constructor(endpoint: EndpointType, rpc_name: string) {
@@ -85,7 +85,7 @@ export class RPCInspector {
         this.rpc_header_section.classList.add('rpc-inspector-header-section');
         this.rpc_header_section.setAttribute("data-rpc-id", this.rpc_id);
 
-        const rpc_node_input_container: HTMLDivElement  = document.createElement('div');
+        const rpc_node_input_container: HTMLDivElement = document.createElement('div');
 
         const gap: HTMLDivElement = document.createElement('div');
 
@@ -115,10 +115,10 @@ export class RPCInspector {
                                         </div>
                                     </div>`;
 
-        new Map<string, {elem: HTMLDivElement, html: string }>([
-            ["rpc-node-input-container", {elem: rpc_node_input_container, html: node_input_html}],
+        new Map<string, { elem: HTMLDivElement, html: string }>([
+            ["rpc-node-input-container", { elem: rpc_node_input_container, html: node_input_html }],
 
-            ["gap", {elem: gap, html: ""}]
+            ["gap", { elem: gap, html: "" }]
         ]).forEach((div_obj, cn) => {
             div_obj.elem.classList.add(cn);
             div_obj.elem.innerHTML = div_obj.html
@@ -162,21 +162,21 @@ export class RPCInspector {
         this.btn_log_history.setAttribute("data-tooltip", "Enable log history");
         const data_toggle = localStorage.getItem("rpc_log_history") === "off" ? "off" : "on";
         this.btn_log_history.setAttribute("data-toggle", data_toggle);
-        this.btn_log_history.innerHTML =  Utils.convertSvgElementToHtml(LogIcon) as string;
+        this.btn_log_history.innerHTML = Utils.convertSvgElementToHtml(LogIcon) as string;
 
         DeleteIcon.classList.add("icon", "delete-icon");
         const btn_clear_response_out = document.createElement('button') as HTMLButtonElement;
         btn_clear_response_out.classList.add("icon-button", "with-tooltip");
         btn_clear_response_out.setAttribute("data-tooltip", "Clear log");
         btn_clear_response_out.setAttribute("data-toggle", "off");
-        btn_clear_response_out.innerHTML =  Utils.convertSvgElementToHtml(DeleteIcon) as string;
+        btn_clear_response_out.innerHTML = Utils.convertSvgElementToHtml(DeleteIcon) as string;
 
         resp_disp_prefs.appendChild(this.btn_log_history);
         resp_disp_prefs.appendChild(btn_clear_response_out);
 
         /* toggle between single response and multiple response mode */
-        this.btn_log_history.addEventListener("click" , () => {
-            if(this.btn_log_history.getAttribute("data-toggle") === "on") {
+        this.btn_log_history.addEventListener("click", () => {
+            if (this.btn_log_history.getAttribute("data-toggle") === "on") {
                 this.btn_log_history.setAttribute("data-toggle", "off");
                 this.show_last_request_and_response();
             } else {
@@ -222,10 +222,10 @@ export class RPCInspector {
         this.api_list_item_container.setAttribute("data-rpc", this.endpoint);
         this.api_list_item_container.setAttribute("data-rpc-id", this.rpc_id);
 
-        this.rpc_url = localStorage.getItem(this.endpoint === DaemonEndpoint? "rpc_daemon_url" : "rpc_wallet_url") || this.rpc_url;
+        this.rpc_url = localStorage.getItem(this.endpoint === DaemonEndpoint ? "rpc_daemon_url" : "rpc_wallet_url") || this.rpc_url;
 
-        if(this.rpc_url.trim() === "") {
-            switch(this.endpoint) {
+        if (this.rpc_url.trim() === "") {
+            switch (this.endpoint) {
                 case DaemonEndpoint:
                     this.rpc_url = DAEMON_DEFAULT_URL;
                     break;
@@ -242,13 +242,13 @@ export class RPCInspector {
             this.ui_command_mode();
         });
 
-        rpc_tab_button.addEventListener('click', () => {RPCInspector.switch_inspector_view(this);});
-        this.rpc_url_input.addEventListener('change', (e) => {this.rpc_url = (e.target as HTMLInputElement).value;});
+        rpc_tab_button.addEventListener('click', () => { RPCInspector.switch_inspector_view(this); });
+        this.rpc_url_input.addEventListener('change', (e) => { this.rpc_url = (e.target as HTMLInputElement).value; });
 
-        this.btn_rpc_connect.addEventListener('click', () => {this.connect();});
+        this.btn_rpc_connect.addEventListener('click', () => { this.connect(); });
 
         this.btn_rpc_send.addEventListener('click', () => {
-            if(this.ws === null) {
+            if (this.ws === null) {
                 this.log(`<error><b>Error</b>: Client not connected to a source. Please connect first.</error>`);
                 return;
             }
@@ -257,7 +257,7 @@ export class RPCInspector {
         });
 
         /* clear the response log */
-        btn_clear_response_out.addEventListener('click', () => {this.rpc_response_out.innerHTML = "";});
+        btn_clear_response_out.addEventListener('click', () => { this.rpc_response_out.innerHTML = ""; });
 
         this.ui_render_api_list_container();
 
@@ -270,16 +270,16 @@ export class RPCInspector {
     connect() {
         const SCHEMA_ID = 255;
 
-        if(this.ws !== null) {
+        if (this.ws !== null) {
             this.log(`Closing existing connection...`);
             this.ws.close();
         }
 
-        localStorage.setItem(this.endpoint === DaemonEndpoint? "rpc_daemon_url" : "rpc_wallet_url", this.rpc_url);
+        localStorage.setItem(this.endpoint === DaemonEndpoint ? "rpc_daemon_url" : "rpc_wallet_url", this.rpc_url);
 
         this.log(`Connecting to <url>${this.rpc_url}</url>...`);
 
-        const url = this.authentication_required ? `${this.rpc_username}:${this.rpc_password}@${this.rpc_url}`: `${this.rpc_url}`;
+        const url = this.authentication_required ? `${this.rpc_username}:${this.rpc_password}@${this.rpc_url}` : `${this.rpc_url}`;
         this.ws = new WebSocket(url);
 
         this.ws.onopen = () => {
@@ -292,25 +292,25 @@ export class RPCInspector {
             this.ws?.send(schema_method);
         };
 
-       this.ws.onmessage = (event) => {
+        this.ws.onmessage = (event) => {
 
-           const rpc_response = JSON.parse(event.data);
-           if(rpc_response.error !== undefined) {
-               this.log(`<error>${rpc_response.error.message}</error>`, ResponseMessage);
-           }
+            const rpc_response = JSON.parse(event.data);
+            if (rpc_response.error !== undefined) {
+                this.log(`<error>${rpc_response.error.message}</error>`, ResponseMessage);
+            }
 
-           if(rpc_response.id === SCHEMA_ID) {
-               this.rpc_ready = true; // Notify UI - "send" button can be enabled
-               console.log(rpc_response);
-               this.load_api_list(rpc_response);
-               return;
-           }
+            if (rpc_response.id === SCHEMA_ID) {
+                this.rpc_ready = true; // Notify UI - "send" button can be enabled
+                console.log("RPC Schema Data:", rpc_response);
+                this.load_api_list(rpc_response);
+                return;
+            }
 
             this.log(`<response><rpc_notify>Received: </rpc_notify><data>${event.data}</data></response>`, ResponseMessage);
             // ws.close(); // Keep open for testing or close if desired
         };
 
-       this.ws.onerror = (error) => {
+        this.ws.onerror = (error) => {
             console.error('WebSocket Error:', error);
             this.log(`<error>Error: See console for details. (Check if server is running and CORS/Auth is correct)</error>`);
         };
@@ -325,7 +325,7 @@ export class RPCInspector {
     }
 
     send_rpc_query() {
-        if(this.ws === null) {
+        if (this.ws === null) {
             this.log(`<error><b>Error</b>: Client not connected to a source. Please connect first.</error>`);
             return;
         }
@@ -373,7 +373,7 @@ export class RPCInspector {
         btn_search_api.style.visibility = "hidden";
         //btn_search_api.setAttribute("disabled", "");
 
-        btn_search_api.innerHTML =  Utils.convertSvgElementToHtml(SearchIcon) as string;
+        btn_search_api.innerHTML = Utils.convertSvgElementToHtml(SearchIcon) as string;
         api_li_disp_prefs.appendChild(btn_search_api);
 
         header_control_section.appendChild(api_li_disp_prefs);
@@ -407,7 +407,7 @@ export class RPCInspector {
 
         const maybeApiData = rpc_api_data.get(this.endpoint);
 
-        if(maybeApiData === undefined) {
+        if (maybeApiData === undefined) {
             console.warn(`RPC API data not found for ${this.endpoint}`);
             return;
         }
@@ -428,8 +428,8 @@ export class RPCInspector {
                     param_count = "params-unknown";
                     break;
 
-                    default:
-                        param_count = "params-n";
+                default:
+                    param_count = "params-n";
             }
 
             api_item.innerHTML = `<label class="${param_count}">${api_cmd}</label>`;
@@ -441,7 +441,7 @@ export class RPCInspector {
 
                 const query_input = document.querySelector(`.rpc-inspector-header-section[data-rpc-id="${this.rpc_id}"] .rpc_query`) as HTMLDivElement;
 
-                if(template === "") {
+                if (template === "") {
                     query_input.innerHTML = `{${api_cmd_required}}`; // req without params
                     // might as well excute without having to click send
                     this.send_rpc_query();
@@ -457,7 +457,7 @@ export class RPCInspector {
         const all_view_btns = document.querySelectorAll('.rpc-selector-container > button');
         all_view_btns.forEach((btn) => {
             const btn_rpc_id = btn.getAttribute("data-rpc-id");
-            if(btn_rpc_id !== inspector.rpc_id) {
+            if (btn_rpc_id !== inspector.rpc_id) {
                 btn.removeAttribute("disabled");
                 btn.classList.remove("selected");
                 btn.classList.add("knockout");
@@ -469,7 +469,7 @@ export class RPCInspector {
                 });
             }
 
-            if(btn_rpc_id === inspector.rpc_id ) {
+            if (btn_rpc_id === inspector.rpc_id) {
                 btn.setAttribute("disabled", "");
                 btn.classList.add("selected");
                 btn.classList.remove("knockout");
@@ -477,29 +477,29 @@ export class RPCInspector {
                 // show UI elements for this rpc_id
                 const inspector_elems = document.querySelectorAll(`div[data-rpc-id="${btn_rpc_id}"]`) as NodeListOf<HTMLElement>;
                 inspector_elems.forEach((inspector_elem) => {
-                    if(!inspector_elem.classList.contains("rpc_api_list")) {
+                    if (!inspector_elem.classList.contains("rpc_api_list")) {
                         inspector_elem.style.display = "block";
                     }
                 });
 
                 const command_mode_elems: string[] = ["rpc_api_list"];
-                switch(inspector.ui_mode) {
+                switch (inspector.ui_mode) {
                     case COMMAND_MODE:
                         inspector.ui_command_mode();
                         break;
 
-                        default:
-                            break;
+                    default:
+                        break;
 
                 }
             }
         });
     }
 
-     private ui_command_mode() {
+    private ui_command_mode() {
         const rpc_api_list: HTMLDivElement | null = document.querySelector(`.rpc_api_list[data-rpc-id="${this.rpc_id}"]`);
 
-        if(rpc_api_list !== null) {
+        if (rpc_api_list !== null) {
             rpc_api_list.style.display = "block";
         }
 
@@ -511,9 +511,9 @@ export class RPCInspector {
         line.classList.add(`${message_type}-msg`, "log-msg");
         line.innerHTML = `<date>[${new Date().toLocaleTimeString()}]</date> <json>${msg}</json>`;
 
-        if(message_type === ResponseMessage) {
+        if (message_type === ResponseMessage) {
             const json_data = line.querySelector('data') as HTMLElement;
-            if(json_data !== null) {
+            if (json_data !== null) {
                 try {
                     const parsed_json = JSON.parse(json_data.textContent || "");
                     json_data.textContent = JSON.stringify(parsed_json, null, 2);
@@ -525,7 +525,7 @@ export class RPCInspector {
 
         this.rpc_response_out.appendChild(line);
 
-        if(this.btn_log_history.getAttribute("data-toggle") === "on") {
+        if (this.btn_log_history.getAttribute("data-toggle") === "on") {
             this.show_all_log_items();
         } else {
             this.show_last_request_and_response()
@@ -548,7 +548,7 @@ export class RPCInspector {
 
 
         const last_request_item = this.rpc_response_out.querySelectorAll('.request-msg');
-        if(last_request_item.length > 0) {
+        if (last_request_item.length > 0) {
             last_request_item[last_request_item.length - 1].classList.add('last-request-msg');
             last_request_item[last_request_item.length - 1].classList.remove('hidden');
         }

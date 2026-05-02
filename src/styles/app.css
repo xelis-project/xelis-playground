@@ -1519,7 +1519,7 @@ button[data-toggle='off']:hover:not(:disabled) {
     width: stretch;
     margin-left: -0.75rem;
     margin-right: -0.75rem;
-    top: 5px;
+    top: 3px;
 }
 
 .dropdown.menu-centered .dropdown-content .menu-option {
