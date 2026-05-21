@@ -28,7 +28,6 @@ use xelis_common::{
     contract::{
         ChainState,
         ContractMetadata,
-        ContractProviderWrapper,
         ContractVersion,
         ExecutionsChanges,
         ExecutionsManager,
@@ -897,7 +896,7 @@ impl Silex {
                 }).map_err(|e| format!("Error while adding module: {}", e))?;
 
                 let context = vm.context_mut();
-                context.insert(ContractProviderWrapper(&mut storage));
+                context.insert_ref(&storage);
                 context.insert_mut(&mut chain_state);
 
                 if let Some(max_gas) = max_gas {

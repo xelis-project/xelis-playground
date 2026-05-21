@@ -7,7 +7,7 @@ use xelis_common::{
     contract::{ContractModule, ContractProvider, ContractStorage},
     crypto::{Hash, PublicKey}
 };
-use xelis_vm::ValueCell;
+use xelis_vm::{ValueCell, tid};
 use async_trait::async_trait;
 
 pub struct MockStorage {
@@ -15,6 +15,8 @@ pub struct MockStorage {
     pub balances: HashMap<Hash, HashMap<Hash, u64>>,
     pub assets: HashMap<Hash, (AssetData, u64)>,
 }
+
+tid!(MockStorage);
 
 #[async_trait]
 impl ContractStorage for MockStorage {
@@ -35,7 +37,7 @@ impl ContractStorage for MockStorage {
 }
 
 #[async_trait]
-impl ContractProvider for MockStorage {
+impl<'a> ContractProvider<'a> for MockStorage {
     async fn get_contract_balance_for_asset(&self, contract: &Hash, asset: &Hash, topoheight: TopoHeight) -> Result<Option<(TopoHeight, u64)>, anyhow::Error> {
         let balance = self.balances
             .get(contract)
