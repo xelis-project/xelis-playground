@@ -329,7 +329,8 @@ export class RPCInspector {
             this.log(`<error><b>Error</b>: Client not connected to a source. Please connect first.</error>`);
             return;
         }
-        this.rpc_query = this.rpc_query_input.textContent;
+
+      	this.rpc_query = this.rpc_query_input.textContent.replaceAll("\u00a0", "");
 
         try {
             let parsed_query = JSON.parse(this.rpc_query);
