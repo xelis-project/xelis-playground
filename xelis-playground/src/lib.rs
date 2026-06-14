@@ -420,7 +420,7 @@ impl Silex {
                 .collect(),
             logs_receiver: receiver,
             is_running: AtomicBool::new(false),
-            selected_version: ContractVersion::V0,
+            selected_version: ContractVersion::V1,
         }
     }
 
@@ -841,7 +841,7 @@ impl Silex {
 
             // TODO: configurable
             let header = BlockHeader::new(
-                BlockVersion::V0,
+                BlockVersion::V6,
                 0,
                 0,
                 Immutable::Owned(Default::default()),
@@ -854,7 +854,7 @@ impl Silex {
                 contract_executor: zero_hash.clone(),
                 contract_caller: None,
                 deposits: deposits.clone(),
-                contract_version: ContractVersion::V0,
+                contract_version: selected_version,
             };
             let global_modules = HashMap::new();
 
