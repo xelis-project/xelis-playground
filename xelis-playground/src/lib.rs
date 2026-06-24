@@ -656,45 +656,211 @@ impl Silex {
         funcs
     }
 
-    fn parse_str_to_number<T: std::str::FromStr>(value: Option<String>) -> Result<T, JsValue> {
+    fn parse_str_to_number<T: std::str::FromStr>(value: &str) -> Result<T, JsValue> {
         value
-            .ok_or_else(|| JsValue::from_str("Expected a string value"))?
+            .trim()
             .parse::<T>()
             .map_err(|_| JsValue::from_str("Failed to parse the value as a number"))
     }
 
-    fn parse_js_value_to_val(value: JsValue, param: &Type) -> Result<Primitive, JsValue> {
+    fn js_value_to_string(value: JsValue) -> Result<String, JsValue> {
+        if let Some(value) = value.as_string() {
+            return Ok(value);
+        }
+
+        if let Some(value) = value.as_bool() {
+            return Ok(value.to_string());
+        }
+
+        if let Some(value) = value.as_f64() {
+            return Ok(value.to_string());
+        }
+
+        Err(JsValue::from_str("Expected a string-compatible value"))
+    }
+
+    fn parse_string_literal(value: &str) -> String {
+        let trimmed = value.trim();
+        let Some(quote) = trimmed.chars().next() else {
+            return String::new();
+        };
+
+        if !matches!(quote, '"' | '\'') || !trimmed.ends_with(quote) || trimmed.len() < 2 {
+            return value.to_owned();
+        }
+
+        let inner = &trimmed[quote.len_utf8()..trimmed.len() - quote.len_utf8()];
+        let mut output = String::with_capacity(inner.len());
+        let mut chars = inner.chars();
+
+        while let Some(ch) = chars.next() {
+            if ch != '\\' {
+                output.push(ch);
+                continue;
+            }
+
+            match chars.next() {
+                Some('n') => output.push('\n'),
+                Some('r') => output.push('\r'),
+                Some('t') => output.push('\t'),
+                Some('\\') => output.push('\\'),
+                Some('"') => output.push('"'),
+                Some('\'') => output.push('\''),
+                Some(other) => output.push(other),
+                None => output.push('\\'),
+            }
+        }
+
+        output
+    }
+
+    fn strip_wrapping<'a>(
+        value: &'a str,
+        open: char,
+        close: char,
+        expected: &str,
+    ) -> Result<&'a str, JsValue> {
+        let value = value.trim();
+        if !value.starts_with(open) || !value.ends_with(close) {
+            return Err(JsValue::from_str(&format!(
+                "Expected {} value wrapped in {}{}",
+                expected, open, close
+            )));
+        }
+
+        Ok(&value[open.len_utf8()..value.len() - close.len_utf8()])
+    }
+
+    fn find_top_level_delimiter(value: &str, delimiter: char) -> Result<Option<usize>, JsValue> {
+        let mut stack = Vec::new();
+        let mut quote = None;
+        let mut escaped = false;
+
+        for (index, ch) in value.char_indices() {
+            if let Some(active_quote) = quote {
+                if escaped {
+                    escaped = false;
+                } else if ch == '\\' {
+                    escaped = true;
+                } else if ch == active_quote {
+                    quote = None;
+                }
+                continue;
+            }
+
+            match ch {
+                '"' | '\'' => quote = Some(ch),
+                '[' => stack.push(']'),
+                '{' => stack.push('}'),
+                '(' => stack.push(')'),
+                ']' | '}' | ')' => {
+                    if stack.pop() != Some(ch) {
+                        return Err(JsValue::from_str(
+                            "Mismatched delimiters in parameter value",
+                        ));
+                    }
+                }
+                _ if ch == delimiter && stack.is_empty() => return Ok(Some(index)),
+                _ => {}
+            }
+        }
+
+        if quote.is_some() || !stack.is_empty() {
+            return Err(JsValue::from_str("Unclosed delimiter in parameter value"));
+        }
+
+        Ok(None)
+    }
+
+    fn split_top_level(value: &str, delimiter: char) -> Result<Vec<&str>, JsValue> {
+        let value = value.trim();
+        if value.is_empty() {
+            return Ok(Vec::new());
+        }
+
+        let mut parts = Vec::new();
+        let mut start = 0;
+        let mut stack = Vec::new();
+        let mut quote = None;
+        let mut escaped = false;
+
+        for (index, ch) in value.char_indices() {
+            if let Some(active_quote) = quote {
+                if escaped {
+                    escaped = false;
+                } else if ch == '\\' {
+                    escaped = true;
+                } else if ch == active_quote {
+                    quote = None;
+                }
+                continue;
+            }
+
+            match ch {
+                '"' | '\'' => quote = Some(ch),
+                '[' => stack.push(']'),
+                '{' => stack.push('}'),
+                '(' => stack.push(')'),
+                ']' | '}' | ')' => {
+                    if stack.pop() != Some(ch) {
+                        return Err(JsValue::from_str(
+                            "Mismatched delimiters in parameter value",
+                        ));
+                    }
+                }
+                _ if ch == delimiter && stack.is_empty() => {
+                    let part = value[start..index].trim();
+                    if part.is_empty() {
+                        return Err(JsValue::from_str("Empty item in parameter value"));
+                    }
+
+                    parts.push(part);
+                    start = index + ch.len_utf8();
+                }
+                _ => {}
+            }
+        }
+
+        if quote.is_some() || !stack.is_empty() {
+            return Err(JsValue::from_str("Unclosed delimiter in parameter value"));
+        }
+
+        let part = value[start..].trim();
+        if part.is_empty() {
+            return Err(JsValue::from_str("Empty trailing item in parameter value"));
+        }
+
+        parts.push(part);
+        Ok(parts)
+    }
+
+    fn parse_text_to_primitive(value: &str, param: &Type) -> Result<Primitive, JsValue> {
         Ok(match param {
-            Type::U8 => Primitive::U8(Self::parse_str_to_number(value.as_string())?),
-            Type::U16 => Primitive::U16(Self::parse_str_to_number(value.as_string())?),
-            Type::U32 => Primitive::U32(Self::parse_str_to_number(value.as_string())?),
-            Type::U64 => Primitive::U64(Self::parse_str_to_number(value.as_string())?),
-            Type::U128 => Primitive::U128(Self::parse_str_to_number(value.as_string())?),
-            Type::U256 => Primitive::U256(Self::parse_str_to_number(value.as_string())?),
-            Type::String => Primitive::String(
-                value
-                    .as_string()
-                    .ok_or_else(|| JsValue::from_str("Expected a string value"))?,
-            ),
+            Type::U8 => Primitive::U8(Self::parse_str_to_number(value)?),
+            Type::U16 => Primitive::U16(Self::parse_str_to_number(value)?),
+            Type::U32 => Primitive::U32(Self::parse_str_to_number(value)?),
+            Type::U64 => Primitive::U64(Self::parse_str_to_number(value)?),
+            Type::U128 => Primitive::U128(Self::parse_str_to_number(value)?),
+            Type::U256 => Primitive::U256(Self::parse_str_to_number(value)?),
+            Type::String => Primitive::String(Self::parse_string_literal(value)),
             Type::Bool => Primitive::Boolean(
                 value
-                    .as_string()
-                    .ok_or_else(|| JsValue::from_str("Expected a string value"))?
+                    .trim()
                     .parse::<bool>()
                     .map_err(|_| JsValue::from_str("Failed to parse as bool value"))?,
             ),
             Type::Range(inner) => {
-                let value = value.as_string().ok_or_else(|| JsValue::from_str("Expected a string value"))?;
                 let parts: Vec<&str> = value.split("..").collect();
                 if parts.len() != 2 {
                     return Err(JsValue::from_str("Invalid range format"));
                 }
 
-                let start = Self::parse_js_value_to_val(JsValue::from_str(parts[0]), inner)?;
-                let end = Self::parse_js_value_to_val(JsValue::from_str(parts[1]), inner)?;
+                let start = Self::parse_text_to_primitive(parts[0], inner)?;
+                let end = Self::parse_text_to_primitive(parts[1], inner)?;
 
                 Primitive::Range(Box::new((start, end)))
-            },
+            }
+            Type::Function(_) => Primitive::U16(Self::parse_str_to_number(value)?),
             _ => {
                 return Err(JsValue::from_str(&format!(
                     "Unsupported parameter type parsing: {}",
@@ -704,50 +870,292 @@ impl Silex {
         })
     }
 
-    fn parse_js_value_to_const(&self, value: JsValue, param: &Type) -> Result<ValueCell, JsValue> {
+    fn parse_record_fields(
+        &self,
+        value: &str,
+        fields: &[(Cow<'static, str>, Type)],
+        owner: &str,
+    ) -> Result<Vec<ValueCell>, JsValue> {
+        let parts = Self::split_top_level(value, ',')?;
+        if parts.len() != fields.len() {
+            return Err(JsValue::from_str(&format!(
+                "Invalid field count for {}: expected {}, got {}",
+                owner,
+                fields.len(),
+                parts.len()
+            )));
+        }
+
+        parts
+            .into_iter()
+            .zip(fields.iter())
+            .map(|(part, (field_name, field_type))| {
+                let value = if let Some(index) = Self::find_top_level_delimiter(part, ':')? {
+                    let name = part[..index].trim();
+                    if name != field_name.as_ref() {
+                        return Err(JsValue::from_str(&format!(
+                            "Invalid field name for {}: expected `{}`, got `{}`",
+                            owner, field_name, name
+                        )));
+                    }
+
+                    &part[index + ':'.len_utf8()..]
+                } else {
+                    part
+                };
+
+                self.parse_text_to_const(value.trim(), field_type)
+            })
+            .collect()
+    }
+
+    fn parse_array_text(&self, value: &str, inner: &Type) -> Result<ValueCell, JsValue> {
+        let value = Self::strip_wrapping(value, '[', ']', "array")?;
+        let values = Self::split_top_level(value, ',')?
+            .into_iter()
+            .map(|part| self.parse_text_to_const(part, inner).map(Into::into))
+            .collect::<Result<Vec<_>, _>>()?;
+
+        Ok(ValueCell::Object(values))
+    }
+
+    fn parse_tuple_text(&self, value: &str, types: &[Type]) -> Result<ValueCell, JsValue> {
+        let value = value.trim();
+        let value = if value.starts_with('(') {
+            Self::strip_wrapping(value, '(', ')', "tuple")?
+        } else {
+            Self::strip_wrapping(value, '[', ']', "tuple")?
+        };
+
+        let parts = Self::split_top_level(value, ',')?;
+        if parts.len() != types.len() {
+            return Err(JsValue::from_str(&format!(
+                "Invalid tuple item count: expected {}, got {}",
+                types.len(),
+                parts.len()
+            )));
+        }
+
+        let values = parts
+            .into_iter()
+            .zip(types.iter())
+            .map(|(part, ty)| self.parse_text_to_const(part, ty).map(Into::into))
+            .collect::<Result<Vec<_>, _>>()?;
+
+        Ok(ValueCell::Object(values))
+    }
+
+    fn parse_map_text(
+        &self,
+        value: &str,
+        key_type: &Type,
+        value_type: &Type,
+    ) -> Result<ValueCell, JsValue> {
+        let value = Self::strip_wrapping(value, '{', '}', "map")?;
+        let mut map = IndexMap::new();
+
+        for part in Self::split_top_level(value, ',')? {
+            let index = Self::find_top_level_delimiter(part, ':')?
+                .ok_or_else(|| JsValue::from_str("Expected `key: value` map entry"))?;
+            let key = self.parse_text_to_const(part[..index].trim(), key_type)?;
+            let value =
+                self.parse_text_to_const(part[index + ':'.len_utf8()..].trim(), value_type)?;
+
+            map.insert(key, value.into());
+        }
+
+        Ok(ValueCell::Map(Box::new(map)))
+    }
+
+    fn parse_struct_text(
+        &self,
+        value: &str,
+        ty: &xelis_types::StructType,
+    ) -> Result<ValueCell, JsValue> {
+        let value = Self::strip_wrapping(value, '{', '}', ty.name())?;
+        let values = self
+            .parse_record_fields(value, ty.fields(), ty.name())?
+            .into_iter()
+            .map(Into::into)
+            .collect();
+
+        Ok(ValueCell::Object(values))
+    }
+
+    fn parse_enum_text(
+        &self,
+        value: &str,
+        ty: &xelis_types::EnumType,
+    ) -> Result<ValueCell, JsValue> {
+        let value = value.trim();
+        let value = value
+            .rsplit_once("::")
+            .map(|(_, variant)| variant)
+            .unwrap_or(value);
+
+        let payload_start = value
+            .char_indices()
+            .find(|(_, ch)| matches!(ch, '{' | '('))
+            .map(|(index, ch)| (index, ch));
+
+        let (variant_name, payload) = match payload_start {
+            Some((index, open)) => {
+                let close = if open == '{' { '}' } else { ')' };
+                let payload = Self::strip_wrapping(&value[index..], open, close, "enum variant")?;
+                (value[..index].trim(), Some(payload))
+            }
+            None => (value.trim(), None),
+        };
+
+        let (variant_id, (_, variant)) = ty
+            .variants()
+            .iter()
+            .enumerate()
+            .find(|(_, (name, _))| name.as_ref() == variant_name)
+            .ok_or_else(|| {
+                JsValue::from_str(&format!(
+                    "Unknown enum variant `{}` for {}",
+                    variant_name,
+                    ty.name()
+                ))
+            })?;
+
+        let variant_id = u8::try_from(variant_id)
+            .map_err(|_| JsValue::from_str("Enum variant id exceeds u8"))?;
+
+        let mut values = vec![Primitive::U8(variant_id).into()];
+        if variant.fields().is_empty() {
+            if payload
+                .map(|value| !value.trim().is_empty())
+                .unwrap_or(false)
+            {
+                return Err(JsValue::from_str(&format!(
+                    "Enum variant `{}` does not accept fields",
+                    variant_name
+                )));
+            }
+
+            return Ok(ValueCell::Object(values));
+        }
+
+        let payload = payload.ok_or_else(|| {
+            JsValue::from_str(&format!("Enum variant `{}` requires fields", variant_name))
+        })?;
+
+        values.extend(
+            self.parse_record_fields(payload, variant.fields(), variant_name)?
+                .into_iter()
+                .map(Into::into),
+        );
+
+        Ok(ValueCell::Object(values))
+    }
+
+    fn parse_untyped_text(&self, value: &str) -> Result<ValueCell, JsValue> {
+        let trimmed = value.trim();
+        if trimmed.eq_ignore_ascii_case("null") || trimmed.is_empty() {
+            return Ok(Primitive::Null.into());
+        }
+
+        if trimmed.eq_ignore_ascii_case("true") || trimmed.eq_ignore_ascii_case("false") {
+            return Ok(Primitive::Boolean(trimmed.parse::<bool>().unwrap()).into());
+        }
+
+        if trimmed.starts_with('[') && trimmed.ends_with(']') {
+            return self.parse_array_text(trimmed, &Type::Any);
+        }
+
+        if trimmed.starts_with('{') && trimmed.ends_with('}') {
+            return self.parse_map_text(trimmed, &Type::Any, &Type::Any);
+        }
+
+        if trimmed.starts_with('"') || trimmed.starts_with('\'') {
+            return Ok(Primitive::String(Self::parse_string_literal(trimmed)).into());
+        }
+
+        if let Ok(value) = trimmed.parse::<u64>() {
+            return Ok(Primitive::U64(value).into());
+        }
+
+        Ok(Primitive::String(value.to_owned()).into())
+    }
+
+    fn parse_text_to_const(&self, value: &str, param: &Type) -> Result<ValueCell, JsValue> {
         Ok(match param {
-            // TODO: support others types
             Type::Optional(ty) => {
-                if value.is_null() || value.is_undefined() || value.as_string().map(|v| v.is_empty()).unwrap_or(false) {
+                let trimmed = value.trim();
+                if trimmed.is_empty() || trimmed.eq_ignore_ascii_case("null") {
                     Primitive::Null.into()
                 } else {
-                    self.parse_js_value_to_const(value, ty)?
+                    self.parse_text_to_const(value, ty)?
                 }
-            },
+            }
+            Type::Voidable(ty) => self.parse_text_to_const(value, ty)?,
             Type::Bytes => {
-                // TODO: support u8 array
-                let value = value.as_string().ok_or_else(|| JsValue::from_str("Expected a string (hex) value"))?;
-                let bytes = hex::decode(value).map_err(|_| JsValue::from_str("Failed to parse as blob (hex) value"))?;
+                let value = Self::parse_string_literal(value);
+                let value = value.strip_prefix("0x").unwrap_or(&value);
+                let bytes = hex::decode(value)
+                    .map_err(|_| JsValue::from_str("Failed to parse as blob (hex) value"))?;
                 ValueCell::Bytes(bytes)
-            },
+            }
             Type::Opaque(ty) => {
                 let environment = &self.environments[&self.selected_version];
-                let name = environment.get_opaque_name(ty)
+                let name = environment
+                    .get_opaque_name(ty)
                     .ok_or_else(|| JsValue::from_str("Failed to get opaque name"))?;
 
                 match name {
                     "Hash" => {
-                        let value = value.as_string().ok_or_else(|| JsValue::from_str("Expected a string value"))?;
-                        let hash = Hash::from_hex(&value).map_err(|_| JsValue::from_str("Failed to parse as hash value"))?;
+                        let value = Self::parse_string_literal(value);
+                        let hash = Hash::from_hex(&value)
+                            .map_err(|_| JsValue::from_str("Failed to parse as hash value"))?;
                         Primitive::Opaque(hash.into()).into()
-                    },
+                    }
                     "Address" => {
-                        let value = value.as_string().ok_or_else(|| JsValue::from_str("Expected a string value"))?;
-                        let address = Address::from_string(&value)
-                            .map_err(|e| JsValue::from_str(&format!("Failed to parse as address value: {}", e)))?;
+                        let value = Self::parse_string_literal(value);
+                        let address = Address::from_string(&value).map_err(|e| {
+                            JsValue::from_str(&format!("Failed to parse as address value: {}", e))
+                        })?;
 
                         Primitive::Opaque(address.into()).into()
-                    },
+                    }
                     "Signature" => {
-                        let value = value.as_string().ok_or_else(|| JsValue::from_str("Expected a string value"))?;
-                        let signature = Signature::from_hex(&value).map_err(|_| JsValue::from_str("Failed to parse as signature value"))?;
+                        let value = Self::parse_string_literal(value);
+                        let signature = Signature::from_hex(&value)
+                            .map_err(|_| JsValue::from_str("Failed to parse as signature value"))?;
                         Primitive::Opaque(signature.into()).into()
                     }
-                    _ => return Err(JsValue::from_str(&format!("Unsupported opaque type parsing: {}", name)))
+                    _ => {
+                        return Err(JsValue::from_str(&format!(
+                            "Unsupported opaque type parsing: {}",
+                            name
+                        )))
+                    }
                 }
-            },
-            _ => ValueCell::Primitive(Self::parse_js_value_to_val(value, param)?)
+            }
+            Type::Array(inner) => self.parse_array_text(value, inner)?,
+            Type::Map(key, value_type) => self.parse_map_text(value, key, value_type)?,
+            Type::Struct(ty) => self.parse_struct_text(value, ty)?,
+            Type::Enum(ty) => self.parse_enum_text(value, ty)?,
+            Type::Tuples(types) => self.parse_tuple_text(value, types)?,
+            Type::Closure(_) => {
+                self.parse_tuple_text(value, &[Type::U16, Type::Bool, Type::U16])?
+            }
+            Type::Any | Type::T(_) => self.parse_untyped_text(value)?,
+            _ => ValueCell::Primitive(Self::parse_text_to_primitive(value, param)?),
         })
+    }
+
+    fn parse_js_value_to_const(&self, value: JsValue, param: &Type) -> Result<ValueCell, JsValue> {
+        if value.is_null() || value.is_undefined() {
+            return match param {
+                Type::Optional(_) => Ok(Primitive::Null.into()),
+                _ => Err(JsValue::from_str("Expected a parameter value")),
+            };
+        }
+
+        let value = Self::js_value_to_string(value)?;
+        self.parse_text_to_const(&value, param)
     }
 
     pub fn js_to_storage_preset(&self, js_value: JsValue) -> Result<StoragePreset, JsValue> {
@@ -1077,7 +1485,10 @@ impl Silex {
 
 #[cfg(test)]
 mod tests {
+    use std::borrow::Cow;
+
     use xelis_common::config::MAX_GAS_USAGE_PER_TX;
+    use xelis_types::{EnumVariant, StructType};
 
     use super::*;
 
@@ -1093,18 +1504,176 @@ mod tests {
         "#;
 
         let silex = Silex::new();
-        let program = silex.compile_internal(code).expect("Failed to compile the program");
+        let program = silex
+            .compile_internal(code)
+            .expect("Failed to compile the program");
         let entries = program.entries();
         let entry = entries.get(0).expect("No entry found");
-        let result = silex.execute_program_internal(
-            program,
-            entry.id() as u16,
-            Some(MAX_GAS_USAGE_PER_TX),
-            IndexMap::new(),
-            vec![Primitive::String("Hello".to_string()).into(), Primitive::String("world".to_string()).into()],
-            vec![],
-            true,
-        ).await.expect("Failed to execute the program");
+        let result = silex
+            .execute_program_internal(
+                program,
+                entry.id() as u16,
+                Some(MAX_GAS_USAGE_PER_TX),
+                IndexMap::new(),
+                vec![
+                    Primitive::String("Hello".to_string()).into(),
+                    Primitive::String("world".to_string()).into(),
+                ],
+                vec![],
+                true,
+            )
+            .await
+            .expect("Failed to execute the program");
+
+        assert_eq!(result.value(), "0");
+    }
+
+    #[test]
+    fn test_parse_string_array_parameter() {
+        let silex = Silex::new();
+        let ty = Type::Array(Box::new(Type::String));
+
+        let value = silex
+            .parse_text_to_const("[hello, world]", &ty)
+            .expect("Failed to parse string array");
+
+        assert_eq!(
+            value,
+            ValueCell::Object(vec![
+                Primitive::String("hello".to_owned()).into(),
+                Primitive::String("world".to_owned()).into(),
+            ])
+        );
+    }
+
+    #[test]
+    fn test_parse_nested_parameter_combinations() {
+        let silex = Silex::new();
+        let ty = Type::Map(
+            Box::new(Type::String),
+            Box::new(Type::Array(Box::new(Type::U64))),
+        );
+
+        let value = silex
+            .parse_text_to_const("{first: [1, 2], second: [3]}", &ty)
+            .expect("Failed to parse nested map/array");
+
+        let ValueCell::Map(map) = value else {
+            panic!("Expected map value");
+        };
+
+        let first_key: ValueCell = Primitive::String("first".to_owned()).into();
+        let first = map.get(&first_key).expect("Missing first key");
+        assert_eq!(
+            first.as_ref(),
+            &ValueCell::Object(vec![Primitive::U64(1).into(), Primitive::U64(2).into(),])
+        );
+
+        let second_key: ValueCell = Primitive::String("second".to_owned()).into();
+        let second = map.get(&second_key).expect("Missing second key");
+        assert_eq!(
+            second.as_ref(),
+            &ValueCell::Object(vec![Primitive::U64(3).into(),])
+        );
+    }
+
+    #[test]
+    fn test_parse_struct_and_enum_parameters() {
+        let silex = Silex::new();
+        let struct_type = StructType::new(
+            1,
+            "Payload",
+            vec![
+                (Cow::Borrowed("names"), Type::Array(Box::new(Type::String))),
+                (Cow::Borrowed("enabled"), Type::Bool),
+            ],
+        );
+
+        let value = silex
+            .parse_text_to_const(
+                "{names: [alice, bob], enabled: true}",
+                &Type::Struct(struct_type),
+            )
+            .expect("Failed to parse struct");
+
+        assert_eq!(
+            value,
+            ValueCell::Object(vec![
+                ValueCell::Object(vec![
+                    Primitive::String("alice".to_owned()).into(),
+                    Primitive::String("bob".to_owned()).into(),
+                ])
+                .into(),
+                Primitive::Boolean(true).into(),
+            ])
+        );
+
+        let enum_type = xelis_types::EnumType::new(
+            2,
+            "Choice",
+            vec![
+                (Cow::Borrowed("None"), EnumVariant::new(Vec::new())),
+                (
+                    Cow::Borrowed("Names"),
+                    EnumVariant::new(vec![(
+                        Cow::Borrowed("values"),
+                        Type::Array(Box::new(Type::String)),
+                    )]),
+                ),
+            ],
+        );
+
+        let value = silex
+            .parse_text_to_const(
+                "Choice::Names{values: [alice, bob]}",
+                &Type::Enum(enum_type),
+            )
+            .expect("Failed to parse enum");
+
+        assert_eq!(
+            value,
+            ValueCell::Object(vec![
+                Primitive::U8(1).into(),
+                ValueCell::Object(vec![
+                    Primitive::String("alice".to_owned()).into(),
+                    Primitive::String("bob".to_owned()).into(),
+                ])
+                .into(),
+            ])
+        );
+    }
+
+    #[tokio::test]
+    async fn test_execute_program_with_string_array_parameter() {
+        let code = r#"
+            entry assert_strings(values: string[]) {
+                assert(values.len() == 2);
+                assert(values[0] == "hello");
+                assert(values[1] == "world");
+                return 0;
+            }
+        "#;
+
+        let silex = Silex::new();
+        let program = silex
+            .compile_internal(code)
+            .expect("Failed to compile the program");
+        let entry = program.entries().get(0).expect("No entry found").clone();
+        let value = silex
+            .parse_text_to_const("[hello, world]", &entry.parameters[0].ty)
+            .expect("Failed to parse entry parameter");
+        let result = silex
+            .execute_program_internal(
+                program,
+                entry.id() as u16,
+                Some(MAX_GAS_USAGE_PER_TX),
+                IndexMap::new(),
+                vec![value],
+                vec![],
+                true,
+            )
+            .await
+            .expect("Failed to execute the program");
 
         assert_eq!(result.value(), "0");
     }
