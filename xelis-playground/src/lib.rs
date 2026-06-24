@@ -313,6 +313,7 @@ pub struct Func {
     params: Vec<String>,
     syscall_id: u16,
     cost: u64,
+    comment: Option<String>,
 }
 
 #[wasm_bindgen]
@@ -344,6 +345,10 @@ impl Func {
     pub fn gas_cost_formatted(&self) -> String {
         format_xelis(self.cost)
     }
+
+    pub fn comment(&self) -> Option<String> {
+        self.comment.clone()
+    }
 }
 
 #[wasm_bindgen]
@@ -351,6 +356,7 @@ pub struct ConstFunc {
     name: String,
     for_type: String,
     params: Vec<String>,
+    comment: Option<String>,
 }
 
 #[wasm_bindgen]
@@ -365,6 +371,10 @@ impl ConstFunc {
 
     pub fn params(&self) -> Vec<String> {
         self.params.clone()
+    }
+
+    pub fn comment(&self) -> Option<String> {
+        self.comment.clone()
     }
 }
 
@@ -570,7 +580,8 @@ impl Silex {
                     return_type: f.return_type.as_ref().map(Type::to_string),
                     params,
                     syscall_id,
-                    cost: f.cost
+                    cost: f.cost,
+                    comment: f.comment.map(str::to_owned),
                 });
             }
         }
@@ -637,6 +648,7 @@ impl Silex {
                     name: name.to_string(),
                     for_type: for_type.to_string(),
                     params,
+                    comment: const_fn.comment.map(str::to_owned),
                 });
             }
         }
