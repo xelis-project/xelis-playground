@@ -7,6 +7,7 @@ export class ModalExport {
   element: HTMLElement;
   btn_export_download: HTMLElement;
   btn_export_copy: HTMLElement;
+  btn_export_share: HTMLElement;
   tab_export_hex: HTMLElement;
   tab_export_bytes: HTMLElement;
   tab_export_json: HTMLElement;
@@ -25,6 +26,7 @@ export class ModalExport {
     this.element = document.getElementById('modal_export') as HTMLElement;
     this.btn_export_download = document.getElementById('btn_export_download') as HTMLElement;
     this.btn_export_copy = document.getElementById('btn_export_copy') as HTMLElement;
+    this.btn_export_share = document.getElementById('btn_export_share') as HTMLElement;
     this.tab_export_hex = document.getElementById('tab_export_hex') as HTMLElement;
     this.tab_export_bytes = document.getElementById('tab_export_bytes') as HTMLElement;
     this.tab_export_json = document.getElementById('tab_export_json') as HTMLElement;
@@ -41,6 +43,7 @@ export class ModalExport {
     this.tab_export_abi.addEventListener('click', () => this.handle_tab_click('abi'));
     this.tab_export_asm.addEventListener('click', () => this.handle_tab_click('asm'));
     this.btn_export_copy.addEventListener('click', () => this.handle_copy_click());
+    this.btn_export_share.addEventListener('click', () => this.handle_share_click());
     this.btn_export_download.addEventListener('click', () => this.handle_download_click());
   }
 
@@ -68,6 +71,34 @@ export class ModalExport {
       a.href = URL.createObjectURL(this.program_blob);
       a.download = this.program_filename || '';
       a.click();
+    }
+  }
+
+  async handle_share_click() {
+    const share_url = this.app.get_share_url();
+
+    if (typeof navigator.share === "function") {
+      try {
+        await navigator.share({
+          title: "Xelis Playground",
+          url: share_url,
+        });
+        return;
+      } catch (e) {
+        if (e instanceof DOMException && e.name === "AbortError") {
+          return;
+        }
+
+        console.error("Failed to share URL:", e);
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(share_url);
+      alert('Share link copied to clipboard.');
+    } catch (e) {
+      console.error("Failed to copy share URL:", e);
+      alert('Unable to copy share link.');
     }
   }
 

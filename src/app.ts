@@ -26,6 +26,8 @@ type EntryCallParam = [string, string];
 type EntryCallParameterList = EntryCallParam[];
 const DATA_TYPE = 0;
 const DATA_TYPE_VALUE = 1;
+const SHARED_CODE_PARAMS = ["code", "b64", "base64"];
+const DEFAULT_CODE = `entry main() {\r\tprintln("Hello, World!");\r\treturn 0;\r}`;
 
 export class App {
     silex: any;
@@ -662,15 +664,100 @@ export class App {
     }
 
     load_save() {
-        let code = localStorage.getItem('code');
+        const shared_code = this.get_shared_code_from_url();
+        const saved_code = localStorage.getItem('code');
+        const should_load_shared_code = shared_code !== null && this.should_overwrite_saved_code(shared_code, saved_code);
+        let code = should_load_shared_code ? shared_code : saved_code;
         if (!code) {
-            code = `entry main() {\r\tprintln("Hello, World!");\r\treturn 0;\r}`;
+            code = DEFAULT_CODE;
         }
 
         this.set_editor_code(code);
 
+        if (should_load_shared_code && shared_code !== null) {
+            localStorage.setItem('code', shared_code);
+            this.output.textContent = "Shared code loaded from URL.\n";
+        } else if (shared_code !== null) {
+            this.output.textContent = "Shared code was not loaded. Existing editor code kept.\n";
+        }
+
         const tabsize = localStorage.getItem('tabsize') || '4';
         this.set_tabsize(tabsize);
+    }
+
+    private should_overwrite_saved_code(shared_code: string, saved_code: string | null): boolean {
+        if (!this.has_saved_editor_work(saved_code) || (saved_code !== null && this.code_matches(saved_code, shared_code))) {
+            return true;
+        }
+
+        return window.confirm("You already have code saved in this browser. Loading this shared code will replace it. Overwrite your current code?");
+    }
+
+    private has_saved_editor_work(saved_code: string | null): boolean {
+        if (saved_code === null) {
+            return false;
+        }
+
+        const normalized_code = this.normalize_code_for_compare(saved_code);
+        return normalized_code !== "" && normalized_code !== this.normalize_code_for_compare(DEFAULT_CODE);
+    }
+
+    private code_matches(left: string, right: string): boolean {
+        return this.normalize_code_for_compare(left) === this.normalize_code_for_compare(right);
+    }
+
+    private normalize_code_for_compare(code: string): string {
+        return code.replace(/\r\n?/g, "\n").trim();
+    }
+
+    private get_shared_code_from_url(): string | null {
+        const encoded_code = this.get_shared_code_param();
+        if (encoded_code === null) {
+            return null;
+        }
+
+        try {
+            return Utils.decodeBase64Url(encoded_code);
+        } catch (e) {
+            console.error("Failed to load shared code:", e);
+            this.output.innerHTML = this.output_error("Failed to load shared code from URL.\n");
+            return null;
+        }
+    }
+
+    private get_shared_code_param(): string | null {
+        const query_code = this.get_shared_code_from_params(new URLSearchParams(window.location.search));
+        if (query_code !== null) {
+            return query_code;
+        }
+
+        const hash = window.location.hash.replace(/^#/, "");
+        if (!hash) {
+            return null;
+        }
+
+        const hash_code = this.get_shared_code_from_params(new URLSearchParams(hash));
+        if (hash_code !== null) {
+            return hash_code;
+        }
+
+        const hash_query_index = hash.indexOf("?");
+        if (hash_query_index === -1) {
+            return null;
+        }
+
+        return this.get_shared_code_from_params(new URLSearchParams(hash.slice(hash_query_index + 1)));
+    }
+
+    private get_shared_code_from_params(params: URLSearchParams): string | null {
+        for (const param of SHARED_CODE_PARAMS) {
+            const value = params.get(param);
+            if (value !== null && value !== "") {
+                return value;
+            }
+        }
+
+        return null;
     }
 
     set_tabsize(tabsize: string) {
@@ -1225,6 +1312,17 @@ export class App {
 
     open_modal_export() {
         this.modal.open(this.modal_export.element);
+    }
+
+    get_share_url() {
+        const url = new URL(window.location.href);
+        for (const param of SHARED_CODE_PARAMS) {
+            url.searchParams.delete(param);
+        }
+        url.searchParams.set(SHARED_CODE_PARAMS[0], Utils.encodeBase64Url(this.editor.getValue()));
+        url.hash = "";
+
+        return url.toString();
     }
 
     get_program() {
