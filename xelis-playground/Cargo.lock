@@ -2273,7 +2273,7 @@ dependencies = [
 [[package]]
 name = "xelis_common"
 version = "1.23.0"
-source = "git+https://github.com/xelis-project/xelis-blockchain?branch=dev#e1067b7590cdd9f5e4048b6c99d0819907a9d4b2"
+source = "git+https://github.com/xelis-project/xelis-blockchain?branch=dev#5de24714540fa59229fb1883f2c5b0abc1c96024"
 dependencies = [
  "anyhow",
  "async-trait",

@@ -914,6 +914,7 @@ export class App {
                                         }
 
                                         case "address":
+                                        case "ciphertext":
                                         case "hash": {
                                             const p_input = param_container.querySelector(`.type-container > textarea`) as HTMLInputElement;
                                             p_input.value = current_call_history_params[j][1];

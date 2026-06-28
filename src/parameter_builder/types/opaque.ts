@@ -23,6 +23,7 @@ export function opaque_type(parameter: Parameter, root_container: HTMLElement) {
     switch (opaque_name.toLowerCase()) {
         case "address":
         case "hash":
+        case "ciphertext":
             // const string_type = {name: DataType.STRING_TYPE.name, type: DataType.STRING_TYPE.name, signature: DataType.STRING_TYPE.name, value: null};
             // const string_tag = ParameterBuilder.create(string_type, opaque_container);
             // content.appendChild(string_tag);
