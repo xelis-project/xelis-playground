@@ -21,6 +21,7 @@ use xelis_assembler::Disassembler;
 use xelis_builder::{Builder, EnvironmentBuilder};
 use xelis_bytecode::Module;
 use xelis_common::{
+    account::CiphertextCache,
     asset::{AssetData, AssetOwner, MaxSupplyMode},
     block::{Block, BlockHeader, BlockVersion},
     config::{COIN_VALUE, MAXIMUM_SUPPLY, XELIS_ASSET},
@@ -52,8 +53,7 @@ use xelis_common::{
         Transaction,
         TransactionType,
         TxVersion
-    },
-    utils::format_xelis
+    }, utils::format_xelis
 };
 use xelis_compiler::Compiler;
 use xelis_lexer::Lexer;
@@ -1110,6 +1110,12 @@ impl Silex {
                         let hash = Hash::from_hex(&value)
                             .map_err(|_| JsValue::from_str("Failed to parse as hash value"))?;
                         Primitive::Opaque(hash.into()).into()
+                    }
+                    "Ciphertext" => {
+                        let value = Self::parse_string_literal(value);
+                        let ciphertext = CiphertextCache::from_hex(&value)
+                            .map_err(|_| JsValue::from_str("Failed to parse as ciphertext value"))?;
+                        Primitive::Opaque(ciphertext.into()).into()
                     }
                     "Address" => {
                         let value = Self::parse_string_literal(value);
