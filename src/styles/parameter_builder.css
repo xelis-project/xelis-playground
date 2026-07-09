@@ -2,20 +2,26 @@
 /** background #030c134a **/
 /** background #0b26354a **/
 
-pre, pre *
-, .code
-, .pb-arguments-container > pre *
-, textarea, input, select, option, #output_container
-, #signature-container > parameter *
-, #export_program_value
-{
+pre,
+pre *,
+.code,
+.pb-arguments-container>pre *,
+textarea,
+input,
+select,
+option,
+#output_container,
+#signature-container>parameter *,
+#export_program_value {
     font-family: 'Source Code Pro', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace !important;
 }
 
-pre:not(.input_editor > pre), .code {
+pre:not(.input_editor > pre),
+.code {
     /* padding: 5px; */
     margin: 0;
-    color: #299def; /* rgb(187, 225, 255);*/
+    color: #299def;
+    /* rgb(187, 225, 255);*/
     /* font-size: small; */
     display: inline;
     white-space: pre-wrap;
@@ -26,9 +32,17 @@ pre:not(.input_editor > pre), .code {
     color: #94dfff;
 }
 
-body, #modal_parameter_builder *, #parameter-display *
-, .controls, .btn, .opt-btn, #screen_right > .controls .title, #screen_right > #program-spec > #entry-controls *:not(pre *)
-, #screen_right > #program-spec > #entry-controls *:not(input), h2.title1, .title {
+body,
+#modal_parameter_builder *,
+#parameter-display *,
+.controls,
+.btn,
+.opt-btn,
+#screen_right>.controls .title,
+#screen_right>#program-spec>#entry-controls *:not(pre *),
+#screen_right>#program-spec>#entry-controls *:not(input),
+h2.title1,
+.title {
     font-family: "Michroma", "Nimbus-ExtLight", sans-serif;
 }
 
@@ -37,7 +51,8 @@ body, #modal_parameter_builder *, #parameter-display *
 }
 
 .modal-content:has(.parameter-builder-container) {
-    background-color: #030c134a; /* #071A27; /*#12364D; /*#0A2B41*/
+    background-color: #030c134a;
+    /* #071A27; /*#12364D; /*#0A2B41*/
     color: #00dbff;
 }
 
@@ -51,7 +66,8 @@ body, #modal_parameter_builder *, #parameter-display *
 
 h2 {
     font-size: 1.0rem;
-    /* color: #2c454e; */ /* #bbe1ff;*/
+    /* color: #2c454e; */
+    /* #bbe1ff;*/
     /*color: #137579;*/
     color: #6bccf9;
 }
@@ -93,7 +109,7 @@ h2 {
     alignment-baseline: baseline;
 }
 
-.parameter-header > span {
+.parameter-header>span {
     margin-left: 10px;
     color: #a8ebf9;
     font-weight: lighter;
@@ -114,14 +130,20 @@ h2 {
     margin: 0 0 15px 0;
 }
 
-textarea, input, select, option {
+textarea,
+input,
+select,
+option {
     color: rgb(187, 225, 255);
     font-size: 0.9rem;
     border: 1px solid #00dbff40;
     background-color: #00000036;
 }
 
-input:focus, textarea:focus, select:focus, option:focus {
+input:focus,
+textarea:focus,
+select:focus,
+option:focus {
     border: 1px solid #00dbffb0 !important;
     outline: none;
 }
@@ -136,16 +158,18 @@ textarea {
     box-sizing: border-box;
 }
 
-input, select, option {
+input,
+select,
+option {
     padding: 4px;
     margin-bottom: 4px;
 }
 
 input[type="number"]::-webkit-outer-spin-button,
- input[type="number"]::-webkit-inner-spin-button {
-     -webkit-appearance: none;
-     margin: 0;
- }
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
 
 input[type="number"] {
     -moz-appearance: textfield;
@@ -166,7 +190,9 @@ input[type="number"] {
 
 /** main buttons **/
 /* overrides */
-.controls, .btn, .select-selected {
+.controls,
+.btn,
+.select-selected {
     text-transform: uppercase;
     font-size: 0.6rem;
 }
@@ -249,7 +275,8 @@ input[type="number"] {
     border: solid 1px #114C34;
 }
 
-.clean, .clean:hover{
+.clean,
+.clean:hover {
     border: none;
     background: none !important;
 }
@@ -286,6 +313,7 @@ input[type="number"] {
 .mini-btn {
     font-size: 0.5rem;
 }
+
 /* end main buttons */
 
 .controls {
@@ -302,7 +330,7 @@ input[type="number"] {
     gap: 0.25em;
 }
 
-.pb-arg-btns > div {
+.pb-arg-btns>div {
     display: flex;
     gap: 0.25em;
     flex-wrap: wrap;
@@ -313,7 +341,7 @@ input[type="number"] {
     font-size: 0.65rem;
 }
 
-.array-container + .opt-btn {
+.array-container+.opt-btn {
     margin: 15px 0 0;
 }
 
@@ -336,28 +364,31 @@ input[type="number"] {
     font-size: 1rem;
 }
 
-.array-container .array-item-container:not(:last-of-type) .input-container.type-container.simple-type > input {
+.array-container .array-item-container:not(:last-of-type) .input-container.type-container.simple-type>input {
     border-bottom: 0;
 }
 
-.array-item-container > .input-container {
+.array-item-container>.input-container {
     display: inline;
 }
 
-.array-item-container > .map-container {
+.array-item-container>.map-container {
     display: inline-grid;
 }
 
-#arguments-container, .pb-arguments-container {
+#arguments-container,
+.pb-arguments-container {
     padding: 15px;
     margin: 0 0 1rem 0;
     font-size: 0.8rem;
     border: 1px solid #299def;
     color: #299def;
-    width: auto; /* Make it span the full viewport width */
+    width: auto;
+    /* Make it span the full viewport width */
     min-height: 50px;
     /* You might want to add a background color or border for visibility */
-    background-color: #041018; /* #030c13; /* Example */
+    background-color: #041018;
+    /* #030c13; /* Example */
     border-top: 16px solid;
     overflow: auto;
 }
@@ -367,7 +398,7 @@ input[type="number"] {
     display: block;
 }
 
-#parameter-display > div.pb-arguments-container.readonly {
+#parameter-display>div.pb-arguments-container.readonly {
     position: unset;
     width: auto;
     margin: auto;
@@ -385,7 +416,7 @@ div.pb-arguments-container.readonly {
 }
 
 .pb-arguments-container pre * {
-    display: inline!important;
+    display: inline !important;
 }
 
 .pb-arguments-container opaque * {
@@ -407,7 +438,13 @@ string {
     color: #2fdcb0;
 }
 
-u8, u16, u32, u64, u128, u256, u512 {
+u8,
+u16,
+u32,
+u64,
+u128,
+u256,
+u512 {
     color: #ffc35d;
 }
 
@@ -453,21 +490,24 @@ input[type=number]::-webkit-outer-spin-button {
     border: none;
 }
 
-.stats > span {
+.stats>span {
     color: #00ffac;
     font-size: 1rem;
     text-transform: uppercase;
 }
 
-.hud label, .parameter-sel-container label, div.pb-arguments-container.readonly > label {
+.hud label,
+.parameter-sel-container label,
+div.pb-arguments-container.readonly>label {
     text-transform: uppercase;
     display: block;
     font-size: 0.6rem;
     margin-bottom: 0.35em;
     color: #00ffebb5 !important;
 }
+
 /* pb readonly display */
-div.pb-arguments-container.readonly > pre {
+div.pb-arguments-container.readonly>pre {
     display: flex;
     padding: 0;
     line-height: 2rem;
@@ -491,7 +531,7 @@ div.pb-arguments-container.readonly > pre {
     flex-shrink: 0;
 }
 
-#parameter_builder_container .pb-input-scrollbox  {
+#parameter_builder_container .pb-input-scrollbox {
     display: flex;
     flex-grow: 1;
     flex-direction: column;
@@ -508,7 +548,7 @@ div.pb-arguments-container.readonly > pre {
 }
 
 #parameter_builder_container .po-selection {
-  margin-top: 1rem;
+    margin-top: 1rem;
 }
 
 #entry-call-container {
@@ -522,11 +562,12 @@ div.pb-arguments-container.readonly > pre {
     gap: 20px;
     border: none;
 }
-#entry-controls > .hud {
+
+#entry-controls>.hud {
     margin-bottom: 0;
 }
 
-#entry-controls > .options-container {
+#entry-controls>.options-container {
     /*border: 1px solid #41607c;*/
     border: thin solid #7afad34a;
     white-space: nowrap;
@@ -539,24 +580,24 @@ div.pb-arguments-container.readonly > pre {
     margin-bottom: 10px;
 }
 
-#signature-container > parameter label {
+#signature-container>parameter label {
     font-weight: bold;
 }
 
-#signature-container > parameter:first-child::after {
+#signature-container>parameter:first-child::after {
     content: ', ';
 }
 
-#signature-container > parameter::after {
+#signature-container>parameter::after {
     content: ', ';
     margin-right: 0.4rem;
 }
 
-#signature-container > parameter:last-child::after {
+#signature-container>parameter:last-child::after {
     content: '';
 }
 
-#signature-container > parameter signature {
+#signature-container>parameter signature {
     font-size: 1rem;
     color: #d4bdff;
 }
@@ -573,9 +614,12 @@ div.pb-arguments-container.readonly > pre {
     text-transform: unset;
 }
 
-#pb-ui-params-stat{
+#pb-ui-params-stat {
     text-align: center;
 }
 
 /** index.css overrides **/
 
+.invalid-data {
+    color: rgb(255, 115, 76);
+}

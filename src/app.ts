@@ -913,6 +913,7 @@ export class App {
                                             break;
                                         }
 
+                                        case "bytes":
                                         case "address":
                                         case "hash": {
                                             const p_input = param_container.querySelector(`.type-container > textarea`) as HTMLInputElement;

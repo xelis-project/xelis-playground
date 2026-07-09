@@ -7,6 +7,7 @@ export class DataType {
     static BOOL_TYPE = Object.freeze({ name: "boolean", schema_keys: [] });
     static CHAR_TYPE = Object.freeze({ name: "char", schema_keys: [] });
     static STRING_TYPE = Object.freeze({ name: "string", schema_keys: [] });
+    static BYTES_TYPE = Object.freeze({ name: "bytes", schema_keys: [] });
     static ARRAY_TYPE = Object.freeze({ name: "array", schema_keys: ["item"] });
     static ENUM_TYPE = Object.freeze({ name: "enum", schema_keys: ["variants"] });
     static MAP_TYPE = Object.freeze({ name: "map", schema_keys: ["key", "value"] });

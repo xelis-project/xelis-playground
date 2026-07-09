@@ -8,6 +8,7 @@ import { enum_type } from "./types/enum";
 import { boolean_type } from "./types/boolean";
 import { DataType } from "./data_type";
 import { Parameter } from "./xvm_param_parser";
+import { bytes_type } from "./types/bytes";
 
 interface ParameterBuilderOptions {
     pb_container: HTMLElement;
@@ -27,6 +28,8 @@ export class ParameterBuilder {
                 return struct_type(parameter, root_container);
             case DataType.OPAQUE_TYPE.name.toLowerCase():
                 return opaque_type(parameter, root_container);
+            case DataType.BYTES_TYPE.name.toLowerCase():
+                return bytes_type(parameter, root_container);
             case DataType.BOOL_TYPE.name.toLowerCase():
             case "bool":  // TODO: alias?
                 return boolean_type(parameter, root_container);
@@ -67,7 +70,7 @@ export class ParameterBuilder {
             const arg_build = ParameterBuilder.create(p, param_container);
             arg_wrapper.appendChild(arg_build);
             /* when we get input changes, we report it so that any additional argument displays can be updated */
-            document.addEventListener('pb-input-did-change', (e) => {
+            document.addEventListener('pb-input-did-change', () => {
                 const pba_did_change_event = new CustomEvent("pb-argument-did-change", {
                     detail: {
                         arg_container: arg_container,
