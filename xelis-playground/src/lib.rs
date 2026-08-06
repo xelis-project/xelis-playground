@@ -25,7 +25,7 @@ use xelis_common::{
     asset::{AssetData, AssetOwner, MaxSupplyMode},
     block::{Block, BlockHeader, BlockVersion},
     config::{COIN_VALUE, MAXIMUM_SUPPLY, XELIS_ASSET},
-    context::NoOpBuildHasher,
+    context::{Context, NoOpBuildHasher},
     contract::{
         ChainState,
         ContractMetadata,
@@ -53,7 +53,9 @@ use xelis_common::{
         Transaction,
         TransactionType,
         TxVersion
-    }, utils::format_xelis
+    },
+    serializer::Writer,
+    utils::format_xelis
 };
 use xelis_compiler::Compiler;
 use xelis_lexer::Lexer;
@@ -93,6 +95,7 @@ pub struct Program {
     module: Module,
     entries: Vec<Entry>,
     abi: String,
+    version: ContractVersion,
 }
 
 #[wasm_bindgen]
@@ -103,11 +106,18 @@ impl Program {
     }
 
     pub fn to_bytes(&self) -> Vec<u8> {
-        self.module.to_bytes()
+        let mut bytes = Vec::new();
+        let mut writer = Writer::with_context(&mut bytes, {
+            let mut context = Context::new();
+            context.store(self.version);
+            context
+        });
+        self.module.write(&mut writer);
+        bytes
     }
 
     pub fn to_hex(&self) -> String {
-        self.module.to_hex()
+        hex::encode(self.to_bytes())
     }
 
     pub fn to_json(&self) -> String {
@@ -527,6 +537,7 @@ impl Silex {
             module,
             entries,
             abi,
+            version: self.selected_version,
         })
     }
 
@@ -1494,7 +1505,8 @@ mod tests {
     use std::borrow::Cow;
 
     use xelis_common::config::MAX_GAS_USAGE_PER_TX;
-    use xelis_types::{EnumVariant, StructType};
+    use xelis_common::serializer::Reader;
+    use xelis_types::{EnumVariant, StructType, TypePacked};
 
     use super::*;
 
@@ -1532,6 +1544,53 @@ mod tests {
             .expect("Failed to execute the program");
 
         assert_eq!(result.value(), "0");
+    }
+
+    #[test]
+    fn test_v1_compiles_public_entry_parameters() {
+        let code = r#"
+            entry main(msg: string, username: string) {
+                println(msg + " " + username)
+                return 0
+            }
+        "#;
+
+        let silex = Silex::new();
+        let program = silex
+            .compile_internal(code)
+            .expect("Failed to compile the program");
+
+        let chunk = program
+            .module
+            .get_chunk_at(0)
+            .expect("Chunk should be present");
+        let params = chunk
+            .access
+            .parameters()
+            .expect("Parameters should be present");
+
+        assert_eq!(params.len(), 2);
+        assert_eq!(params[0], TypePacked::String);
+        assert_eq!(params[1], TypePacked::String);
+
+        let serialized = program.to_bytes();
+        let mut reader = Reader::with_context(&serialized, {
+            let mut context = Context::new();
+            context.store(ContractVersion::V1);
+            context
+        });
+        let unserialized = Module::read(&mut reader)
+            .expect("Serialized module should be deserialized");
+        let params = unserialized
+            .get_chunk_at(0)
+            .expect("Chunk should be present after deserialization")
+            .access
+            .parameters()
+            .expect("Parameters should be present after deserialization");
+
+        assert_eq!(params.len(), 2);
+        assert_eq!(params[0], TypePacked::String);
+        assert_eq!(params[1], TypePacked::String);
     }
 
     #[test]
