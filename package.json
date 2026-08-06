@@ -15,7 +15,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "postinstall": "node scripts/patch-magical-svg.js"
   },
   "devDependencies": {
     "typescript": "^5.9.2",
@@ -33,6 +34,7 @@
     "pnpm": "^10.15.0",
     "split.js": "^1.6.5",
     "uuidv7": "^1.0.2",
+    "@xelis/xelis-wallet-connect": "https://github.com/codehalo/xelis-wallet-connect#main",
     "vite-plugin-magical-svg": "^1.8.0"
   }
 }

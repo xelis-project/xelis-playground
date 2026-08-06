@@ -4,10 +4,12 @@ export class RightPanelModes {
     public btn_mode_contract: HTMLElement;
     public btn_mode_documentation: HTMLElement;
     public btn_mode_rpcinspector: HTMLElement;
+    public btn_mode_account: HTMLElement;
 
     public contract_mode_container = document.getElementById("contract_container") as HTMLElement;
     public documentation_mode_container = document.getElementById("documentation_container") as HTMLElement;
     public rpcinspector_mode_container = document.getElementById("rpcinspector_container") as HTMLElement;
+    public account_mode_container = (document.getElementById("account_container") || document.getElementById("account-panel-container")) as HTMLElement;
     public r_mode_title = document.getElementById("r_mode_title") as HTMLElement;
 
     constructor() {
@@ -17,6 +19,7 @@ export class RightPanelModes {
         this.btn_mode_contract = document.getElementById('btn_mode_contract') as HTMLElement;
         this.btn_mode_documentation = document.getElementById('btn_mode_documentation') as HTMLElement;
         this.btn_mode_rpcinspector = document.getElementById('btn_mode_rpcinspector') as HTMLElement;
+        this.btn_mode_account = document.getElementById('btn_mode_account') as HTMLElement;
 
         const mode_objects = [
             {
@@ -33,6 +36,11 @@ export class RightPanelModes {
                 btn: this.btn_mode_rpcinspector,
                 container: this.rpcinspector_mode_container,
                 name: "RPC Inspector"
+            },
+            {
+                btn: this.btn_mode_account,
+                container: this.account_mode_container,
+                name: "Account"
             }
         ];
 

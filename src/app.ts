@@ -1,6 +1,7 @@
 import ace from 'ace-builds';
 import 'ace-builds/src-noconflict/mode-rust';
 import 'ace-builds/src-noconflict/theme-tomorrow_night_bright';
+import { XelisWallet } from '@xelis/xelis-wallet-connect';
 
 import { Silex } from '../public/xelis_playground';
 import { SplitLayout } from "./split_layout";
@@ -20,7 +21,9 @@ import ConstructorIcon from "./resources/icons/constructor-icon.svg";
 import { Utils } from "./Utils";
 import { StorageEditor } from "./StorageEditor";
 import { RightPanelModes } from './RightPanelModes';
-import { DaemonEndpoint, RPCInspector, WalletEndpoint } from './RPCInspector';
+import { POSTPERMISSIONS, RPCInspector } from './RPCInspector';
+import { DaemonEndpoint, WalletEndpoint } from './RPCInspector/types';
+
 
 type EntryCallParam = [string, string];
 type EntryCallParameterList = EntryCallParam[];
@@ -99,6 +102,8 @@ export class App {
     storage_editor: StorageEditor;
     rpc_inspector_daemon: RPCInspector;
     rpc_inspector_wallet: RPCInspector;
+
+    xelisWallet: XelisWallet | null = null;
 
     contract_mode_elems: HTMLElement[] = [];
 
@@ -235,7 +240,9 @@ export class App {
 
         /* RPC Inspectors */
         this.rpc_inspector_daemon = new RPCInspector(DaemonEndpoint, "Daemon");
-        this.rpc_inspector_wallet = new RPCInspector(WalletEndpoint, "Wallet");
+        this.rpc_inspector_wallet = new RPCInspector(WalletEndpoint, "Wallet", this.xelisWallet);
+        this.rpc_inspector_wallet.rpc_url_input.value = `NO WALLET (ACCOUNT) CONNECTED`;
+        this.rpc_inspector_wallet.rpc_url_input.readOnly = true;
         RPCInspector.switch_inspector_view(this.rpc_inspector_daemon);
         /* end RPC Inspectors */
 
@@ -258,6 +265,138 @@ export class App {
         this.btn_deposits_clear = document.getElementById('btn_deposits_clear') as HTMLElement;
         this.btn_deposits_close = document.getElementById('btn_deposits_close') as HTMLElement;
         /* end Deposits modal */
+
+        /* Wallet Panel */
+        const wallet_container = document.getElementById('wallet_container') as HTMLDivElement;
+        const PERMISSIONS = [
+            "get_address",
+            "get_balance",
+            "network_info",
+            "build_transaction",
+            "schema"
+        ].concat(POSTPERMISSIONS);
+
+        this.xelisWallet = new XelisWallet(wallet_container,
+            {
+                appData: {
+                    name: "Xelis Playground",
+                    description: "Xelis Playground Wallet",
+                    permissions: PERMISSIONS
+                },
+                uiOptions: {
+                    theme: 'xwp-theme'
+                }
+            });
+
+        this.xelisWallet.addEventListener("wallet-ready", (event: Event) => {
+            this.rpc_inspector_wallet.xelisWallet = this.xelisWallet;
+            // OPTIONAL. Prefetching permissions avoids wallet popups every time the app requests permissions.
+            this.rpc_inspector_wallet.rpc_url_input.value = `WALLET READY: Address unknown.`;
+
+            const xswd_prefetch = {
+                "id": "XSWD_PREFETCH_PERMISSIONS",
+                "jsonrpc": "2.0",
+                "method": "xswd.prefetch_permissions",
+                "params": {
+                    "reason": "User convenience.",
+                    "permissions": PERMISSIONS
+                }
+            };
+
+            if (this.xelisWallet !== null && this.xelisWallet.wallet !== null) {
+                this.xelisWallet.wallet.send_query(JSON.stringify(xswd_prefetch));
+            }
+        });
+
+        this.xelisWallet.addEventListener("connection-data-received", (e: Event) => {
+
+            const event = e as CustomEvent;
+
+            const response = event.detail.data;
+            console.log("Received data from wallet:", response);
+
+            const callMethod = (id: string, method: string) => {
+                return {
+                    "id": id,
+                    "jsonrpc": "2.0",
+                    "method": method
+                }
+            };
+
+            switch (response.id) {
+                case "XSWD_PREFETCH_PERMISSIONS": {
+                    if (response.result) {
+
+                        if (this.xelisWallet !== null && this.xelisWallet.wallet !== null) {
+                            this.xelisWallet.wallet.send_query(JSON.stringify(callMethod(`${WalletEndpoint}:schema`, "wallet.schema")));
+                        }
+                    }
+
+                    if (this.xelisWallet !== null && this.xelisWallet.wallet !== null) {
+                        this.xelisWallet.wallet.send_query(JSON.stringify(callMethod(`${WalletEndpoint}:address`, "wallet.get_address")));
+                    }
+
+                    break;
+                }
+
+                case `${WalletEndpoint}:schema`: {
+                    /* this doesnt work at all find out if we can do post-permission requests */
+
+                    let rpcPostMethods: string[] = response.result.methods.map((method: any) => method.name);
+                    // remove PERMISSION methods from rpc_method_schema (primarily because we want to 
+                    // prefetch the list and schema would cause a recursive loop)
+                    rpcPostMethods = rpcPostMethods.filter((method: string) => !PERMISSIONS.includes(method));
+                    
+                    console.log("RPC Method Schema: qqq", rpcPostMethods);
+                    const xswdPostPrefetch = {
+                        "id": "XSWD_POST_PREFETCH_PERMISSIONS",
+                        "jsonrpc": "2.0",
+                        "method": "xswd.prefetch_permissions",
+                        "params": {
+                            "reason": "User convenience.",
+                            "permissions": rpcPostMethods
+                        }
+                    };
+
+                    // if (this.xelisWallet !== null && this.xelisWallet.wallet !== null) {
+                    //     this.xelisWallet.wallet.send_query(JSON.stringify(xswdPostPrefetch));
+                    // }
+
+                    this.rpc_inspector_wallet.processResponse(response);
+                    break;
+                }
+
+                case `${WalletEndpoint}:address`: {
+                    this.rpc_inspector_wallet.rpc_url_input.value = response.result;
+                    break;
+                }
+
+                default: {
+                    // for now only the rpc inspector needs the account connection
+                    this.rpc_inspector_wallet.processResponse(response);
+                }
+            }
+
+        });
+
+        this.xelisWallet.addEventListener("wallet-will-disconnect", () => {
+            console.log("Wallet disconnecting.");
+            this.xelisWallet = null;
+            this.rpc_inspector_wallet.xelisWallet = null;
+        });
+
+        this.xelisWallet.addEventListener("wallet-disconnect", () => {
+            console.log("Wallet disconnected.");
+            this.xelisWallet = null;
+            this.rpc_inspector_wallet.xelisWallet = null;
+        });
+
+        this.xelisWallet.addEventListener("wallet-connect-error", (e: Event) => {
+            const error = e as CustomEvent;
+            console.error("Wallet connection failed:", error.detail);
+        });
+
+        /* End Wallet Panel*/
 
         this.btn_export.addEventListener('click', () => this.open_modal_export());
         this.btn_compile.addEventListener('click', () => this.compile_code());

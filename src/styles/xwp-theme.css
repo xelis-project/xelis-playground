@@ -1,0 +1,211 @@
+.xwp-theme {
+  --bg-color: transparent;
+  /* Slate 900 */
+  /*--bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);*/
+  --container-bg: transparent;
+  /* Slate 800 with opacity */
+  --container-border: rgba(255, 255, 255, 0.1);
+  --text-primary: #f8fafc;
+  --xelis-green: #00f1a1;
+  /* Slate 50 */
+  --text-secondary: #94a3b8;
+  /* Slate 400 */
+  --accent-color: #3b82f6;
+  /* Blue 500 */
+  --accent-hover: #2563eb;
+  /* Blue 600 */
+  --input-bg: rgba(15, 23, 42, 0.6);
+  --autofill-bg: #141d30;
+  --autofill-bg-focus: #121a2d;
+  --input-border: rgba(255, 255, 255, 0.15);
+  --autofill-border: #3b4352;
+  --input-focus: #3b82f6;
+  --glow-color: rgba(59, 130, 246, 0.5);
+  --error-color: #ef4444;
+  --error-color-2: rgb(236, 97, 26);
+}
+
+.xwp-theme {
+  color: var(--text-primary);
+  font-family: Michroma, sans-serif;
+  box-sizing: border-box;
+  background-color: var(--bg-color);
+  padding: 3rem;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  padding: 2rem;
+}
+
+.xwp-theme .container {
+  background: var(--container-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding: 2.5rem;
+  border: 1px solid var(--container-border);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 40px rgba(59, 130, 246, 0.1);
+  width: 100%;
+  max-width: 500px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.xwp-theme .container:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4), 0 0 60px rgba(59, 130, 246, 0.2);
+}
+
+.xwp-theme .header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.xwp-theme h2 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-size: 2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.xwp-theme p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.xwp-theme .wallet-panel {
+  /*background: rgba(15, 23, 42, 0.4);*/
+  /*border: 1px solid var(--container-border) !important;*/
+  /* Overriding inline styles in JS */
+  padding: 1rem !important;
+  /* Overriding inline styles in JS */
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  transition: all 0.3s ease;
+}
+
+.xwp-theme .wallet-panel {
+  padding-top: 2.5rem !important;
+}
+
+.xwp-theme .wallet-connect-title {
+  padding-bottom: 1rem !important;
+  font-weight: normal;
+  color: #93d6ff;
+  font-size: 1.1rem;
+}
+
+.xwp-theme.connected-wallet .wallet-connect-title {
+  color: #00ffeb;
+}
+
+.xwp-theme .wallet-panel button {
+  flex: 1;
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--accent-color);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  padding: 0.75rem 1rem;
+  font-family: inherit;
+  font-size: 0.65rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 140px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.xwp-theme .wallet-panel button {
+  background: rgb(0 255 235 / 9%);
+  color: #00ffeb;
+  border: none;
+}
+
+.xwp-theme .wallet-panel button:hover {
+  background: #00ffeb39;
+  transform: translateY(-1px);
+}
+
+.xwp-theme .progress-ring__circle {
+  stroke: #00d2c2 !important;
+}
+
+.xwp-theme .btn-remove-file.active {
+  color: var(--error-color-2);
+}
+
+.xwp-theme .btn-remove-file:hover {
+  cursor: pointer;
+}
+
+.xwp-theme .error {
+  color: var(--error-color-2) !important;
+}
+
+.xwp-theme .disabled {
+  cursor: default;
+}
+
+.xwp-theme .lower-message {
+  padding: 1.5rem 2rem;
+  color: #00ffeb;
+}
+
+.xwp-theme .wallet-error-container {
+  margin-bottom: 0.75rem;
+  color: #00ffeb;
+}
+
+.xwp-theme .error-ui-message {
+  margin-bottom: 0.75rem;
+}
+
+/* Prevent horizontal scroll in wallet-panel and QR Code screen */
+.xwp-theme,
+.xwp-theme .container,
+.xwp-theme .wallet-panel {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow-x: hidden !important;
+}
+
+.xwp-theme .qr-data-container {
+  min-width: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  word-break: break-all !important;
+  overflow-wrap: anywhere !important;
+  box-sizing: border-box !important;
+  margin: 1rem 0 !important;
+
+  border: 1px solid #299def24;
+  display: none;
+}
+
+.xwp-theme .qr-code-container {
+  max-width: 100% !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.xwp-theme .qr-code {
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+.xwp-theme .mode-title {
+  color: #93d6ff;
+  font-size: 0.8rem;
+}
+
+.xwp-theme .btn-close-wallet {
+  display: none !important;
+}

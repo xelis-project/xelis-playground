@@ -565,6 +565,12 @@ body {
     overflow: scroll;
 }
 
+#account_container,
+.account-panel-container {
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
 .function-list-header,
 #configuration_container,
 .static-top {
@@ -1420,6 +1426,13 @@ button[data-toggle='off']:hover:not(:disabled) {
     color: #debe66;
 }
 
+.btn-edit-method-input,
+.btn-method-json-container,
+.query_editor,
+.api-ui-container {
+    display: none !important;
+}
+
 .rpc-selector-container {
     display: flex;
     flex-direction: row;
@@ -1686,3 +1699,67 @@ button[data-toggle='off']:hover:not(:disabled) {
         transform-origin: top;
     }
 }
+
+/** Wallet Container & Panel Alignment **/
+#account_container.rpm-show,
+.account-panel-container.rpm-show {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+#account_container .flex-bottom,
+.account-panel-container .flex-bottom {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: flex-start;
+    flex-direction: column;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
+#wallet_container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: center;
+    width: 100%;
+    max-width: 100%;
+    padding: 2.5rem 1rem;
+    box-sizing: border-box;
+    margin: 0 auto;
+    overflow-x: hidden;
+}
+
+.wallet_panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: center;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    margin: 0 auto;
+    overflow-x: hidden;
+}
+
+#wallet_container > *,
+.wallet_panel > * {
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 0;
+    max-width: 100%;
+}
+
+
+
