@@ -4,9 +4,7 @@ import {PanelOptions, UIContainers} from "./UIContainers";
 import {silex_examples} from "./examples";
 import {Utils} from "./Utils";
 
-import EditIcon from "./resources/icons/edit-icon.svg";
-import DeleteIcon from "./resources/icons/trash-icon.svg";
-import ExportIcon from "./resources/icons/export-icon.svg";
+import { getEditIconHtml, getDeleteIconHtml, getExportIconHtml } from "./resources/icons";
 
 type ProjectUUID = string;
 type ProjectName = string;
@@ -1359,12 +1357,9 @@ export class ProjectManager {
         }
 
         // set styles on icons
-        EditIcon.classList.add("icon", "edit-icon");
-        const edit_icon_html = Utils.convertSvgElementToHtml(EditIcon);
-        DeleteIcon.classList.add("icon", "delete-icon");
-        const delete_icon_html = Utils.convertSvgElementToHtml(DeleteIcon);
-        ExportIcon.classList.add("icon", "export-icon");
-        const export_icon_html = Utils.convertSvgElementToHtml(ExportIcon);
+        const edit_icon_html = getEditIconHtml("icon", "edit-icon");
+        const delete_icon_html = getDeleteIconHtml("icon", "delete-icon");
+        const export_icon_html = getExportIconHtml("icon", "export-icon");
         //const copyicon_html = convertSvgElementToHtml(CopyIcon);
 
 

@@ -14,15 +14,14 @@ import { XVMParamParser } from './parameter_builder/xvm_param_parser';
 import { ParameterBuilder } from './parameter_builder/parameter_builder';
 import { PanelOptions, UIContainers } from "./UIContainers";
 
-import HistoryIcon from "./resources/icons/history-icon.svg";
-import ReuseIcon from "./resources/icons/recycle-icon.svg";
-import ConstructorIcon from "./resources/icons/constructor-icon.svg";
+import { getHistoryIconHtml, getReuseIconHtml, getConstructorIconHtml } from "./resources/icons";
 
 import { Utils } from "./Utils";
 import { StorageEditor } from "./StorageEditor";
 import { RightPanelModes } from './RightPanelModes';
-import { POSTPERMISSIONS, RPCInspector } from './RPCInspector';
+import {RPCInspector } from './RPCInspector';
 import { DaemonEndpoint, WalletEndpoint } from './RPCInspector/types';
+import { accountWallet } from './AccountWallet';
 
 
 type EntryCallParam = [string, string];
@@ -241,7 +240,7 @@ export class App {
         /* RPC Inspectors */
         this.rpc_inspector_daemon = new RPCInspector(DaemonEndpoint, "Daemon");
         this.rpc_inspector_wallet = new RPCInspector(WalletEndpoint, "Wallet", this.xelisWallet);
-        this.rpc_inspector_wallet.rpc_url_input.value = `NO WALLET (ACCOUNT) CONNECTED`;
+        this.rpc_inspector_wallet.rpc_url_input.value = RPCInspector.MSG.NO_WALLET_CONNECTED;
         this.rpc_inspector_wallet.rpc_url_input.readOnly = true;
         RPCInspector.switch_inspector_view(this.rpc_inspector_daemon);
         /* end RPC Inspectors */
@@ -266,137 +265,9 @@ export class App {
         this.btn_deposits_close = document.getElementById('btn_deposits_close') as HTMLElement;
         /* end Deposits modal */
 
-        /* Wallet Panel */
-        const wallet_container = document.getElementById('wallet_container') as HTMLDivElement;
-        const PERMISSIONS = [
-            "get_address",
-            "get_balance",
-            "network_info",
-            "build_transaction",
-            "schema"
-        ].concat(POSTPERMISSIONS);
-
-        this.xelisWallet = new XelisWallet(wallet_container,
-            {
-                appData: {
-                    name: "Xelis Playground",
-                    description: "Xelis Playground Wallet",
-                    permissions: PERMISSIONS
-                },
-                uiOptions: {
-                    theme: 'xwp-theme'
-                }
-            });
-
-        this.xelisWallet.addEventListener("wallet-ready", (event: Event) => {
-            this.rpc_inspector_wallet.xelisWallet = this.xelisWallet;
-            // OPTIONAL. Prefetching permissions avoids wallet popups every time the app requests permissions.
-            this.rpc_inspector_wallet.rpc_url_input.value = `WALLET READY: Address unknown.`;
-
-            const xswd_prefetch = {
-                "id": "XSWD_PREFETCH_PERMISSIONS",
-                "jsonrpc": "2.0",
-                "method": "xswd.prefetch_permissions",
-                "params": {
-                    "reason": "User convenience.",
-                    "permissions": PERMISSIONS
-                }
-            };
-
-            if (this.xelisWallet !== null && this.xelisWallet.wallet !== null) {
-                this.xelisWallet.wallet.send_query(JSON.stringify(xswd_prefetch));
-            }
-        });
-
-        this.xelisWallet.addEventListener("connection-data-received", (e: Event) => {
-
-            const event = e as CustomEvent;
-
-            const response = event.detail.data;
-            console.log("Received data from wallet:", response);
-
-            const callMethod = (id: string, method: string) => {
-                return {
-                    "id": id,
-                    "jsonrpc": "2.0",
-                    "method": method
-                }
-            };
-
-            switch (response.id) {
-                case "XSWD_PREFETCH_PERMISSIONS": {
-                    if (response.result) {
-
-                        if (this.xelisWallet !== null && this.xelisWallet.wallet !== null) {
-                            this.xelisWallet.wallet.send_query(JSON.stringify(callMethod(`${WalletEndpoint}:schema`, "wallet.schema")));
-                        }
-                    }
-
-                    if (this.xelisWallet !== null && this.xelisWallet.wallet !== null) {
-                        this.xelisWallet.wallet.send_query(JSON.stringify(callMethod(`${WalletEndpoint}:address`, "wallet.get_address")));
-                    }
-
-                    break;
-                }
-
-                case `${WalletEndpoint}:schema`: {
-                    /* this doesnt work at all find out if we can do post-permission requests */
-
-                    let rpcPostMethods: string[] = response.result.methods.map((method: any) => method.name);
-                    // remove PERMISSION methods from rpc_method_schema (primarily because we want to 
-                    // prefetch the list and schema would cause a recursive loop)
-                    rpcPostMethods = rpcPostMethods.filter((method: string) => !PERMISSIONS.includes(method));
-                    
-                    console.log("RPC Method Schema: qqq", rpcPostMethods);
-                    const xswdPostPrefetch = {
-                        "id": "XSWD_POST_PREFETCH_PERMISSIONS",
-                        "jsonrpc": "2.0",
-                        "method": "xswd.prefetch_permissions",
-                        "params": {
-                            "reason": "User convenience.",
-                            "permissions": rpcPostMethods
-                        }
-                    };
-
-                    // if (this.xelisWallet !== null && this.xelisWallet.wallet !== null) {
-                    //     this.xelisWallet.wallet.send_query(JSON.stringify(xswdPostPrefetch));
-                    // }
-
-                    this.rpc_inspector_wallet.processResponse(response);
-                    break;
-                }
-
-                case `${WalletEndpoint}:address`: {
-                    this.rpc_inspector_wallet.rpc_url_input.value = response.result;
-                    break;
-                }
-
-                default: {
-                    // for now only the rpc inspector needs the account connection
-                    this.rpc_inspector_wallet.processResponse(response);
-                }
-            }
-
-        });
-
-        this.xelisWallet.addEventListener("wallet-will-disconnect", () => {
-            console.log("Wallet disconnecting.");
-            this.xelisWallet = null;
-            this.rpc_inspector_wallet.xelisWallet = null;
-        });
-
-        this.xelisWallet.addEventListener("wallet-disconnect", () => {
-            console.log("Wallet disconnected.");
-            this.xelisWallet = null;
-            this.rpc_inspector_wallet.xelisWallet = null;
-        });
-
-        this.xelisWallet.addEventListener("wallet-connect-error", (e: Event) => {
-            const error = e as CustomEvent;
-            console.error("Wallet connection failed:", error.detail);
-        });
-
-        /* End Wallet Panel*/
+        /* Wallet Account Panel */
+        accountWallet(_thisApp);
+        /* End Wallet Account Panel */
 
         this.btn_export.addEventListener('click', () => this.open_modal_export());
         this.btn_compile.addEventListener('click', () => this.compile_code());
@@ -413,15 +284,13 @@ export class App {
         this.btn_output_panel_toggle.addEventListener('click', () => this.output_panel_toggle(undefined));
 
         this.btn_call_history = document.querySelector(`#btn-call-history`) as HTMLButtonElement;
-        HistoryIcon.classList.add("icon", "history-icon");
-        _thisApp.btn_call_history.innerHTML = Utils.convertSvgElementToHtml(HistoryIcon) as string;
+        _thisApp.btn_call_history.innerHTML = getHistoryIconHtml("icon", "history-icon");
         // const call_history_container = document.createElement(`div`);
         // call_history_container.classList.add("call-history-container");
         // call_history_container.textContent = "";
         // this.btn_call_history.appendChild(call_history_container);
         this.btn_run_constructor = document.querySelector(`#btn_run_constructor`) as HTMLButtonElement;
-        ConstructorIcon.classList.add("icon", "constructor-icon");
-        _thisApp.btn_run_constructor.innerHTML = Utils.convertSvgElementToHtml(ConstructorIcon) as string;
+        _thisApp.btn_run_constructor.innerHTML = getConstructorIconHtml("icon", "constructor-icon");
 
         _thisApp.btn_run_constructor.addEventListener('click', () => {
             this.run_constructor = !this.run_constructor;
@@ -429,8 +298,7 @@ export class App {
         });
 
         this.btn_reuse_entry_calls = document.querySelector(`#btn-reuse-last-call`) as HTMLButtonElement;
-        ReuseIcon.classList.add("icon", "recycle-icon");
-        _thisApp.btn_reuse_entry_calls.innerHTML = Utils.convertSvgElementToHtml(ReuseIcon) as string;
+        _thisApp.btn_reuse_entry_calls.innerHTML = getReuseIconHtml("icon", "recycle-icon");
         _thisApp.btn_reuse_entry_calls.addEventListener("click", e => {
             const data_toggle = _thisApp.btn_reuse_entry_calls.getAttribute("data-toggle");
             if (data_toggle !== undefined && data_toggle !== null) {

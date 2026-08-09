@@ -1,9 +1,7 @@
 import {PanelOptions, UIContainers} from "./UIContainers";
 import {UUID, uuidv7} from "uuidv7";
-import EditIcon from "./resources/icons/edit-icon.svg";
+import { getEditIconHtml, getDeleteIconHtml } from "./resources/icons";
 import {Utils} from "./Utils";
-import DeleteIcon from "./resources/icons/trash-icon.svg";
-import ExportIcon from "./resources/icons/export-icon.svg";
 import {FileMetaData, PMConfig, Project} from "./project";
 import { createElement } from "ace-builds-internal/lib/dom";
 
@@ -718,10 +716,8 @@ export class StorageEditor {
         this.map_desc_input.value = _thisSE.storage_preset_maps[map_uuid].description;
 
         // set styles on icons
-        EditIcon.classList.add("icon", "edit-icon");
-        const edit_icon_html = Utils.convertSvgElementToHtml(EditIcon);
-        DeleteIcon.classList.add("icon", "delete-icon");
-        const delete_icon_html = Utils.convertSvgElementToHtml(DeleteIcon);
+        const edit_icon_html = getEditIconHtml("icon", "edit-icon");
+        const delete_icon_html = getDeleteIconHtml("icon", "delete-icon");
 
         this.count_presets_in_map(map_uuid);
 
