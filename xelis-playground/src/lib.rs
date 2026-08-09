@@ -19,16 +19,15 @@ use tokio_with_wasm as tokio;
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 use xelis_assembler::Disassembler;
 use xelis_builder::{Builder, EnvironmentBuilder};
-use xelis_bytecode::Module;
 use xelis_common::{
     account::CiphertextCache,
     asset::{AssetData, AssetOwner, MaxSupplyMode},
     block::{Block, BlockHeader, BlockVersion},
     config::{COIN_VALUE, MAXIMUM_SUPPLY, XELIS_ASSET},
-    context::NoOpBuildHasher,
     contract::{
         ChainState,
         ContractMetadata,
+        ContractModule,
         ContractVersion,
         ExecutionsChanges,
         ExecutionsManager,
@@ -53,7 +52,8 @@ use xelis_common::{
         Transaction,
         TransactionType,
         TxVersion
-    }, utils::format_xelis
+    },
+    utils::format_xelis
 };
 use xelis_compiler::Compiler;
 use xelis_lexer::Lexer;
@@ -90,7 +90,7 @@ pub struct Silex {
 
 #[wasm_bindgen]
 pub struct Program {
-    module: Module,
+    contract: ContractModule,
     entries: Vec<Entry>,
     abi: String,
 }
@@ -103,16 +103,16 @@ impl Program {
     }
 
     pub fn to_bytes(&self) -> Vec<u8> {
-        self.module.to_bytes()
+        self.contract.to_bytes()
     }
 
     pub fn to_hex(&self) -> String {
-        self.module.to_hex()
+        hex::encode(self.to_bytes())
     }
 
     pub fn to_json(&self) -> String {
-        serde_json::to_string_pretty(&self.module)
-            .expect("Failed to serialize module to JSON")
+        serde_json::to_string_pretty(&self.contract)
+            .expect("Failed to serialize contract to JSON")
     }
 
     pub fn to_abi(&self) -> String {
@@ -120,15 +120,15 @@ impl Program {
     }
 
     pub fn to_asm(&self) -> String {
-        let mut disassembler = Disassembler::new(&self.module);
+        let mut disassembler = Disassembler::new(&self.contract.module);
         disassembler.disasemble()
-            .expect("Failed to disassemble the module")
+            .expect("Failed to disassemble the contract")
             .to_string()
     }
 
     // Check if the program has a constructor (hook id 0)
     pub fn has_constructor(&self) -> bool {
-        self.module.get_chunk_id_of_hook(0).is_some()
+        self.contract.module.get_chunk_id_of_hook(0).is_some()
     }
 }
 
@@ -232,7 +232,7 @@ pub struct ExecutionResult {
     used_memory: u64,
     storage: MockStorage,
     // events per contract
-    events: HashMap<Hash, HashMap<u64, Vec<ValueCell>, NoOpBuildHasher>>
+    events: HashMap<Hash, HashMap<u64, Vec<ValueCell>>>
 }
 
 #[wasm_bindgen]
@@ -524,7 +524,10 @@ impl Silex {
           .unwrap_or_else(|err| format!("{{\"error\": \"{}\"}}", err));
 
         Ok(Program {
-            module,
+            contract: ContractModule {
+                module: Arc::new(module),
+                version: self.selected_version,
+            },
             entries,
             abi,
         })
@@ -1308,7 +1311,7 @@ impl Silex {
                 // For playground, we allow everything
                 permission: Cow::Owned(InterContractPermission::All),
                 gas_fee_allowance: 0,
-                cache_clone_refs: selected_version == ContractVersion::V0,
+                block_version: BlockVersion::V7,
             };
 
             let environment = &environments[&selected_version];
@@ -1316,7 +1319,7 @@ impl Silex {
             let (res, elapsed_time, used_gas, used_memory) = {
                 let mut vm = VM::default();
                 vm.append_module(ModuleMetadata {
-                    module: (&program.module).into(),
+                    module: program.contract.module.clone().into(),
                     environment: environment.clone().into(),
                     metadata: (&metadata).into(),
                 }).map_err(|e| format!("Error while adding module: {}", e))?;
@@ -1351,7 +1354,7 @@ impl Silex {
 
                     // VM has consumed the module, lets re-inject it again
                     vm.append_module(ModuleMetadata {
-                        module: (&program.module).into(),
+                        module: program.contract.module.clone().into(),
                         environment: environment.clone().into(),
                         metadata: (&metadata).into(),
                     }).map_err(|e| format!("Error while re-adding module: {}", e))?;
@@ -1494,7 +1497,7 @@ mod tests {
     use std::borrow::Cow;
 
     use xelis_common::config::MAX_GAS_USAGE_PER_TX;
-    use xelis_types::{EnumVariant, StructType};
+    use xelis_types::{EnumVariant, StructType, TypePacked};
 
     use super::*;
 
@@ -1532,6 +1535,50 @@ mod tests {
             .expect("Failed to execute the program");
 
         assert_eq!(result.value(), "0");
+    }
+
+    #[test]
+    fn test_v1_compiles_public_entry_parameters() {
+        let code = r#"
+            entry main(msg: string, username: string) {
+                println(msg + " " + username)
+                return 0
+            }
+        "#;
+
+        let silex = Silex::new();
+        let program = silex
+            .compile_internal(code)
+            .expect("Failed to compile the program");
+
+        let chunk = program
+            .contract
+            .module
+            .get_chunk_at(0)
+            .expect("Chunk should be present");
+        let params = chunk
+            .access
+            .parameters()
+            .expect("Parameters should be present");
+
+        assert_eq!(params.len(), 2);
+        assert_eq!(params[0], TypePacked::String);
+        assert_eq!(params[1], TypePacked::String);
+
+        let serialized = program.to_bytes();
+        let got = ContractModule::from_bytes(&serialized)
+            .expect("Serialized module should be deserialized");
+        let params = got
+            .module
+            .get_chunk_at(0)
+            .expect("Chunk should be present after deserialization")
+            .access
+            .parameters()
+            .expect("Parameters should be present after deserialization");
+
+        assert_eq!(params.len(), 2);
+        assert_eq!(params[0], TypePacked::String);
+        assert_eq!(params[1], TypePacked::String);
     }
 
     #[test]
