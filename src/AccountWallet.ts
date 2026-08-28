@@ -23,9 +23,9 @@ export function accountWallet(_thisApp: App) {
             uiOptions: {
                 theme: 'xwp-theme'
             }
-        });
+        }) as XelisWallet;
 
-    _thisApp.xelisWallet.addEventListener("wallet-ready", (event: Event) => {
+    _thisApp.xelisWallet.addEventListener("wallet-ready", (_: Event) => {
         _thisApp.rpc_inspector_wallet.xelisWallet = _thisApp.xelisWallet;
         // OPTIONAL. Prefetching permissions avoids wallet popups every time the app requests permissions.
         _thisApp.rpc_inspector_wallet.rpc_url_input.value = `WALLET READY: Address unknown.`;
@@ -65,7 +65,7 @@ export function accountWallet(_thisApp: App) {
                 if (response.result) {
 
                     if (_thisApp.xelisWallet !== null && _thisApp.xelisWallet.wallet !== null) {
-                        _thisApp.xelisWallet.wallet.send_query(JSON.stringify(callMethod(`${WalletEndpoint}:schema`, "wallet.schema")));
+                        _thisApp.xelisWallet.wallet.send_query(JSON.stringify(callMethod(`${WalletEndpoint}:schema`, "schema")));
                     }
                 }
 
@@ -77,27 +77,13 @@ export function accountWallet(_thisApp: App) {
             }
 
             case `${WalletEndpoint}:schema`: {
-                /* this doesnt work at all find out if we can do post-permission requests */
+                /* this doesn't work at all find out if we can do post-permission requests */
 
-                let rpcPostMethods: string[] = response.result.methods.map((method: any) => method.name);
-                // remove PERMISSION methods from rpc_method_schema (primarily because we want to 
-                // prefetch the list and schema would cause a recursive loop)
-                rpcPostMethods = rpcPostMethods.filter((method: string) => !PERMISSIONS.includes(method));
+                console.log("RPC Method Schema: ", response.result);
 
-                console.log("RPC Method Schema: qqq", rpcPostMethods);
-                const xswdPostPrefetch = {
-                    "id": "XSWD_POST_PREFETCH_PERMISSIONS",
-                    "jsonrpc": "2.0",
-                    "method": "xswd.prefetch_permissions",
-                    "params": {
-                        "reason": "User convenience.",
-                        "permissions": rpcPostMethods
-                    }
-                };
-
-                // if (_thisApp.xelisWallet !== null && _thisApp.xelisWallet.wallet !== null) {
-                //     _thisApp.xelisWallet.wallet.send_query(JSON.stringify(xswdPostPrefetch));
-                // }
+                if(response.error) {
+                    _thisApp.rpc_inspector_wallet.rpcLog(`<error><b>Error</b>: ${JSON.stringify(response.error)}</error>`);
+                }
 
                 _thisApp.rpc_inspector_wallet.processResponse(response);
                 break;
@@ -117,6 +103,9 @@ export function accountWallet(_thisApp: App) {
     });
 
     function resetRPCWalletUI() {
+        if(_thisApp.xelisWallet !== null) {
+            (_thisApp.xelisWallet as XelisWallet).walletUI.reset();
+        }
         _thisApp.xelisWallet = null;
         _thisApp.rpc_inspector_wallet.xelisWallet = null;
         _thisApp.rpc_inspector_wallet.rpc_url_input.value = RPCInspector.MSG.NO_WALLET_CONNECTED;
@@ -136,5 +125,6 @@ export function accountWallet(_thisApp: App) {
     _thisApp.xelisWallet.addEventListener("wallet-connect-error", (e: Event) => {
         const error = e as CustomEvent;
         console.error("Wallet connection failed:", error.detail);
+        resetRPCWalletUI();
     });
 }

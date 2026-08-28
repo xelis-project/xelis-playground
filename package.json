@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "@svgr/cli": "^8.1.0",
-    "@xelis/xelis-wallet-connect": "https://github.com/xelis-project/xelis-wallet-connect#main",
+    "@xelis/xelis-wallet-connect": "https://github.com/xelis-project/xelis-wallet-connect#dev",
     "ace-builds": "^1.43.0",
     "bytes-formatter": "^21.6.15",
     "fflate": "^0.7.1",
