@@ -106,8 +106,8 @@ export function accountWallet(_thisApp: App) {
         if(_thisApp.xelisWallet !== null) {
             (_thisApp.xelisWallet as XelisWallet).walletUI.reset();
         }
-        _thisApp.xelisWallet = null;
-        _thisApp.rpc_inspector_wallet.xelisWallet = null;
+        // _thisApp.xelisWallet = null;
+        // _thisApp.rpc_inspector_wallet.xelisWallet = null;
         _thisApp.rpc_inspector_wallet.rpc_url_input.value = RPCInspector.MSG.NO_WALLET_CONNECTED;
         _thisApp.rpc_inspector_wallet.clearMethodList();
     }
