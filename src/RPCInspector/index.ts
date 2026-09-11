@@ -357,10 +357,9 @@ export class RPCInspector {
 
     connect() {   // now only makes sense for the daemon endpoint.
         if (this.ws !== null) {
-            return;
-            // this.log(`Closing existing connection...`);
-            // this.willReconnect = true;
-            // this.ws.close();
+            this.rpcLog(`Closing existing connection...`);
+            this.willReconnect = true;
+            this.ws.close();
         }
 
         localStorage.setItem(this.endpoint === DaemonEndpoint ? "rpc_daemon_url" : "rpc_wallet_url", this.rpc_url);
