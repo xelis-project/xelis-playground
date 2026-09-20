@@ -1,6 +1,18 @@
 #!/bin/bash
 set -e # Exit on error (if cmd fails)
 
+handle_error() {
+  local line="$1"
+  local cmd="$2"
+  echo "" >&2
+  echo "Build failed at line $line: $cmd" >&2
+  if [ -t 0 ]; then
+    read -r -p "Press Enter to exit..."
+  fi
+  exit 1
+}
+trap 'handle_error $LINENO "$BASH_COMMAND"' ERR
+
 # Make sure Clang is installed
 # if command -v clang &> /dev/null; then
 #   echo "Clang is installed."
