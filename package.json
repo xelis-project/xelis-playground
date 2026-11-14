@@ -12,12 +12,17 @@
     "url": "git+https://github.com/xelis-project/xelis-playground.git"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "cargo test --locked --manifest-path xelis-playground/Cargo.toml",
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "check": "tsc --noEmit",
+    "build:wasm": "bash ./scripts/build-wasm.sh",
+    "test:ui": "npm run build && node tests/responsive.mjs",
+    "test:completion": "node tests/completion-context.mjs"
   },
   "devDependencies": {
+    "playwright-core": "1.65.1",
     "typescript": "^5.9.2",
     "vite": "^6.3.6",
     "vite-plugin-dts": "^4.5.4",

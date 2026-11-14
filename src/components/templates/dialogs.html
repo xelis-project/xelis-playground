@@ -1,0 +1,229 @@
+<div id="editor_save_code_container" class="panel_container">
+          <div class="panel_backdrop hide"></div>
+          <div class="panel_body hide"><button class="dialog-dismiss" type="button" data-dismiss="editor_save_code_container" aria-label="Close dialog">×</button>
+            <!--              <h5 style="margin-top: 0;">Save Code</h5>-->
+            <div class="panel-options-container">
+              <div class="po-btns">
+              </div>
+              <div class="po-selection"></div>
+            </div>
+          </div>
+        </div>
+<div id="editor_project_container" class="panel_container">
+          <div class="panel_backdrop hide"></div>
+          <div class="panel_body hide">
+            <button id="btn_close_project_panel"
+              class="dialog-btn opt-btn icon-green close-btn top-right">close</button>
+            <h5 style="margin-top: 0;">Projects</h5>
+            <div class="panel-options-container">
+              <div class="po-btns">
+                <input type="file" id="editor_load_file_input" class="hide">
+                <button id="btn_editor_new_project" class="btn">New Project</button>
+              </div>
+              <div class="po-selection"></div>
+            </div>
+          </div>
+        </div>
+<div id="editor_options_container" class="panel_container">
+          <div class="panel_backdrop hide"></div>
+          <div class="panel_body hide"><button class="dialog-dismiss" type="button" data-dismiss="editor_options_container" aria-label="Close dialog">×</button>
+            <h5 style="margin-top: 0;">Workspace settings</h5>
+            <div class="auto-compile-settings">
+              <label><input id="auto-compile" type="checkbox" /> Check code automatically after typing</label>
+              <label for="auto-compile-delay">Typing pause</label>
+              <select id="auto-compile-delay"><option value="1000">1 second</option><option value="2000">2 seconds</option><option value="3000">3 seconds</option><option value="5000">5 seconds</option></select>
+              <p>Use Ctrl+Space in the editor for function suggestions.</p>
+            </div>
+            <div class="panel-options-container">
+              <div class="po-btns">
+                <div class="info-block">
+                  <div id="editor-tabsize-menu" class="dropdown-menu">
+                    <key>Tab Size</key>
+                    <div class="dropdown menu-centered">
+                      <div class="menu-stat-ro">
+                        <span class="menu-item-name menu-selection" data-selection-value="4">4</span>
+                      </div>
+                      <div class="dropdown-content">
+                        <a class="menu-option" data-menu-value="2">2</a>
+                        <a class="menu-option" data-menu-value="4">4</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="info-block">
+                  <div id="contract-version-menu" class="dropdown-menu">
+                    <key>Contract Version</key>
+                    <div class="dropdown menu-centered">
+                      <div class="menu-stat-ro">
+                        <span class="menu-item-name menu-selection" data-selection-value=""
+                          style="visibility: visible;">--</span>
+                      </div>
+                      <div class="dropdown-content"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="po-selection"></div>
+            </div>
+          </div>
+        </div>
+<div id="alert_container_left" class="panel_container alert_container left hide">
+          <div class="panel_backdrop "></div>
+          <div class="panel_body">
+            <div class="panel-options-container">
+              <div class="po-btns"></div>
+              <div class="po-selection"></div>
+            </div>
+          </div>
+        </div>
+<div id="storage_preset_container" class="panel_container type-2">
+              <div class="panel_backdrop bkdrp-strong hide"></div>
+              <div class="panel_body hide">
+                <div class="panel-title title">Storage Editor</div>
+                <div class="info-block">
+                  <div>
+                    <key>Storage Map</key>
+                    <div class="dropdown">
+                      <div class="menu-stat-ro">
+                        <span id="storage-editor-menu-selected" class="menu-item-name"></span>
+                      </div>
+                      <div id="storage-editor-menu-content" class="dropdown-content">
+
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="info-block-button-container">
+                    <button id="btn_close_storage_editor" data-panel-id="storage_preset_container"
+                      class="opt-btn icon-green right">DONE</button>
+                  </div>
+                </div>
+                <div class="panel-options-container">
+                  <div class="po-btns" style="display: none;"></div>
+                  <div id="storage-modal-content" class="modal-content" style="display: none;"></div>
+                  <div class="po-selection">
+
+                    <div id="storage-map-new-dialog" class="dialog-container layout-tight" style="display: none;">
+                      <div class="dialog-title">New Storage Map</div>
+                      <div class="vertical"><label>Name</label><input id="sm-input-name" type="text"
+                          placeholder="Map Name (required)" class="large-input" required=""></div>
+                      <div class="vertical"><label>Description</label><input id="sm-input-description" type="text"
+                          placeholder="Description" class="large-input">
+                      </div>
+                      <div class="dialog-btn-container right">
+                        <button id="sm-cancel-new" class="dialog-btn btn">Cancel</button>
+                        <button id="sm-create-new" class="dialog-btn btn" disabled="">Create</button>
+                      </div>
+                    </div>
+
+                    <div id="storage-map-insert-update-dialog" class="dialog-container layout-tight"
+                      style="display: none;">
+                      <div class="storage-info-block">
+                        <div class="sm-info">
+                          <input id="sm-info-name" type="text" placeholder="Map Name" class="" />
+                          <input id="sm-info-description" type="text" placeholder="Description" class="" />
+                        </div>
+                        <div class="storage-map-update-btn-container right">
+                          <button id="btn_update_storage_map" class="opt-btn icon-green right" disabled>UPDATE</button>
+                          <button id="btn_delete_storage_map" class="opt-btn icon-green right">Delete</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+<div id="parameter_builder_container" class="panel_container type-2">
+              <div class="panel_backdrop bkdrp-strong hide"></div>
+              <div class="panel_body hide">
+                <div class="panel-title title">Argument Editor</div>
+                <div class="info-block">
+                  <div>
+                    <key>Entry</key>
+                    <div id="pb-ui-entry-stat"></div>
+                  </div>
+                  <div>
+                    <key>Parameters</key>
+                    <div id="pb-ui-params-stat"></div>
+                  </div>
+                  <div class="info-block-button-container"><button id="btn_close_arg_editor"
+                      data-panel-id="parameter_builder_container" class="opt-btn icon-green right">DONE</button></div>
+                </div>
+                <div class="panel-options-container">
+                  <div class="po-btns" style="display: none;"></div>
+                  <div id="pb-modal-content" class="modal-content" style="display: none;"></div>
+                  <div class="po-selection"></div>
+                </div>
+              </div>
+            </div>
+<div id="modal_export" class="modal hidden">
+      <div class="modal-backdrop"></div>
+      <div class="modal-frame"><button class="dialog-dismiss" type="button" data-dismiss="modal_export" aria-label="Close dialog">×</button>
+        <div class="modal-title">Export contract</div>
+        <div class="modal-content">
+          <div>
+            <div class="export-program-buttons" role="tablist" aria-label="Export format">
+              <button id="tab_export_hex">Hex</button>
+              <button id="tab_export_bytes">Bytes</button>
+              <button id="tab_export_json">Json</button>
+              <button id="tab_export_abi">ABI</button>
+              <button id="tab_export_asm">ASM</button>
+            </div>
+            <div id="export_program_value" class="export-program-value"></div>
+            <div id="export_program_size" class="export-program-size"></div><p id="export-feedback" role="status" class="field-hint"></p>
+          </div>
+          <div class="flex-row">
+            <button id="btn_export_copy" class="btn">
+              <svg fill="currentColor" viewBox="0 0 24 24" style="width: 1.5rem; height: 1.5rem;">
+                <path
+                  d="M21,10V20a1,1,0,0,1-1,1H10a1,1,0,0,1-1-1V10a1,1,0,0,1,1-1H20A1,1,0,0,1,21,10ZM6,14H5V5h9V6a1,1,0,0,0,2,0V4a1,1,0,0,0-1-1H4A1,1,0,0,0,3,4V15a1,1,0,0,0,1,1H6a1,1,0,0,0,0-2Z" />
+              </svg>
+              Copy
+            </button>
+            <button id="btn_export_share" class="btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 1.5rem; height: 1.5rem;">
+                <circle cx="18" cy="5" r="3" stroke-width="1.5" />
+                <circle cx="6" cy="12" r="3" stroke-width="1.5" />
+                <circle cx="18" cy="19" r="3" stroke-width="1.5" />
+                <path d="M8.7 10.7L15.3 6.3M8.7 13.3L15.3 17.7" stroke-width="1.5" stroke-linecap="round"
+                  stroke-linejoin="round" />
+              </svg>
+              Share
+            </button>
+            <button id="btn_export_download" class="btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 1.5rem; height: 1.5rem;">
+                <path
+                  d="M20 15V18C20 19.1046 19.1046 20 18 20H6C4.89543 20 4 19.1046 4 18L4 15M8 11L12 15M12 15L16 11M12 15V3"
+                  stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              Download
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+<div id="modal_deposits" class="modal hidden">
+      <div class="modal-backdrop"></div>
+      <div class="modal-frame"><button class="dialog-dismiss" type="button" data-dismiss="modal_deposits" aria-label="Close dialog">×</button>
+        <div class="modal-title">Contract deposits</div>
+        <div class="modal-content">
+          <div id="deposits_list_container">
+            <div style="margin-bottom: 0.5rem; color: #aaa; font-size: 0.9rem;">
+              Configure assets and amounts to deposit when running the entry point.
+            </div>
+            <div id="deposits_list"></div>
+          </div>
+          <button id="btn_add_deposit" class="btn" style="width: 100%;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              style="width: 1.2rem; height: 1.2rem; vertical-align: middle;">
+              <path d="M12 5V19M5 12H19" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            Add Deposit
+          </button>
+          <div class="flex-row" style="gap: 0.5rem; margin-top: 1rem;">
+            <button id="btn_deposits_clear" class="btn" style="flex: 1;">Clear All</button>
+            <button id="btn_deposits_close" class="btn" style="flex: 1;">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>

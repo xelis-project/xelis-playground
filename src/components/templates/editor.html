@@ -1,0 +1,17 @@
+<section id="editor_container" class="editor-panel" aria-label="Source editor">
+  <header id="editor_header" class="panel_header">
+    <div class="file-label"><span class="file-symbol">S</span><span>Contract source<small>Silex</small></span></div>
+    <div id="editor_commands">
+      <button id="btn_editor_save_code" class="opt-btn" data-panel-id="editor_save_code_container">Save</button>
+      <button id="btn_editor_load_file" class="opt-btn" style="display:none">Import</button>
+      <button id="btn_export" class="opt-btn" disabled>Export</button>
+    </div>
+  </header>
+  <pre id="input_editor" tabindex="0" aria-label="Silex source editor"></pre>
+  <div id="editor-info" class="editor-status info-block">
+    <div><key>Project</key><span id="current-project"></span></div>
+    <div><key>Buffer</key><span id="editor-buffer-info"></span></div>
+    <div><key>File</key><span id="current-file"></span></div>
+  </div>
+  <div id="editor-check-status" role="status" aria-live="polite"></div>
+</section>

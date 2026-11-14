@@ -1,27 +1,30 @@
+import { EditorAssistance } from './components/editor-assistance';
+import { renderDeposits, type Deposit } from './components/deposit-editor';
+import { renderExecutionResult } from './components/execution-console';
 import ace from 'ace-builds';
-import 'ace-builds/src-noconflict/mode-rust';
+import { SilexMode } from './components/silex-mode';
 import 'ace-builds/src-noconflict/theme-tomorrow_night_bright';
 import { XelisWallet } from '@xelis/xelis-wallet-connect';
 
 import { Silex } from '../public/xelis_playground';
-import { SplitLayout } from "./split_layout";
-import { TextDotLoading } from './text_dot_loading';
-import { ModalExport } from "./model_export";
-import { FuncList } from './func_list';
-import { Modal } from './modal';
-import { ProjectManager } from './project';
-import { XVMParamParser } from './parameter_builder/xvm_param_parser';
-import { ParameterBuilder } from './parameter_builder/parameter_builder';
-import { PanelOptions, UIContainers } from "./UIContainers";
+import { SplitLayout } from "./split-layout";
+import { TextDotLoading } from './components/loading-indicator';
+import { ModalExport } from "./export-dialog";
+import { FuncList } from './standard-library';
+import { Modal } from './components/modal';
+import { ProjectManager } from './project-manager';
+import { XVMParamParser } from './parameter-builder/parameter-parser';
+import { ParameterBuilder } from './parameter-builder/parameter-builder';
+import { PanelOptions, UIContainers } from "./components/panel-controller";
 
-import { getHistoryIconHtml, getReuseIconHtml, getConstructorIconHtml } from "./resources/icons";
+import { getHistoryIconHtml, getReuseIconHtml, getConstructorIconHtml } from "./resources/icons/index";
 
-import { Utils } from "./Utils";
-import { StorageEditor } from "./StorageEditor";
-import { RightPanelModes } from './RightPanelModes';
-import {RPCInspector } from './RPCInspector';
-import { DaemonEndpoint, WalletEndpoint } from './RPCInspector/types';
-import { accountWallet } from './AccountWallet';
+import { Utils } from "./utils";
+import { StorageEditor } from "./storage-editor";
+import { RightPanelModes } from './tool-navigation';
+import {RPCInspector } from './rpc-inspector/index';
+import { DaemonEndpoint, WalletEndpoint } from './rpc-inspector/types';
+import { accountWallet } from './account-wallet';
 
 
 type EntryCallParam = [string, string];
@@ -116,7 +119,7 @@ export class App {
     btn_add_deposit: HTMLElement;
     btn_deposits_clear: HTMLElement;
     btn_deposits_close: HTMLElement;
-    deposits: Array<{ hash: string, amount: string, depositType: 'public' }> = [];
+    deposits: Deposit[] = [];
     /* end Deposits Configuration */
 
     constructor(silex: Silex) {
@@ -225,11 +228,8 @@ export class App {
         this.btn_close_arg_editor = document.querySelector(`#btn_close_arg_editor`) as HTMLElement;
         /* end Argument Editor (Parameter Builder)*/
 
-        this.contract_mode_elems = [
-            document.getElementById('program-spec') as HTMLElement,
-            document.getElementById('output_container') as HTMLElement,
-            document.querySelector(`.output-header`) as HTMLElement
-        ];
+        // Dialogs now overlay the workspace; opening them does not hide panels.
+        this.contract_mode_elems = [];
 
         /* Storage Editor*/
         this.storage_editor = StorageEditor.default(() => {
@@ -548,20 +548,28 @@ export class App {
         this.modal = new Modal();
 
         this.func_list = new FuncList(this.silex);
-        this.split_layout = new SplitLayout(this);
+        this.split_layout = new SplitLayout(() => this.editor?.resize());
         this.modal_export = new ModalExport(this);
 
         const editor_element = document.getElementById('input_editor') as HTMLPreElement;
         this.editor = ace.edit(editor_element);
-        this.editor.session.setMode("ace/mode/rust");
+        this.editor.session.setMode(new SilexMode());
         this.editor.setTheme("ace/theme/tomorrow_night_bright");
         this.editor.setOptions({
             enableAutoIndent: true,
+            fontSize: 14,
+            showPrintMargin: false,
             wrapBehavioursEnabled: true // auto surround
         });
 
+        new EditorAssistance(this.editor, this.silex, () => parseInt(this.cvMenuSelection.dataset.selectionValue as string));
         this.editor.setHighlightActiveLine(false);
-        this.editor.renderer.setPadding(8);
+        this.editor.renderer.setPadding(20);
+        this.editor.commands.addCommand({
+            name: "compileContract",
+            bindKey: { win: "Ctrl-Enter", mac: "Command-Enter" },
+            exec: () => { if (!this.btn_compile.hasAttribute("disabled")) this.compile_code(); }
+        });
         this.editor.renderer.setScrollMargin(10, 10);
 
         const editor_session = this.editor.getSession();
@@ -803,8 +811,8 @@ export class App {
 
         // UI
 
-        this.hud_entry_name.innerHTML = `&nbsp;`;
-        this.hud_entry_name.style.visibility = 'hidden';
+        this.hud_entry_name.textContent = "Compile to select an entry";
+        this.hud_entry_name.style.visibility = 'visible';
 
         // entry call window
         this.btn_entry_call.click();
@@ -990,11 +998,11 @@ export class App {
     }
 
     output_error(text: string, append: boolean = false) {
-        return `<span class="out-err">${text}</span>`;
+        return `<span class="out-err">${Utils.escapeHtml(text)}</span>`;
     }
 
     output_success(text: string, append: boolean = false) {
-        return `<span class="out-success">${text}</span>`;
+        return `<span class="out-success">${Utils.escapeHtml(text)}</span>`;
     }
 
     compile_code() {
@@ -1097,7 +1105,9 @@ export class App {
             this.btn_entry_call.classList.add('selected');
             this.btn_signature.removeAttribute('disabled');
             this.btn_copy.removeAttribute('disabled');
+            document.dispatchEvent(new Event("workspace:show-tools"));
         } catch (e) {
+            document.dispatchEvent(new Event("workspace:show-console"));
             this.output.innerHTML += this.output_error("Error: " + e + "\n");
         }
     }
@@ -1200,17 +1210,17 @@ export class App {
     }
 
     async run_program() {
+        document.dispatchEvent(new Event("workspace:show-console"));
         let max_gas = null as bigint | null; // infinite
         this.output.innerHTML = "";
 
         if (this.input_max_gas.value) {
-            const max_gas_int = parseInt(this.input_max_gas.value);
-            if (max_gas_int < 0) {
-                this.output.innerHTML = this.output_error("Error: Max gas cannot be negative.\n");
+            const value = this.input_max_gas.value.trim();
+            if (!/^\d+$/.test(value) || BigInt(value) > 18446744073709551615n) {
+                this.output.innerHTML = this.output_error("Enter a whole gas limit between 0 and 18446744073709551615.\n");
                 return;
             }
-
-            max_gas = BigInt(max_gas_int);
+            max_gas = BigInt(value);
         }
 
         this.btn_run_set_running();
@@ -1252,47 +1262,16 @@ export class App {
             );
             output_dot_loading.stop();
 
-            this.output.textContent = "";
-            let logs = result.logs();
-            if (logs.length > 0) {
-                this.output.textContent += logs.join("\n");
-                this.output.textContent += "\n";
-            }
-
-            this.output.textContent += `-------- Result --------\n`;
-            if (result.is_error()) {
-                this.output.textContent += `Error raised: ${result.value()}\n`;
-            } else {
-                this.output.textContent += `Exit value: ${result.value()}\n`;
-            }
-            this.output.textContent += `Executed in: ${result.elapsed_time()}\n`;
-            this.output.textContent += `Gas usage: ${result.used_gas()} lex (${result.used_gas_formatted()} XEL)\n`;
-            this.output.textContent += `Memory usage: ${result.used_memory()} (${result.used_memory_formatted()})\n`;
-
-            const storage = result.storage();
-            console.log(storage);
-            if (storage.length > 0) {
-                this.output.textContent += `-------- Storage --------\n`;
-                storage.forEach((item: any) => {
-                    this.output.textContent += `${item.key()}: ${item.value()}\n`;
-                });
-            }
-
-            const events = result.events();
-            if (events.length > 0) {
-                this.output.textContent += `-------- Events --------\n`;
-                events.forEach((event: any) => {
-                    this.output.textContent += `${event.contract()} #${event.event_id()}: ${event.event()}\n`;
-                });
-            }
+            renderExecutionResult(this.output, result);
         } catch (e) {
             output_dot_loading.stop();
             this.output.innerHTML += this.output_error("Error: " + e + "\n");
+        } finally {
+            output_dot_loading.stop();
+            this.btn_run_set_run();
+            this.btn_export.removeAttribute("disabled");
+            this.btn_compile.removeAttribute("disabled");
         }
-
-        this.btn_run_set_run();
-        this.btn_export.removeAttribute("disabled");
-        this.btn_compile.removeAttribute("disabled");
 
         this.did_run_program = true;
     }
@@ -1379,27 +1358,12 @@ export class App {
     }
 
     output_panel_toggle(should_shrink: boolean | undefined) {
-
-        const btn_output_panel_expand = document.querySelector(`#btn_output_panel_expand`) as HTMLButtonElement;
-        const btn_output_panel_shrink = document.querySelector(`#btn_output_panel_shrink`) as HTMLButtonElement;
-        const gas_limit_display = document.querySelector(`#gas_limit_display`) as HTMLElement;
-
-        if (this.output_panel_expanded) {
-            console.log("Shrink output window");
-            btn_output_panel_expand.classList.remove('hide');
-            btn_output_panel_shrink.classList.add('hide');
-            this.parameter_display.classList.remove('hide');
-            gas_limit_display.classList.remove('hide');
-            this.output_panel_expanded = false;
-        } else {
-            console.log("Expand output window");
-
-            btn_output_panel_expand.classList.add('hide');
-            btn_output_panel_shrink.classList.remove('hide');
-            this.parameter_display.classList.add('hide');
-            gas_limit_display.classList.add('hide');
-            this.output_panel_expanded = true;
-        }
+        this.output_panel_expanded = should_shrink === undefined ? !this.output_panel_expanded : !should_shrink;
+        document.getElementById('screen_left')!.classList.toggle('console-expanded', this.output_panel_expanded);
+        document.getElementById('btn_output_panel_expand')!.classList.toggle('hide', this.output_panel_expanded);
+        document.getElementById('btn_output_panel_shrink')!.classList.toggle('hide', !this.output_panel_expanded);
+        this.btn_output_panel_toggle.setAttribute('aria-expanded', String(this.output_panel_expanded));
+        this.editor.resize();
     }
 
     /* should be in a utilities file */
@@ -1528,46 +1492,7 @@ export class App {
     }
 
     render_deposits_list() {
-        this.deposits_list.innerHTML = '';
-
-        if (this.deposits.length === 0) {
-            this.deposits_list.innerHTML = '<div style="padding: 1rem; text-align: center; color: #888;">No deposits configured</div>';
-            return;
-        }
-
-        this.deposits.forEach((deposit, index) => {
-            const depositItem = document.createElement('div');
-            depositItem.style.cssText = 'display: flex; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center;';
-
-            const hashInput = document.createElement('input');
-            hashInput.type = 'text';
-            hashInput.placeholder = 'Asset Hash (64 hex chars)';
-            hashInput.value = deposit.hash;
-            hashInput.style.cssText = 'flex: 2; padding: 0.5rem; background: #1a1a1a; border: 1px solid #2fdcb0; color: white; border-radius: 4px;';
-            hashInput.addEventListener('input', (e) => {
-                this.deposits[index].hash = (e.target as HTMLInputElement).value;
-            });
-
-            const amountInput = document.createElement('input');
-            amountInput.type = 'text';
-            amountInput.placeholder = 'Amount (in atomic units)';
-            amountInput.value = deposit.amount;
-            amountInput.style.cssText = 'flex: 1; padding: 0.5rem; background: #1a1a1a; border: 1px solid #2fdcb0; color: white; border-radius: 4px;';
-            amountInput.addEventListener('input', (e) => {
-                this.deposits[index].amount = (e.target as HTMLInputElement).value;
-            });
-
-            const removeBtn = document.createElement('button');
-            removeBtn.innerHTML = '×';
-            removeBtn.style.cssText = 'width: 2rem; height: 2rem; background: #d32f2f; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1.5rem; line-height: 1;';
-            removeBtn.addEventListener('click', () => this.remove_deposit(index));
-
-            depositItem.appendChild(hashInput);
-            depositItem.appendChild(amountInput);
-            depositItem.appendChild(removeBtn);
-
-            this.deposits_list.appendChild(depositItem);
-        });
+        renderDeposits(this.deposits_list, this.deposits, index => this.remove_deposit(index));
     }
 
     get_deposits_for_execution() {

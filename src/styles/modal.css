@@ -51,7 +51,7 @@
   font-size: 22px;
   padding: 1rem;
   border-bottom: thin solid #2fdcb099;
-  color: #2fdcb0;
+  color: var(--accent);
 }
 
 .modal-content {
@@ -61,7 +61,6 @@
   flex-direction: column;
 }
 
-/* Deposits Modal Styles */
 #deposits_list_container {
   max-height: 400px;
   overflow-y: auto;
@@ -73,7 +72,7 @@
 
 #deposits_list input:focus {
   outline: none;
-  border-color: #2fdcb0;
+  border-color: var(--accent);
   box-shadow: 0 0 0 2px rgba(47, 220, 176, 0.2);
 }
 

@@ -1,0 +1,82 @@
+/* Overlays are outside the split panes, so their content cannot be clipped. */
+#dialog-layer { position: fixed; inset: 0; pointer-events: none; z-index: 300; }
+#dialog-layer > .panel_container, #dialog-layer > .modal { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; width: 100%; height: 100%; pointer-events: auto; z-index: auto; }
+#dialog-layer > .panel_container:not(:has(> .panel_body:not(.hide))), #dialog-layer > .hidden, #dialog-layer > .hide { display: none !important; }
+#dialog-layer .panel_backdrop, #dialog-layer .modal-backdrop { position: absolute; inset: 0; width: 100%; height: 100%; background: #0009; backdrop-filter: blur(6px); z-index: 0; }
+#dialog-layer .panel_body, #dialog-layer .modal-frame, #alert_container_left .panel_body { position: relative; width: min(840px, 100%); max-width: 100%; max-height: calc(100dvh - 48px); min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 24px; margin: 0; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 24px 100px #0009; z-index: 1; animation: none; transform: none; }
+#dialog-layer #editor_options_container .panel_body, #dialog-layer #modal_deposits .modal-frame { width: min(540px, 100%); }
+#dialog-layer .panel-title, #dialog-layer h5, #dialog-layer .modal-title { font: 550 18px var(--font-ui); margin: 0 44px 20px 0; padding: 0; color: var(--text); border: 0; text-transform: none; }
+#dialog-layer .modal-content { padding: 0; min-width: 0; }
+.dialog-dismiss, #dialog-layer .close-btn.top-right { position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface-raised); color: var(--muted); font-size: 20px; display: grid; place-items: center; padding: 0; }
+#dialog-layer .close-btn.top-right { width: auto; padding: 0 10px; font-size: 11px; }
+#dialog-layer .panel-options-container, #dialog-layer .po-selection, #dialog-layer .po-btns { min-width: 0; max-width: 100%; }
+#dialog-layer .po-btns { flex-wrap: wrap; }
+#dialog-layer .dialog-container { padding: 16px; margin-top: 16px; border: 1px solid var(--border); border-radius: 6px; }
+#dialog-layer .dialog-title { font-size: 14px; color: var(--text); margin-bottom: 16px; }
+#dialog-layer .dialog-btn-container { flex-wrap: wrap; padding-top: 16px; }
+#dialog-layer .data-table-container { max-width: 100%; overflow: auto; border: 1px solid var(--border); border-radius: 6px; }
+#dialog-layer .data-table { width: 100%; font: 12px/1.5 var(--font-ui); color: var(--text); }
+#dialog-layer .data-table th { padding: 10px; color: var(--muted); font-weight: 500; text-transform: none; letter-spacing: normal; font-size: 11px; background: var(--surface-raised); border-color: var(--border); }
+#dialog-layer .data-table td { background: transparent; border-color: var(--border); padding: 10px; overflow-wrap: anywhere; max-width: 240px; }
+#dialog-layer .data-table tbody tr:hover td { background: var(--surface-raised) !important; color: var(--text); }
+#dialog-layer .sp-content-dtc { height: auto; max-height: 50dvh; margin: 16px 0 0; }
+#dialog-layer .ui-horiz-layout, #dialog-layer .storage-info-block, #dialog-layer .storage-map-update-btn-container, #dialog-layer .sm-info { display: flex; flex-wrap: wrap; gap: 12px; width: 100%; min-width: 0; }
+#dialog-layer .sm-info input { flex: 1 1 180px; width: auto; }
+#dialog-layer .info-block { margin: 12px 0; }
+#dialog-layer .info-block-button-container { margin-left: auto; }
+#dialog-layer .param-container { margin-top: 20px; max-width: 100%; }
+#dialog-layer .param-container:first-child { margin-top: 0; }
+#dialog-layer .parameter-header { color: var(--accent); background: var(--accent-soft); padding: 7px 10px; border-radius: 4px; }
+#dialog-layer .pb-input-scrollbox { max-height: none; }
+#dialog-layer .pb-input-container { overflow: visible; }
+#dialog-layer .pb-arguments-container { max-width: 100%; overflow: auto; padding: 12px; background: var(--background); border-radius: 6px; }
+#dialog-layer .input-container, #dialog-layer .type-container { min-width: 0; max-width: 100%; }
+#dialog-layer .parameter-sel-container { grid-template-columns: repeat(3, minmax(0, 1fr)); white-space: normal; }
+#dialog-layer .parameter-sel-container button { overflow-wrap: anywhere; }
+#dialog-layer .export-program-buttons { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+#dialog-layer .export-program-buttons button { flex: 1; padding: 8px 12px; border-radius: 5px; border: 1px solid var(--border); background: transparent; color: var(--muted); font-size: 12px; }
+#dialog-layer .export-program-buttons button.selected { background: var(--accent-soft); color: var(--accent); border-color: var(--border-accent); }
+#dialog-layer .export-program-value { max-height: 45dvh; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; background: var(--background); color: var(--text); padding: 16px; border: 1px solid var(--border); border-radius: 6px; font-size: 12px; }
+#deposits_list_container { max-height: 50dvh; overflow: auto; }
+#deposits_list > div { min-width: 0; max-width: 100%; }
+#dialog-layer .with-tooltip::after { display: none; }
+#dialog-layer p { overflow-wrap: anywhere; }
+.dropdown.is-open .dropdown-content { display: block; }
+.dropdown:focus-within:not(.is-open) .dropdown-content { display: none; }
+@media (hover: none) { .dropdown:hover:not(.is-open) .dropdown-content { display: none; } }
+@media (max-width: 580px) {
+  #dialog-layer > .panel_container, #dialog-layer > .modal { padding: 8px; }
+  #dialog-layer .panel_body, #dialog-layer .modal-frame, #alert_container_left .panel_body { padding: 16px; max-height: calc(100dvh - 16px); border-radius: 8px; }
+  #dialog-layer .dialog-container { padding: 12px; }
+  #dialog-layer .dialog-title { font-size: 13px; }
+  #dialog-layer .data-table th, #dialog-layer .data-table td { padding: 8px; font-size: 11px; }
+  #dialog-layer #parameter-detail-body { grid-template-columns: minmax(0, 1fr); }
+  .dialog-dismiss { top: 10px; right: 10px; }
+}
+.empty-state { padding: 16px; border: 1px dashed var(--border); border-radius: 6px; color: var(--muted); font-size: 12px; }
+.deposit-row { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto; align-items: end; gap: 12px; padding: 16px 0; border-bottom: 1px solid var(--border); }
+.deposit-row label { min-width: 0; font-size: 11px; }
+.deposit-row input { margin-top: 6px !important; }
+.deposit-remove { color: var(--danger); margin-bottom: 2px; }
+@media (max-width: 580px) {
+  .deposit-row { grid-template-columns: minmax(0, 1fr) auto; }
+  .deposit-row > label:first-child { grid-column: 1 / -1; }
+}
+/* Click/keyboard menus expand in flow, including inside short dialogs. */
+.dropdown:hover:not(.is-open) .dropdown-content { display: none; }
+.dropdown .dropdown-content, .dropdown.menu-centered .dropdown-content { position: static; min-width: 0; width: 100%; max-width: 100%; transform: none; margin: 6px 0 0; }
+#export-feedback:empty { display: none; }
+#export-feedback { color: var(--muted); font-size: 12px; margin: 8px 0 0; }
+
+#editor_options_container .dropdown-menu {
+  flex: 1 1 8rem;
+  min-width: 0;
+}
+#editor_options_container .dropdown {
+  width: 100%;
+}
+#editor_options_container .po-btns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+#editor_options_container .info-block { display: block; min-width: 0; }
+#editor_options_container .dropdown-menu { width: 100%; }
+
+.dropdown.menu-centered { display: block; }

@@ -1,0 +1,20 @@
+/* VS Code Dark+ token palette on the shared XELIS editor surface. */
+.ace_editor { background: var(--surface); color: #d4d4d4; font-family: var(--font-mono); line-height: 1.7; }
+.ace_editor .ace_gutter { background: var(--surface); color: #858585; }
+.ace_editor .ace_gutter-active-line { background: var(--surface-raised); color: #c6c6c6; }
+.ace_editor .ace_cursor { color: #aeafad; }
+.ace_editor .ace_marker-layer .ace_selection { background: #264f78; }
+.ace_editor .ace_marker-layer .ace_active-line { background: #ffffff06; }
+.ace_editor .ace_comment { color: #6a9955; font-style: normal; }
+.ace_editor .ace_keyword, .ace_editor .ace_storage { color: #569cd6; }
+.ace_editor .ace_keyword.ace_control { color: #c586c0; }
+.ace_editor .ace_keyword.ace_operator { color: #d4d4d4; }
+.ace_editor .ace_variable { color: #9cdcfe; }
+.ace_editor .ace_variable.ace_language { color: #569cd6; }
+.ace_editor .ace_entity.ace_name.ace_function { color: #dcdcaa; }
+.ace_editor .ace_entity.ace_name.ace_type, .ace_editor .ace_support.ace_type { color: #4ec9b0; }
+.ace_editor .ace_string { color: #ce9178; }
+.ace_editor .ace_constant.ace_numeric { color: #b5cea8; }
+.ace_editor .ace_constant.ace_language { color: #569cd6; }
+.ace_editor .ace_constant.ace_character.ace_escape { color: #d7ba7d; }
+.ace_editor .ace_paren, .ace_editor .ace_punctuation { color: #d4d4d4; }
